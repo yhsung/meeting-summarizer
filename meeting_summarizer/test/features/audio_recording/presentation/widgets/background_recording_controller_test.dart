@@ -13,57 +13,57 @@ import 'package:meeting_summarizer/features/audio_recording/presentation/widgets
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  
+
   // Setup mock platform channels
   setUpAll(() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
-      const MethodChannel('com.meeting_summarizer/background_audio'),
-      (call) async {
-        switch (call.method) {
-          case 'initialize':
-          case 'enableBackground':
-          case 'disableBackground':
-          case 'startForegroundService':
-          case 'stopForegroundService':
-          case 'dispose':
-            return true;
-          default:
-            return null;
-        }
-      },
-    );
-    
+          const MethodChannel('com.meeting_summarizer/background_audio'),
+          (call) async {
+            switch (call.method) {
+              case 'initialize':
+              case 'enableBackground':
+              case 'disableBackground':
+              case 'startForegroundService':
+              case 'stopForegroundService':
+              case 'dispose':
+                return true;
+              default:
+                return null;
+            }
+          },
+        );
+
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
-      const MethodChannel('com.meeting_summarizer/background_session'),
-      (call) async {
-        switch (call.method) {
-          case 'initialize':
-          case 'enableBackgroundSession':
-          case 'disableBackgroundSession':
-          case 'startBackgroundTask':
-          case 'endBackgroundTask':
-          case 'dispose':
-            return true;
-          default:
-            return null;
-        }
-      },
-    );
+          const MethodChannel('com.meeting_summarizer/background_session'),
+          (call) async {
+            switch (call.method) {
+              case 'initialize':
+              case 'enableBackgroundSession':
+              case 'disableBackgroundSession':
+              case 'startBackgroundTask':
+              case 'endBackgroundTask':
+              case 'dispose':
+                return true;
+              default:
+                return null;
+            }
+          },
+        );
   });
-  
+
   tearDownAll(() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
-      const MethodChannel('com.meeting_summarizer/background_audio'),
-      null,
-    );
+          const MethodChannel('com.meeting_summarizer/background_audio'),
+          null,
+        );
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
-      const MethodChannel('com.meeting_summarizer/background_session'),
-      null,
-    );
+          const MethodChannel('com.meeting_summarizer/background_session'),
+          null,
+        );
   });
   group('BackgroundRecordingController', () {
     late TestBackgroundAudioService mockAudioService;
@@ -214,7 +214,10 @@ void main() {
       // Verify the status section is displayed
       expect(find.text('Background Status'), findsOneWidget);
       // The specific text might vary, so let's check for the general structure
-      expect(find.byType(Card), findsAtLeastNWidgets(1)); // Should have status cards
+      expect(
+        find.byType(Card),
+        findsAtLeastNWidgets(1),
+      ); // Should have status cards
     });
 
     testWidgets('should display platform capabilities when enabled', (

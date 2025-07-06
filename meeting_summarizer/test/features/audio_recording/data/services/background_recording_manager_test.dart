@@ -12,7 +12,7 @@ import 'package:meeting_summarizer/features/audio_recording/data/services/backgr
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  
+
   group('BackgroundRecordingManager', () {
     late BackgroundRecordingManager manager;
     late TestAudioRecordingService mockAudioService;

@@ -51,7 +51,9 @@ class BackgroundRecordingManager {
         WidgetsBinding.instance.addObserver(_AppLifecycleObserver(this));
       } catch (e) {
         // Binding not initialized (likely in test environment)
-        debugPrint('BackgroundRecordingManager: Could not register lifecycle observer: $e');
+        debugPrint(
+          'BackgroundRecordingManager: Could not register lifecycle observer: $e',
+        );
       }
 
       // Initialize platform-specific background capabilities
