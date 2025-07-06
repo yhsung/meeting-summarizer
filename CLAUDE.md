@@ -158,6 +158,14 @@ task-master show <id>                     # Review task details
 # During implementation, check in code context into the tasks and subtasks
 task-master update-subtask --id=<id> --prompt="implementation notes..."
 
+# Before completing tasks - enforce quality gates
+dart format .                             # Format code
+flutter analyze                           # Check for issues
+flutter test                              # Run tests
+git add .                                 # Stage changes
+git commit -m "feat: task description"    # Commit with task reference
+git push origin main                      # Push and trigger CI/CD
+
 # Complete tasks
 task-master set-status --id=<id> --status=done
 ```
@@ -299,8 +307,16 @@ task-master models --set-fallback gpt-4o-mini
 3. `task-master update-subtask --id=<id> --prompt="detailed plan"` - Log plan
 4. `task-master set-status --id=<id> --status=in-progress` - Start work
 5. Implement code following logged plan
-6. `task-master update-subtask --id=<id> --prompt="what worked/didn't work"` - Log progress
-7. `task-master set-status --id=<id> --status=done` - Complete task
+6. **Format and validate code before tracking:**
+   - `dart format .` or `flutter analyze` - Format source code and check for issues
+   - Run any lint/typecheck commands for the project
+   - Run relevant tests to ensure implementation works
+7. **Track changes with git:**
+   - `git add .` - Stage all changes
+   - `git commit -m "descriptive message"` - Commit with clear message
+   - `git push origin main` - Push to remote and trigger CI/CD
+8. `task-master update-subtask --id=<id> --prompt="what worked/didn't work"` - Log progress
+9. `task-master set-status --id=<id> --status=done` - Complete task
 
 ### Complex Workflows with Checklists
 
@@ -314,14 +330,19 @@ For large migrations or multi-step processes:
 
 ### Git Integration
 
-Task Master works well with `gh` CLI:
+Task Master works well with `gh` CLI and enforces code quality before commits:
 
 ```bash
+# Standard development workflow with quality gates
+dart format .                     # Format code first
+flutter analyze                   # Check for analysis issues
+flutter test                      # Run tests
+git add .                         # Stage changes
+git commit -m "feat: implement JWT auth (task 1.2)"  # Reference task in commits
+git push origin main              # Push and trigger CI/CD
+
 # Create PR for completed task
 gh pr create --title "Complete task 1.2: User authentication" --body "Implements JWT auth system as specified in task 1.2"
-
-# Reference task in commits
-git commit -m "feat: implement JWT auth (task 1.2)"
 ```
 
 ### Parallel Development with Git Worktrees
