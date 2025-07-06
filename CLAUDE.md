@@ -84,10 +84,12 @@ project/                   # absolute path /Volumes/Samsung970EVOPlus/dev-projec
 │   │   │   │   ├── audio_configuration.dart  # Enhanced audio config with serialization
 │   │   │   │   └── recording_session.dart     # Recording session management
 │   │   │   └── services/
-│   │   │       ├── audio_service_interface.dart  # Service interface definition
-│   │   │       ├── audio_format_manager.dart     # Platform-aware format selection
-│   │   │       ├── codec_manager.dart            # Codec selection and management
-│   │   │       └── file_size_optimizer.dart      # File size optimization strategies
+│   │   │       ├── audio_service_interface.dart           # Service interface definition
+│   │   │       ├── audio_format_manager.dart              # Platform-aware format selection
+│   │   │       ├── codec_manager.dart                     # Codec selection and management
+│   │   │       ├── file_size_optimizer.dart               # File size optimization strategies
+│   │   │       ├── audio_enhancement_service_interface.dart # Audio enhancement interface with noise reduction, echo cancellation, AGC
+│   │   │       └── audio_enhancement_service.dart         # Audio enhancement implementation using FFT-based processing
 │   │   ├── features/
 │   │   │   └── audio_recording/
 │   │   │       ├── data/
@@ -101,9 +103,10 @@ project/                   # absolute path /Volumes/Samsung970EVOPlus/dev-projec
 │   ├── test/
 │   │   ├── core/
 │   │   │   └── services/
-│   │   │       ├── audio_format_manager_test.dart    # Format manager tests
-│   │   │       ├── codec_manager_test.dart            # Codec manager tests
-│   │   │       └── file_size_optimizer_test.dart     # Optimizer tests
+│   │   │       ├── audio_format_manager_test.dart       # Format manager tests
+│   │   │       ├── codec_manager_test.dart               # Codec manager tests
+│   │   │       ├── file_size_optimizer_test.dart        # Optimizer tests
+│   │   │       └── audio_enhancement_service_test.dart   # Audio enhancement comprehensive tests
 │   │   ├── features/
 │   │   │   └── audio_recording/
 │   │   │       ├── audio_recording_service_test.dart
@@ -119,6 +122,74 @@ project/                   # absolute path /Volumes/Samsung970EVOPlus/dev-projec
 │   └── analysis_options.yaml         # Dart analysis configuration
 └── CLAUDE.md                         # This file - auto-loaded by Claude Code
 ```
+
+## Audio Enhancement Capabilities
+
+The meeting summarizer now includes comprehensive audio enhancement features powered by FFT-based signal processing:
+
+### Core Audio Enhancement Features
+
+- **Noise Reduction**: Advanced algorithms to reduce background noise while preserving speech clarity
+- **Echo Cancellation**: Removes echo artifacts from recordings to improve audio quality
+- **Automatic Gain Control (AGC)**: Dynamically adjusts audio levels to maintain consistent volume
+- **Spectral Subtraction**: Advanced noise reduction using frequency domain analysis
+- **Frequency Filtering**: High-pass and low-pass filters to remove unwanted frequency components
+- **Real-time Processing**: Stream-based processing for live audio enhancement
+- **Post-processing Mode**: Batch processing for recorded audio files
+
+### Dependencies & Libraries
+
+- **fftea ^1.5.0+1**: Fast Fourier Transform library for frequency domain processing
+- Supports efficient FFT/IFFT operations for real-time audio processing
+- Optimized for power-of-two and arbitrary-sized arrays
+
+### Audio Enhancement Service Usage
+
+```dart
+// Initialize the service
+final enhancementService = AudioEnhancementService();
+await enhancementService.initialize();
+
+// Configure enhancement parameters
+final config = AudioEnhancementConfig(
+  enableNoiseReduction: true,
+  enableEchoCanellation: false,
+  enableAutoGainControl: true,
+  noiseReductionStrength: 0.7,
+  processingMode: ProcessingMode.realTime,
+);
+await enhancementService.configure(config);
+
+// Process audio data
+final result = await enhancementService.processAudio(audioData, sampleRate);
+
+// Stream processing for real-time enhancement
+final enhancedStream = enhancementService.processAudioStream(
+  inputAudioStream, 
+  sampleRate
+);
+
+// Individual enhancement functions
+final noiseCleaned = await enhancementService.applyNoiseReduction(audioData, sampleRate, 0.5);
+final echoFree = await enhancementService.applyEchoCancellation(audioData, sampleRate, 0.3);
+final normalized = await enhancementService.applyAutoGainControl(audioData, sampleRate, 0.8);
+```
+
+### Performance & Metrics
+
+The service includes comprehensive performance tracking:
+- Processing time per audio chunk
+- Total samples processed
+- Average processing latency
+- Enhancement algorithm usage counters
+
+### Integration with Audio Configuration
+
+The existing `AudioConfiguration` class already includes placeholders for enhancement features:
+- `enableNoiseReduction` - boolean flag for noise reduction
+- `enableAutoGainControl` - boolean flag for AGC
+
+The audio enhancement service seamlessly integrates with the existing audio recording pipeline.
 
 ## MCP Integration
 
