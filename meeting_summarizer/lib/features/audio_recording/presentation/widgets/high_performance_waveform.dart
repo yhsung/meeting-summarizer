@@ -281,7 +281,7 @@ class AdaptiveWaveformWidget extends StatelessWidget {
   final bool highPerformanceMode;
 
   const AdaptiveWaveformWidget({
-    Key? key,
+    super.key,
     required this.waveformData,
     required this.currentAmplitude,
     this.waveColor = Colors.blue,
@@ -290,7 +290,7 @@ class AdaptiveWaveformWidget extends StatelessWidget {
     this.width = 300.0,
     this.showCurrentAmplitude = true,
     this.highPerformanceMode = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

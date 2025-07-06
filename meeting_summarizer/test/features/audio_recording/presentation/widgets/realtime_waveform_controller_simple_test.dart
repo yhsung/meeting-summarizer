@@ -91,6 +91,19 @@ void main() {
         ),
       );
 
+      final session = RecordingSession(
+        id: 'test-id',
+        startTime: DateTime.now(),
+        state: RecordingState.stopped,
+        duration: const Duration(seconds: 30),
+        configuration: AudioConfiguration(),
+        waveformData: const [0.1, 0.5, 0.8],
+        currentAmplitude: 0.7,
+      );
+
+      testRecordingService.addSession(session);
+      await tester.pump();
+
       expect(find.byType(RealtimeWaveformController), findsOneWidget);
       expect(find.text('Not recording'), findsOneWidget);
     });
@@ -104,6 +117,19 @@ void main() {
           ),
         ),
       );
+
+      final session = RecordingSession(
+        id: 'test-id',
+        startTime: DateTime.now(),
+        state: RecordingState.stopped,
+        duration: const Duration(seconds: 30),
+        configuration: AudioConfiguration(),
+        waveformData: const [0.1, 0.5, 0.8],
+        currentAmplitude: 0.7,
+      );
+
+      testRecordingService.addSession(session);
+      await tester.pump();
 
       expect(find.byType(RealtimeWaveformController), findsOneWidget);
       expect(find.text('Not recording'), findsOneWidget);
@@ -123,7 +149,7 @@ void main() {
         startTime: DateTime.now(),
         state: RecordingState.recording,
         duration: const Duration(seconds: 30),
-        configuration: const AudioConfiguration(),
+        configuration: AudioConfiguration(),
         waveformData: const [0.1, 0.5, 0.8],
         currentAmplitude: 0.7,
       );
@@ -150,7 +176,7 @@ void main() {
         startTime: DateTime.now(),
         state: RecordingState.recording,
         duration: const Duration(seconds: 15),
-        configuration: const AudioConfiguration(),
+        configuration: AudioConfiguration(),
         waveformData: const [0.1, 0.5],
         currentAmplitude: 0.3,
       );
@@ -188,7 +214,7 @@ void main() {
         startTime: DateTime.now(),
         state: RecordingState.paused,
         duration: const Duration(minutes: 1, seconds: 30),
-        configuration: const AudioConfiguration(),
+        configuration: AudioConfiguration(),
         waveformData: const [0.1, 0.5, 0.8],
         currentAmplitude: 0.0,
       );
@@ -215,7 +241,7 @@ void main() {
         startTime: DateTime.now(),
         state: RecordingState.recording,
         duration: const Duration(minutes: 10, seconds: 5),
-        configuration: const AudioConfiguration(),
+        configuration: AudioConfiguration(),
       );
 
       testRecordingService.addSession(session);
@@ -238,7 +264,7 @@ void main() {
         startTime: DateTime.now(),
         state: RecordingState.initializing,
         duration: Duration.zero,
-        configuration: const AudioConfiguration(),
+        configuration: AudioConfiguration(),
       );
 
       testRecordingService.addSession(session);
