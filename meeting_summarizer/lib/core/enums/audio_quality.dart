@@ -1,6 +1,6 @@
 enum AudioQuality {
   low('Low', 8000, 8),
-  medium('Medium', 22050, 16), 
+  medium('Medium', 22050, 16),
   high('High', 44100, 16);
 
   const AudioQuality(this.label, this.sampleRate, this.bitDepth);

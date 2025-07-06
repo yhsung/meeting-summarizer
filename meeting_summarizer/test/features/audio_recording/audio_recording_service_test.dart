@@ -8,30 +8,30 @@ import 'package:meeting_summarizer/features/audio_recording/data/audio_recording
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  
+
   group('AudioRecordingService', () {
     late AudioRecordingService audioService;
 
     setUp(() {
       audioService = AudioRecordingService();
-      
+
       // Mock the method channel for record package
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(
-        const MethodChannel('com.llfbandit.record'),
-        (MethodCall methodCall) async {
-          switch (methodCall.method) {
-            case 'hasPermission':
-              return false; // Simulate no permission in tests
-            case 'create':
-              return null;
-            case 'dispose':
-              return null;
-            default:
-              return null;
-          }
-        },
-      );
+            const MethodChannel('com.llfbandit.record'),
+            (MethodCall methodCall) async {
+              switch (methodCall.method) {
+                case 'hasPermission':
+                  return false; // Simulate no permission in tests
+                case 'create':
+                  return null;
+                case 'dispose':
+                  return null;
+                default:
+                  return null;
+              }
+            },
+          );
     });
 
     tearDown(() async {
@@ -84,7 +84,7 @@ void main() {
           format: AudioFormat.aac,
           quality: AudioQuality.low,
         );
-        
+
         expect(modified.format, AudioFormat.aac);
         expect(modified.quality, AudioQuality.low);
         expect(modified.noiseReduction, original.noiseReduction);
@@ -122,7 +122,7 @@ void main() {
         expect(AudioQuality.high.sampleRate, 44100);
         expect(AudioQuality.medium.sampleRate, 22050);
         expect(AudioQuality.low.sampleRate, 8000);
-        
+
         expect(AudioQuality.high.bitRate, 320000);
         expect(AudioQuality.medium.bitRate, 128000);
         expect(AudioQuality.low.bitRate, 32000);

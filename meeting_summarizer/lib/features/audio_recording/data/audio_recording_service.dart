@@ -14,11 +14,11 @@ import '../../../core/services/audio_service_interface.dart';
 
 class AudioRecordingService implements AudioServiceInterface {
   static const Uuid _uuid = Uuid();
-  
+
   final AudioRecorder _recorder = AudioRecorder();
-  final StreamController<RecordingSession> _sessionController = 
+  final StreamController<RecordingSession> _sessionController =
       StreamController<RecordingSession>.broadcast();
-  
+
   RecordingSession? _currentSession;
   Timer? _recordingTimer;
   Timer? _amplitudeTimer;
@@ -76,10 +76,12 @@ class AudioRecordingService implements AudioServiceInterface {
       _updateSession(RecordingState.initializing, configuration);
 
       // Prepare file path
-      final directory = configuration.outputDirectory ?? 
+      final directory =
+          configuration.outputDirectory ??
           (await getApplicationDocumentsDirectory()).path;
       final sessionId = _uuid.v4();
-      final filename = fileName ?? 'recording_${DateTime.now().millisecondsSinceEpoch}';
+      final filename =
+          fileName ?? 'recording_${DateTime.now().millisecondsSinceEpoch}';
       _recordingPath = '$directory/$filename.${configuration.format.extension}';
 
       // Configure recording settings
@@ -95,7 +97,7 @@ class AudioRecordingService implements AudioServiceInterface {
 
       // Start recording
       await _recorder.start(recordConfig, path: _recordingPath!);
-      
+
       // Create session
       _currentSession = RecordingSession(
         id: sessionId,
@@ -112,7 +114,6 @@ class AudioRecordingService implements AudioServiceInterface {
 
       _sessionController.add(_currentSession!);
       debugPrint('AudioRecordingService: Recording started - $_recordingPath');
-
     } catch (e) {
       _updateSession(RecordingState.error, null, e.toString());
       debugPrint('AudioRecordingService: Start recording failed: $e');
@@ -129,10 +130,9 @@ class AudioRecordingService implements AudioServiceInterface {
 
       await _recorder.pause();
       await _stopTimers();
-      
+
       _updateSession(RecordingState.paused);
       debugPrint('AudioRecordingService: Recording paused');
-
     } catch (e) {
       _updateSession(RecordingState.error, null, e.toString());
       debugPrint('AudioRecordingService: Pause recording failed: $e');
@@ -150,10 +150,9 @@ class AudioRecordingService implements AudioServiceInterface {
       await _recorder.resume();
       _startRecordingTimer();
       _startAmplitudeMonitoring();
-      
+
       _updateSession(RecordingState.recording);
       debugPrint('AudioRecordingService: Recording resumed');
-
     } catch (e) {
       _updateSession(RecordingState.error, null, e.toString());
       debugPrint('AudioRecordingService: Resume recording failed: $e');
@@ -164,7 +163,7 @@ class AudioRecordingService implements AudioServiceInterface {
   @override
   Future<String?> stopRecording() async {
     try {
-      if (_currentSession == null || 
+      if (_currentSession == null ||
           (!_currentSession!.state.isActive && !_currentSession!.isPaused)) {
         throw Exception('No recording to stop');
       }
@@ -173,26 +172,27 @@ class AudioRecordingService implements AudioServiceInterface {
       await _stopTimers();
 
       final path = await _recorder.stop();
-      
+
       if (path != null && await File(path).exists()) {
         final file = File(path);
         final fileSize = await file.length();
-        
+
         _currentSession = _currentSession!.copyWith(
           state: RecordingState.stopped,
           endTime: DateTime.now(),
           filePath: path,
           fileSize: fileSize.toDouble(),
         );
-        
+
         _sessionController.add(_currentSession!);
-        debugPrint('AudioRecordingService: Recording stopped - $path (${fileSize}B)');
-        
+        debugPrint(
+          'AudioRecordingService: Recording stopped - $path (${fileSize}B)',
+        );
+
         return path;
       } else {
         throw Exception('Recording file not found');
       }
-
     } catch (e) {
       _updateSession(RecordingState.error, null, e.toString());
       debugPrint('AudioRecordingService: Stop recording failed: $e');
@@ -205,21 +205,20 @@ class AudioRecordingService implements AudioServiceInterface {
     try {
       await _stopTimers();
       await _recorder.stop();
-      
+
       if (_recordingPath != null && await File(_recordingPath!).exists()) {
         await File(_recordingPath!).delete();
         debugPrint('AudioRecordingService: Recording file deleted');
       }
-      
+
       _currentSession = _currentSession?.copyWith(
         state: RecordingState.stopped,
         endTime: DateTime.now(),
       );
-      
+
       if (_currentSession != null) {
         _sessionController.add(_currentSession!);
       }
-
     } catch (e) {
       debugPrint('AudioRecordingService: Cancel recording failed: $e');
       rethrow;
@@ -271,15 +270,19 @@ class AudioRecordingService implements AudioServiceInterface {
 
   // Private helper methods
 
-  void _updateSession(RecordingState state, [AudioConfiguration? config, String? errorMessage]) {
+  void _updateSession(
+    RecordingState state, [
+    AudioConfiguration? config,
+    String? errorMessage,
+  ]) {
     if (_currentSession != null) {
       _currentSession = _currentSession!.copyWith(
         state: state,
         configuration: config,
         errorMessage: errorMessage,
-        duration: state.isActive || state.isPaused ? 
-            DateTime.now().difference(_currentSession!.startTime) : 
-            _currentSession!.duration,
+        duration: state.isActive || state.isPaused
+            ? DateTime.now().difference(_currentSession!.startTime)
+            : _currentSession!.duration,
       );
       _sessionController.add(_currentSession!);
     } else if (config != null) {
@@ -299,14 +302,14 @@ class AudioRecordingService implements AudioServiceInterface {
     _recordingTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_currentSession != null && _currentSession!.state.isActive) {
         final duration = DateTime.now().difference(_currentSession!.startTime);
-        
+
         // Check recording limit
         if (_currentSession!.configuration.recordingLimit != null &&
             duration >= _currentSession!.configuration.recordingLimit!) {
           stopRecording();
           return;
         }
-        
+
         _currentSession = _currentSession!.copyWith(duration: duration);
         _sessionController.add(_currentSession!);
       }
@@ -314,20 +317,24 @@ class AudioRecordingService implements AudioServiceInterface {
   }
 
   void _startAmplitudeMonitoring() {
-    _amplitudeTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) async {
+    _amplitudeTimer = Timer.periodic(const Duration(milliseconds: 100), (
+      timer,
+    ) async {
       if (_currentSession != null && _currentSession!.state.isActive) {
         try {
           final amplitude = await _recorder.getAmplitude();
           final normalizedAmplitude = amplitude.current.clamp(0.0, 1.0);
-          
-          final newWaveformData = List<double>.from(_currentSession!.waveformData);
+
+          final newWaveformData = List<double>.from(
+            _currentSession!.waveformData,
+          );
           newWaveformData.add(normalizedAmplitude);
-          
+
           // Keep only last 100 amplitude values for performance
           if (newWaveformData.length > 100) {
             newWaveformData.removeAt(0);
           }
-          
+
           _currentSession = _currentSession!.copyWith(
             currentAmplitude: normalizedAmplitude,
             waveformData: newWaveformData,
