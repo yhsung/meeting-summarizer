@@ -97,7 +97,7 @@ void main() {
       test('should return correct information for all codec types', () {
         for (final codecType in CodecType.values) {
           final info = manager.getCodecInfo(codecType);
-          
+
           expect(info.type, codecType);
           expect(info.name, isNotEmpty);
           expect(info.supportedFormats, isNotEmpty);
@@ -109,7 +109,7 @@ void main() {
     group('isCodecSupported', () {
       test('should correctly identify supported codecs', () {
         final availableCodecs = manager.getAvailableCodecs();
-        
+
         for (final codec in availableCodecs) {
           expect(manager.isCodecSupported(codec), isTrue);
         }
@@ -173,21 +173,24 @@ void main() {
         expect(params, containsPair('compressionEfficiency', isA<double>()));
       });
 
-      test('should return consistent parameters for same codec-format-quality combination', () {
-        final params1 = manager.getCodecParameters(
-          codec: CodecType.mp3,
-          format: AudioFormat.mp3,
-          quality: AudioQuality.medium,
-        );
+      test(
+        'should return consistent parameters for same codec-format-quality combination',
+        () {
+          final params1 = manager.getCodecParameters(
+            codec: CodecType.mp3,
+            format: AudioFormat.mp3,
+            quality: AudioQuality.medium,
+          );
 
-        final params2 = manager.getCodecParameters(
-          codec: CodecType.mp3,
-          format: AudioFormat.mp3,
-          quality: AudioQuality.medium,
-        );
+          final params2 = manager.getCodecParameters(
+            codec: CodecType.mp3,
+            format: AudioFormat.mp3,
+            quality: AudioQuality.medium,
+          );
 
-        expect(params1, equals(params2));
-      });
+          expect(params1, equals(params2));
+        },
+      );
     });
 
     group('estimateCompressionRatio', () {

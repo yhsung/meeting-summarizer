@@ -4,7 +4,12 @@ enum AudioQuality {
   high('High', 44100, 16, 'High quality recording, larger file size'),
   ultra('Ultra', 48000, 24, 'Professional quality, maximum file size');
 
-  const AudioQuality(this.label, this.sampleRate, this.bitDepth, this.description);
+  const AudioQuality(
+    this.label,
+    this.sampleRate,
+    this.bitDepth,
+    this.description,
+  );
 
   final String label;
   final int sampleRate;

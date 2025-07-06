@@ -81,7 +81,8 @@ class AudioConfiguration {
       bitDepth: bitDepth ?? this.bitDepth,
       channels: channels ?? this.channels,
       enableNoiseReduction: enableNoiseReduction ?? this.enableNoiseReduction,
-      enableAutoGainControl: enableAutoGainControl ?? this.enableAutoGainControl,
+      enableAutoGainControl:
+          enableAutoGainControl ?? this.enableAutoGainControl,
       recordingLimit: recordingLimit ?? this.recordingLimit,
       outputDirectory: outputDirectory ?? this.outputDirectory,
       maxFileSizeMB: maxFileSizeMB ?? this.maxFileSizeMB,
@@ -117,8 +118,8 @@ class AudioConfiguration {
       channels: map['channels'] ?? 1,
       enableNoiseReduction: map['enableNoiseReduction'] ?? true,
       enableAutoGainControl: map['enableAutoGainControl'] ?? true,
-      recordingLimit: map['recordingLimit'] != null 
-          ? Duration(seconds: map['recordingLimit']) 
+      recordingLimit: map['recordingLimit'] != null
+          ? Duration(seconds: map['recordingLimit'])
           : null,
       outputDirectory: map['outputDirectory'],
       maxFileSizeMB: map['maxFileSizeMB'],

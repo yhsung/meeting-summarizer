@@ -12,15 +12,21 @@ void main() {
     });
 
     group('getOptimalFormat', () {
-      test('should return highest quality format when prioritizing quality', () {
-        final format = manager.getOptimalFormat(
-          quality: AudioQuality.high,
-          prioritizeQuality: true,
-          prioritizeSize: false,
-        );
+      test(
+        'should return highest quality format when prioritizing quality',
+        () {
+          final format = manager.getOptimalFormat(
+            quality: AudioQuality.high,
+            prioritizeQuality: true,
+            prioritizeSize: false,
+          );
 
-        expect(format, isIn([AudioFormat.wav, AudioFormat.m4a, AudioFormat.aac]));
-      });
+          expect(
+            format,
+            isIn([AudioFormat.wav, AudioFormat.m4a, AudioFormat.aac]),
+          );
+        },
+      );
 
       test('should return most compressed format when prioritizing size', () {
         final format = manager.getOptimalFormat(

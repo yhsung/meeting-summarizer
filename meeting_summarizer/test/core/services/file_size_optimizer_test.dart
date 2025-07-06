@@ -30,18 +30,21 @@ void main() {
         expect(result.compressionRatio, greaterThan(0.0));
       });
 
-      test('should return optimization result with maximizeQuality strategy', () {
-        final result = optimizer.optimizeForTarget(
-          targetSizeMB: 50,
-          expectedDuration: const Duration(minutes: 5),
-          recordingType: 'music',
-          strategy: OptimizationStrategy.maximizeQuality,
-        );
+      test(
+        'should return optimization result with maximizeQuality strategy',
+        () {
+          final result = optimizer.optimizeForTarget(
+            targetSizeMB: 50,
+            expectedDuration: const Duration(minutes: 5),
+            recordingType: 'music',
+            strategy: OptimizationStrategy.maximizeQuality,
+          );
 
-        expect(result, isA<OptimizationResult>());
-        expect(result.strategy, 'maximizeQuality');
-        expect(result.qualityScore, greaterThan(0.5));
-      });
+          expect(result, isA<OptimizationResult>());
+          expect(result.strategy, 'maximizeQuality');
+          expect(result.qualityScore, greaterThan(0.5));
+        },
+      );
 
       test('should optimize for speech content', () {
         final result = optimizer.optimizeForTarget(
@@ -67,8 +70,10 @@ void main() {
 
         expect(result, isA<OptimizationResult>());
         expect(result.strategy, 'musicOptimized');
-        expect(result.configuration.quality, 
-               isIn([AudioQuality.high, AudioQuality.ultra]));
+        expect(
+          result.configuration.quality,
+          isIn([AudioQuality.high, AudioQuality.ultra]),
+        );
       });
 
       test('should provide balanced optimization', () {
@@ -96,7 +101,10 @@ void main() {
 
         expect(recommendations, isNotEmpty);
         expect(recommendations.length, greaterThanOrEqualTo(3));
-        expect(recommendations.every((r) => r.estimatedFileSizeMB <= 25.0), isTrue);
+        expect(
+          recommendations.every((r) => r.estimatedFileSizeMB <= 25.0),
+          isTrue,
+        );
       });
 
       test('should include speech optimization for speech content', () {
@@ -180,27 +188,33 @@ void main() {
         expect(tip, contains('fits within target'));
       });
 
-      test('should suggest compression when size exceeds target significantly', () {
-        final config = AudioConfiguration.raw(
-          format: AudioFormat.wav,
-          quality: AudioQuality.ultra,
-          sampleRate: 48000,
-          bitDepth: 24,
-        );
+      test(
+        'should suggest compression when size exceeds target significantly',
+        () {
+          final config = AudioConfiguration.raw(
+            format: AudioFormat.wav,
+            quality: AudioQuality.ultra,
+            sampleRate: 48000,
+            bitDepth: 24,
+          );
 
-        final tip = optimizer.getSizeOptimizationTip(
-          currentSizeMB: 25.0,
-          targetSizeMB: 10,
-          configuration: config,
-        );
+          final tip = optimizer.getSizeOptimizationTip(
+            currentSizeMB: 25.0,
+            targetSizeMB: 10,
+            configuration: config,
+          );
 
-        expect(tip, isNotEmpty);
-        expect(tip.toLowerCase(), anyOf([
-          contains('compress'),
-          contains('quality'),
-          contains('format'),
-        ]));
-      });
+          expect(tip, isNotEmpty);
+          expect(
+            tip.toLowerCase(),
+            anyOf([
+              contains('compress'),
+              contains('quality'),
+              contains('format'),
+            ]),
+          );
+        },
+      );
 
       test('should provide appropriate advice for different size ratios', () {
         final config = AudioConfiguration.raw(
@@ -260,8 +274,10 @@ void main() {
         );
 
         expect(result, isA<OptimizationResult>());
-        expect(result.configuration.quality, 
-               isIn([AudioQuality.high, AudioQuality.ultra]));
+        expect(
+          result.configuration.quality,
+          isIn([AudioQuality.high, AudioQuality.ultra]),
+        );
       });
     });
   });

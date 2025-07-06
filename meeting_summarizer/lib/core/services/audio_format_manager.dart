@@ -5,9 +5,9 @@ import '../models/audio_configuration.dart';
 
 class AudioFormatManager {
   static const AudioFormatManager _instance = AudioFormatManager._internal();
-  
+
   factory AudioFormatManager() => _instance;
-  
+
   const AudioFormatManager._internal();
 
   AudioFormat getOptimalFormat({
@@ -18,13 +18,18 @@ class AudioFormatManager {
     Duration? expectedDuration,
   }) {
     final platformCapabilities = _getPlatformCapabilities();
-    
+
     if (prioritizeQuality && !prioritizeSize) {
       return _selectForQuality(platformCapabilities);
     } else if (prioritizeSize && !prioritizeQuality) {
       return _selectForSize(platformCapabilities);
     } else {
-      return _selectBalanced(platformCapabilities, quality, maxFileSizeMB, expectedDuration);
+      return _selectBalanced(
+        platformCapabilities,
+        quality,
+        maxFileSizeMB,
+        expectedDuration,
+      );
     }
   }
 
@@ -34,14 +39,15 @@ class AudioFormatManager {
     int? maxFileSizeMB,
     Duration? expectedDuration,
   }) {
-    final isSpeech = recordingType.toLowerCase().contains('speech') || 
-                     recordingType.toLowerCase().contains('voice') ||
-                     recordingType.toLowerCase().contains('meeting');
-    
+    final isSpeech =
+        recordingType.toLowerCase().contains('speech') ||
+        recordingType.toLowerCase().contains('voice') ||
+        recordingType.toLowerCase().contains('meeting');
+
     if (maxFileSizeMB != null && expectedDuration != null) {
       return _selectQualityBySize(format, maxFileSizeMB, expectedDuration);
     }
-    
+
     return isSpeech ? AudioQuality.medium : AudioQuality.high;
   }
 
@@ -58,7 +64,7 @@ class AudioFormatManager {
       maxFileSizeMB: maxFileSizeMB,
       expectedDuration: expectedDuration,
     );
-    
+
     final format = getOptimalFormat(
       quality: quality,
       prioritizeQuality: prioritizeQuality,
@@ -66,7 +72,7 @@ class AudioFormatManager {
       maxFileSizeMB: maxFileSizeMB,
       expectedDuration: expectedDuration,
     );
-    
+
     return AudioConfiguration(
       format: format,
       quality: quality,
@@ -83,7 +89,8 @@ class AudioFormatManager {
     required AudioQuality quality,
     required Duration duration,
   }) {
-    final uncompressedSize = quality.estimatedFileSizePerMinute * (duration.inSeconds / 60);
+    final uncompressedSize =
+        quality.estimatedFileSizePerMinute * (duration.inSeconds / 60);
     return uncompressedSize * format.compressionRatio;
   }
 
@@ -95,10 +102,11 @@ class AudioFormatManager {
     required String recordingType,
     required AudioFormat format,
   }) {
-    final isSpeech = recordingType.toLowerCase().contains('speech') || 
-                     recordingType.toLowerCase().contains('voice') ||
-                     recordingType.toLowerCase().contains('meeting');
-    
+    final isSpeech =
+        recordingType.toLowerCase().contains('speech') ||
+        recordingType.toLowerCase().contains('voice') ||
+        recordingType.toLowerCase().contains('meeting');
+
     if (isSpeech) {
       return [AudioQuality.low, AudioQuality.medium, AudioQuality.high];
     } else {
@@ -111,10 +119,11 @@ class AudioFormatManager {
     required AudioQuality quality,
     required String recordingType,
   }) {
-    final isSpeech = recordingType.toLowerCase().contains('speech') || 
-                     recordingType.toLowerCase().contains('voice') ||
-                     recordingType.toLowerCase().contains('meeting');
-    
+    final isSpeech =
+        recordingType.toLowerCase().contains('speech') ||
+        recordingType.toLowerCase().contains('voice') ||
+        recordingType.toLowerCase().contains('meeting');
+
     if (isSpeech) {
       if (format == AudioFormat.mp3 && quality == AudioQuality.medium) {
         return 'Excellent choice for speech recordings - good quality with small file size';
@@ -128,7 +137,7 @@ class AudioFormatManager {
         return 'Professional quality - uncompressed audio with maximum fidelity';
       }
     }
-    
+
     return 'Good choice for ${recordingType.toLowerCase()} recordings';
   }
 
@@ -137,15 +146,15 @@ class AudioFormatManager {
     required AudioQuality quality,
   }) {
     final capabilities = _getPlatformCapabilities();
-    
+
     if (!capabilities.supportedFormats.contains(format)) {
       return false;
     }
-    
+
     if (format == AudioFormat.wav && quality == AudioQuality.ultra) {
       return capabilities.supportsHighBitDepth;
     }
-    
+
     return true;
   }
 
@@ -213,13 +222,13 @@ class AudioFormatManager {
           quality: quality,
           duration: expectedDuration,
         );
-        
+
         if (estimatedSize <= maxFileSizeMB) {
           return format;
         }
       }
     }
-    
+
     return capabilities.preferredFormat;
   }
 
@@ -234,12 +243,12 @@ class AudioFormatManager {
         quality: quality,
         duration: expectedDuration,
       );
-      
+
       if (estimatedSize <= maxFileSizeMB) {
         return quality;
       }
     }
-    
+
     return AudioQuality.low;
   }
 }

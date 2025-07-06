@@ -4,7 +4,12 @@ enum AudioFormat {
   m4a('m4a', 'audio/mp4', false, true),
   aac('aac', 'audio/aac', false, true);
 
-  const AudioFormat(this.extension, this.mimeType, this.isLossless, this.isCompressed);
+  const AudioFormat(
+    this.extension,
+    this.mimeType,
+    this.isLossless,
+    this.isCompressed,
+  );
 
   final String extension;
   final String mimeType;

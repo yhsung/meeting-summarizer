@@ -2,13 +2,7 @@ import 'dart:io';
 import '../enums/audio_format.dart';
 import '../enums/audio_quality.dart';
 
-enum CodecType {
-  aac,
-  mp3,
-  pcm,
-  opus,
-  vorbis,
-}
+enum CodecType { aac, mp3, pcm, opus, vorbis }
 
 class CodecInfo {
   final CodecType type;
@@ -32,9 +26,9 @@ class CodecInfo {
 
 class CodecManager {
   static const CodecManager _instance = CodecManager._internal();
-  
+
   factory CodecManager() => _instance;
-  
+
   const CodecManager._internal();
 
   static const Map<CodecType, CodecInfo> _codecDatabase = {
@@ -42,7 +36,11 @@ class CodecManager {
       type: CodecType.aac,
       name: 'Advanced Audio Coding',
       supportedFormats: [AudioFormat.aac, AudioFormat.m4a],
-      supportedQualities: [AudioQuality.low, AudioQuality.medium, AudioQuality.high],
+      supportedQualities: [
+        AudioQuality.low,
+        AudioQuality.medium,
+        AudioQuality.high,
+      ],
       isHardwareAccelerated: true,
       isLossless: false,
       compressionEfficiency: 0.89,
@@ -51,7 +49,11 @@ class CodecManager {
       type: CodecType.mp3,
       name: 'MPEG-1 Audio Layer III',
       supportedFormats: [AudioFormat.mp3],
-      supportedQualities: [AudioQuality.low, AudioQuality.medium, AudioQuality.high],
+      supportedQualities: [
+        AudioQuality.low,
+        AudioQuality.medium,
+        AudioQuality.high,
+      ],
       isHardwareAccelerated: false,
       isLossless: false,
       compressionEfficiency: 0.80,
@@ -60,7 +62,12 @@ class CodecManager {
       type: CodecType.pcm,
       name: 'Pulse Code Modulation',
       supportedFormats: [AudioFormat.wav],
-      supportedQualities: [AudioQuality.low, AudioQuality.medium, AudioQuality.high, AudioQuality.ultra],
+      supportedQualities: [
+        AudioQuality.low,
+        AudioQuality.medium,
+        AudioQuality.high,
+        AudioQuality.ultra,
+      ],
       isHardwareAccelerated: true,
       isLossless: true,
       compressionEfficiency: 1.0,
@@ -69,7 +76,11 @@ class CodecManager {
       type: CodecType.opus,
       name: 'Opus Interactive Audio Codec',
       supportedFormats: [AudioFormat.wav],
-      supportedQualities: [AudioQuality.low, AudioQuality.medium, AudioQuality.high],
+      supportedQualities: [
+        AudioQuality.low,
+        AudioQuality.medium,
+        AudioQuality.high,
+      ],
       isHardwareAccelerated: false,
       isLossless: false,
       compressionEfficiency: 0.95,
@@ -78,7 +89,11 @@ class CodecManager {
       type: CodecType.vorbis,
       name: 'Vorbis Audio Codec',
       supportedFormats: [AudioFormat.wav],
-      supportedQualities: [AudioQuality.low, AudioQuality.medium, AudioQuality.high],
+      supportedQualities: [
+        AudioQuality.low,
+        AudioQuality.medium,
+        AudioQuality.high,
+      ],
       isHardwareAccelerated: false,
       isLossless: false,
       compressionEfficiency: 0.85,
@@ -94,8 +109,8 @@ class CodecManager {
     final availableCodecs = getAvailableCodecs();
     final compatibleCodecs = availableCodecs.where((codec) {
       final info = _codecDatabase[codec]!;
-      return info.supportedFormats.contains(format) && 
-             info.supportedQualities.contains(quality);
+      return info.supportedFormats.contains(format) &&
+          info.supportedQualities.contains(quality);
     }).toList();
 
     if (compatibleCodecs.isEmpty) {
@@ -127,8 +142,8 @@ class CodecManager {
   }) {
     return getAvailableCodecs().where((codec) {
       final info = _codecDatabase[codec]!;
-      return info.supportedFormats.contains(format) && 
-             info.supportedQualities.contains(quality);
+      return info.supportedFormats.contains(format) &&
+          info.supportedQualities.contains(quality);
     }).toList();
   }
 
@@ -151,7 +166,7 @@ class CodecManager {
     required AudioQuality quality,
   }) {
     final info = _codecDatabase[codec]!;
-    
+
     if (info.isHardwareAccelerated) {
       return 'Hardware accelerated codec - excellent performance and battery efficiency';
     } else if (info.isLossless) {
@@ -171,7 +186,7 @@ class CodecManager {
     required AudioQuality quality,
   }) {
     final info = _codecDatabase[codec]!;
-    
+
     return {
       'codec': codec.name,
       'format': format.extension,
@@ -191,14 +206,14 @@ class CodecManager {
     required AudioQuality quality,
   }) {
     final info = _codecDatabase[codec]!;
-    
+
     if (info.isLossless) {
       return 1.0;
     }
-    
+
     final baseCompression = info.compressionEfficiency;
     final qualityFactor = _getQualityFactor(quality);
-    
+
     return baseCompression * qualityFactor;
   }
 
@@ -215,21 +230,29 @@ class CodecManager {
   }
 
   CodecType _selectForQuality(List<CodecType> codecs) {
-    final losslessCodecs = codecs.where((codec) => _codecDatabase[codec]!.isLossless).toList();
+    final losslessCodecs = codecs
+        .where((codec) => _codecDatabase[codec]!.isLossless)
+        .toList();
     if (losslessCodecs.isNotEmpty) {
       return losslessCodecs.first;
     }
-    
-    codecs.sort((a, b) => _codecDatabase[b]!.compressionEfficiency.compareTo(_codecDatabase[a]!.compressionEfficiency));
+
+    codecs.sort(
+      (a, b) => _codecDatabase[b]!.compressionEfficiency.compareTo(
+        _codecDatabase[a]!.compressionEfficiency,
+      ),
+    );
     return codecs.first;
   }
 
   CodecType _selectForPerformance(List<CodecType> codecs) {
-    final hardwareCodecs = codecs.where((codec) => _codecDatabase[codec]!.isHardwareAccelerated).toList();
+    final hardwareCodecs = codecs
+        .where((codec) => _codecDatabase[codec]!.isHardwareAccelerated)
+        .toList();
     if (hardwareCodecs.isNotEmpty) {
       return hardwareCodecs.first;
     }
-    
+
     return codecs.first;
   }
 
@@ -241,7 +264,7 @@ class CodecManager {
       if (info.isLossless) score += 0.1;
       return MapEntry(codec, score);
     }).toList();
-    
+
     scores.sort((a, b) => b.value.compareTo(a.value));
     return scores.first.key;
   }

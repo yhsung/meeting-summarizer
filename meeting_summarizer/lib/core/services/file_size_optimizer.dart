@@ -32,9 +32,9 @@ class OptimizationResult {
 
 class FileSizeOptimizer {
   static const FileSizeOptimizer _instance = FileSizeOptimizer._internal();
-  
+
   factory FileSizeOptimizer() => _instance;
-  
+
   const FileSizeOptimizer._internal();
 
   AudioFormatManager get _formatManager => AudioFormatManager();
@@ -47,41 +47,55 @@ class FileSizeOptimizer {
     OptimizationStrategy strategy = OptimizationStrategy.balanced,
   }) {
     final optimizations = <String>[];
-    
+
     AudioFormat optimalFormat;
     AudioQuality optimalQuality;
-    
+
     switch (strategy) {
       case OptimizationStrategy.minimizeSize:
         optimalFormat = _selectForMinimalSize();
-        optimalQuality = _selectQualityForSize(optimalFormat, targetSizeMB, expectedDuration);
-        optimizations.add('Selected most compressed format: ${optimalFormat.extension.toUpperCase()}');
+        optimalQuality = _selectQualityForSize(
+          optimalFormat,
+          targetSizeMB,
+          expectedDuration,
+        );
+        optimizations.add(
+          'Selected most compressed format: ${optimalFormat.extension.toUpperCase()}',
+        );
         optimizations.add('Reduced quality to fit target size');
         break;
-        
+
       case OptimizationStrategy.maximizeQuality:
         optimalQuality = _selectForMaximalQuality();
-        optimalFormat = _selectFormatForQuality(optimalQuality, targetSizeMB, expectedDuration);
+        optimalFormat = _selectFormatForQuality(
+          optimalQuality,
+          targetSizeMB,
+          expectedDuration,
+        );
         optimizations.add('Selected highest quality: ${optimalQuality.label}');
         optimizations.add('Optimized format for quality preservation');
         break;
-        
+
       case OptimizationStrategy.speechOptimized:
         optimalQuality = AudioQuality.medium;
         optimalFormat = _selectForSpeech();
         optimizations.add('Optimized for speech content');
         optimizations.add('Selected speech-appropriate quality settings');
         break;
-        
+
       case OptimizationStrategy.musicOptimized:
         optimalQuality = AudioQuality.high;
         optimalFormat = _selectForMusic();
         optimizations.add('Optimized for music content');
         optimizations.add('Selected high-fidelity settings');
         break;
-        
+
       case OptimizationStrategy.balanced:
-        final result = _balancedOptimization(targetSizeMB, expectedDuration, recordingType);
+        final result = _balancedOptimization(
+          targetSizeMB,
+          expectedDuration,
+          recordingType,
+        );
         optimalFormat = result.format;
         optimalQuality = result.quality;
         optimizations.addAll(result.optimizations);
@@ -101,9 +115,10 @@ class FileSizeOptimizer {
       sampleRate: optimalQuality.sampleRate,
       bitDepth: optimalQuality.bitDepth,
       channels: recordingType.toLowerCase().contains('stereo') ? 2 : 1,
-      enableNoiseReduction: recordingType.toLowerCase().contains('speech') || 
-                           recordingType.toLowerCase().contains('voice') ||
-                           recordingType.toLowerCase().contains('meeting'),
+      enableNoiseReduction:
+          recordingType.toLowerCase().contains('speech') ||
+          recordingType.toLowerCase().contains('voice') ||
+          recordingType.toLowerCase().contains('meeting'),
       enableAutoGainControl: true,
     );
 
@@ -140,7 +155,7 @@ class FileSizeOptimizer {
       OptimizationStrategy.maximizeQuality,
     ];
 
-    if (recordingType.toLowerCase().contains('speech') || 
+    if (recordingType.toLowerCase().contains('speech') ||
         recordingType.toLowerCase().contains('voice') ||
         recordingType.toLowerCase().contains('meeting')) {
       strategies.add(OptimizationStrategy.speechOptimized);
@@ -169,7 +184,8 @@ class FileSizeOptimizer {
       duration: currentDuration,
     );
 
-    if (totalExpectedDuration != null && totalExpectedDuration > currentDuration) {
+    if (totalExpectedDuration != null &&
+        totalExpectedDuration > currentDuration) {
       final projectedSize = _formatManager.estimateFileSize(
         format: configuration.format,
         quality: configuration.quality,
@@ -191,7 +207,7 @@ class FileSizeOptimizer {
     }
 
     final ratio = currentSizeMB / targetSizeMB;
-    
+
     if (ratio > 2.0) {
       return 'Consider switching to a more compressed format like MP3 or reducing quality significantly';
     } else if (ratio > 1.5) {
@@ -203,7 +219,7 @@ class FileSizeOptimizer {
 
   AudioFormat _selectForMinimalSize() {
     final supportedFormats = _formatManager.getSupportedFormats();
-    
+
     if (supportedFormats.contains(AudioFormat.aac)) {
       return AudioFormat.aac;
     } else if (supportedFormats.contains(AudioFormat.mp3)) {
@@ -221,7 +237,7 @@ class FileSizeOptimizer {
 
   AudioFormat _selectForSpeech() {
     final supportedFormats = _formatManager.getSupportedFormats();
-    
+
     if (supportedFormats.contains(AudioFormat.aac)) {
       return AudioFormat.aac;
     } else if (supportedFormats.contains(AudioFormat.mp3)) {
@@ -233,7 +249,7 @@ class FileSizeOptimizer {
 
   AudioFormat _selectForMusic() {
     final supportedFormats = _formatManager.getSupportedFormats();
-    
+
     if (supportedFormats.contains(AudioFormat.m4a)) {
       return AudioFormat.m4a;
     } else if (supportedFormats.contains(AudioFormat.wav)) {
@@ -243,79 +259,99 @@ class FileSizeOptimizer {
     }
   }
 
-  AudioQuality _selectQualityForSize(AudioFormat format, int targetSizeMB, Duration duration) {
+  AudioQuality _selectQualityForSize(
+    AudioFormat format,
+    int targetSizeMB,
+    Duration duration,
+  ) {
     for (final quality in AudioQuality.values.reversed) {
       final estimatedSize = _formatManager.estimateFileSize(
         format: format,
         quality: quality,
         duration: duration,
       );
-      
+
       if (estimatedSize <= targetSizeMB) {
         return quality;
       }
     }
-    
+
     return AudioQuality.low;
   }
 
-  AudioFormat _selectFormatForQuality(AudioQuality quality, int targetSizeMB, Duration duration) {
+  AudioFormat _selectFormatForQuality(
+    AudioQuality quality,
+    int targetSizeMB,
+    Duration duration,
+  ) {
     final supportedFormats = _formatManager.getSupportedFormats();
-    
-    for (final format in [AudioFormat.wav, AudioFormat.m4a, AudioFormat.aac, AudioFormat.mp3]) {
+
+    for (final format in [
+      AudioFormat.wav,
+      AudioFormat.m4a,
+      AudioFormat.aac,
+      AudioFormat.mp3,
+    ]) {
       if (!supportedFormats.contains(format)) continue;
-      
+
       final estimatedSize = _formatManager.estimateFileSize(
         format: format,
         quality: quality,
         duration: duration,
       );
-      
+
       if (estimatedSize <= targetSizeMB) {
         return format;
       }
     }
-    
+
     return supportedFormats.first;
   }
 
-  _BalancedResult _balancedOptimization(int targetSizeMB, Duration duration, String recordingType) {
+  _BalancedResult _balancedOptimization(
+    int targetSizeMB,
+    Duration duration,
+    String recordingType,
+  ) {
     final optimizations = <String>[];
-    
-    final isSpeech = recordingType.toLowerCase().contains('speech') || 
-                     recordingType.toLowerCase().contains('voice') ||
-                     recordingType.toLowerCase().contains('meeting');
-    
+
+    final isSpeech =
+        recordingType.toLowerCase().contains('speech') ||
+        recordingType.toLowerCase().contains('voice') ||
+        recordingType.toLowerCase().contains('meeting');
+
     AudioQuality quality = isSpeech ? AudioQuality.medium : AudioQuality.high;
     AudioFormat format = AudioFormat.m4a;
-    
+
     optimizations.add('Selected balanced quality: ${quality.label}');
-    optimizations.add('Selected efficient format: ${format.extension.toUpperCase()}');
-    
+    optimizations.add(
+      'Selected efficient format: ${format.extension.toUpperCase()}',
+    );
+
     double estimatedSize = _formatManager.estimateFileSize(
       format: format,
       quality: quality,
       duration: duration,
     );
-    
+
     if (estimatedSize > targetSizeMB) {
       if (quality != AudioQuality.low) {
         quality = AudioQuality.values[AudioQuality.values.indexOf(quality) - 1];
         optimizations.add('Reduced quality to fit target size');
       }
-      
+
       estimatedSize = _formatManager.estimateFileSize(
         format: format,
         quality: quality,
         duration: duration,
       );
-      
+
       if (estimatedSize > targetSizeMB && format != AudioFormat.aac) {
         format = AudioFormat.aac;
         optimizations.add('Switched to more compressed format');
       }
     }
-    
+
     return _BalancedResult(
       format: format,
       quality: quality,
@@ -325,8 +361,9 @@ class FileSizeOptimizer {
 
   double _calculateQualityScore(AudioFormat format, AudioQuality quality) {
     double formatScore = format.isLossless ? 1.0 : 0.8;
-    double qualityScore = (AudioQuality.values.indexOf(quality) + 1) / AudioQuality.values.length;
-    
+    double qualityScore =
+        (AudioQuality.values.indexOf(quality) + 1) / AudioQuality.values.length;
+
     return (formatScore + qualityScore) / 2;
   }
 }
