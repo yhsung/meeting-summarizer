@@ -128,7 +128,7 @@
               2
             ],
             "details": "Handle app backgrounding scenarios, implement background audio sessions, manage iOS background app refresh, Android foreground services, and web page visibility API integration.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -139,7 +139,7 @@
               3
             ],
             "details": "Integrate noise suppression algorithms, echo cancellation, automatic gain control, and audio filtering. Support both real-time and post-processing enhancement modes.",
-            "status": "pending",
+            "status": "in-progress",
             "testStrategy": ""
           },
           {
@@ -703,7 +703,7 @@
     ],
     "metadata": {
       "created": "2025-07-06T01:29:26.245Z",
-      "updated": "2025-07-06T13:29:09.444Z",
+      "updated": "2025-07-06T16:32:50.281Z",
       "description": "Tasks for master context"
     }
   }
