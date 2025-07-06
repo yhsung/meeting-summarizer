@@ -20,15 +20,19 @@ jobs:
         channel: 'stable'
     
     - name: Install dependencies
+      working-directory: ./meeting_summarizer
       run: flutter pub get
     
     - name: Verify formatting
+      working-directory: ./meeting_summarizer
       run: dart format --output=none --set-exit-if-changed .
     
     - name: Analyze project source
+      working-directory: ./meeting_summarizer
       run: flutter analyze
     
     - name: Run tests
+      working-directory: ./meeting_summarizer
       run: flutter test
 
   build-android:
@@ -51,9 +55,11 @@ jobs:
         java-version: '17'
     
     - name: Install dependencies
+      working-directory: ./meeting_summarizer
       run: flutter pub get
     
     - name: Build APK
+      working-directory: ./meeting_summarizer
       run: flutter build apk --debug
 
   build-ios:
@@ -70,9 +76,11 @@ jobs:
         channel: 'stable'
     
     - name: Install dependencies
+      working-directory: ./meeting_summarizer
       run: flutter pub get
     
     - name: Build iOS
+      working-directory: ./meeting_summarizer
       run: flutter build ios --debug --simulator
 
   build-web:
@@ -89,9 +97,11 @@ jobs:
         channel: 'stable'
     
     - name: Install dependencies
+      working-directory: ./meeting_summarizer
       run: flutter pub get
     
     - name: Build Web
+      working-directory: ./meeting_summarizer
       run: flutter build web --debug
 
   build-macos:
@@ -108,9 +118,11 @@ jobs:
         channel: 'stable'
     
     - name: Install dependencies
+      working-directory: ./meeting_summarizer
       run: flutter pub get
     
     - name: Build macOS
+      working-directory: ./meeting_summarizer
       run: flutter build macos --debug
 
   build-windows:
@@ -127,7 +139,9 @@ jobs:
         channel: 'stable'
     
     - name: Install dependencies
+      working-directory: ./meeting_summarizer
       run: flutter pub get
     
     - name: Build Windows
+      working-directory: ./meeting_summarizer
       run: flutter build windows --debug
