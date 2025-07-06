@@ -159,9 +159,16 @@ task-master show <id>                     # Review task details
 task-master update-subtask --id=<id> --prompt="implementation notes..."
 
 # Before completing tasks - enforce quality gates
-dart format .                             # Format code
-flutter analyze                           # Check for issues
-flutter test                              # Run tests
+dart format .                             # Format code consistently
+flutter analyze                           # Check for static analysis issues
+flutter test                              # Run all unit and widget tests
+
+# Verify builds before git tracking
+flutter build web                         # Verify web compilation
+flutter build apk --debug                 # Verify Android compilation
+flutter build macos                       # Verify macOS compilation (if targeting)
+
+# Track changes with git only after successful builds
 git add .                                 # Stage changes
 git commit -m "feat: task description"    # Commit with task reference
 git push origin main                      # Push and trigger CI/CD
@@ -308,15 +315,21 @@ task-master models --set-fallback gpt-4o-mini
 4. `task-master set-status --id=<id> --status=in-progress` - Start work
 5. Implement code following logged plan
 6. **Format and validate code before tracking:**
-   - `dart format .` or `flutter analyze` - Format source code and check for issues
-   - Run any lint/typecheck commands for the project
-   - Run relevant tests to ensure implementation works
-7. **Track changes with git:**
+   - `dart format .` - Format source code consistently
+   - `flutter analyze` - Check for static analysis issues
+   - `flutter test` - Run all unit and widget tests
+   - Run any project-specific lint/typecheck commands
+7. **Verify builds before git tracking:**
+   - `flutter build web` - Verify web compilation
+   - `flutter build apk --debug` - Verify Android compilation
+   - `flutter build macos` (if targeting macOS) - Verify desktop compilation
+   - **CRITICAL**: Only proceed to git if builds are successful
+8. **Track changes with git only after successful builds:**
    - `git add .` - Stage all changes
    - `git commit -m "descriptive message"` - Commit with clear message
    - `git push origin main` - Push to remote and trigger CI/CD
-8. `task-master update-subtask --id=<id> --prompt="what worked/didn't work"` - Log progress
-9. `task-master set-status --id=<id> --status=done` - Complete task
+9. `task-master update-subtask --id=<id> --prompt="what worked/didn't work"` - Log progress
+10. `task-master set-status --id=<id> --status=done` - Complete task
 
 ### Complex Workflows with Checklists
 
@@ -334,9 +347,16 @@ Task Master works well with `gh` CLI and enforces code quality before commits:
 
 ```bash
 # Standard development workflow with quality gates
-dart format .                     # Format code first
-flutter analyze                   # Check for analysis issues
-flutter test                      # Run tests
+dart format .                     # Format code consistently
+flutter analyze                   # Check for static analysis issues
+flutter test                      # Run all unit and widget tests
+
+# Verify builds before git tracking
+flutter build web                 # Verify web compilation
+flutter build apk --debug         # Verify Android compilation  
+flutter build macos               # Verify macOS compilation (if targeting)
+
+# Track changes with git only after successful builds
 git add .                         # Stage changes
 git commit -m "feat: implement JWT auth (task 1.2)"  # Reference task in commits
 git push origin main              # Push and trigger CI/CD
@@ -432,6 +452,31 @@ These commands make AI calls and may take up to a minute:
 - Requires a research model API key like Perplexity (`PERPLEXITY_API_KEY`) in environment
 - Provides more informed task creation and updates
 - Recommended for complex technical tasks
+
+### Build Troubleshooting
+
+#### Common Build Issues and Solutions
+
+**Android Build Issues:**
+- **NDK Version Mismatch**: Update `android/app/build.gradle.kts` with correct NDK version
+- **MinSdk Too Low**: Update `minSdk` to meet package requirements (e.g., `minSdk = 23`)
+- **Gradle Sync Issues**: Run `flutter clean && flutter pub get` then retry
+
+**macOS Build Issues:**
+- **Deployment Target**: Update `macos/Podfile` platform version (e.g., `platform :osx, '10.15'`)
+- **Xcode Config**: Add `MACOSX_DEPLOYMENT_TARGET = 10.15` to `.xcconfig` files
+- **Pod Dependencies**: Run `cd macos && pod install` after platform updates
+
+**Web Build Issues:**
+- **Compilation Errors**: Check for platform-specific imports in web context
+- **Asset Issues**: Verify assets are properly configured in `pubspec.yaml`
+
+**General Build Strategy:**
+1. Start with `flutter clean` if builds are failing unexpectedly
+2. Build platforms in order: Web → Android → macOS/iOS → Windows
+3. Fix platform-specific issues one at a time
+4. Use `flutter doctor -v` to diagnose environment issues
+5. Check package compatibility with `flutter pub outdated`
 
 ---
 
