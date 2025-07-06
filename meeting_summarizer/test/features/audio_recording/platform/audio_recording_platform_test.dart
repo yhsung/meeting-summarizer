@@ -123,9 +123,11 @@ void main() {
 
     setUp(() {
       platform = MockAudioRecordingPlatform();
-      testConfig = const AudioConfiguration(
+      testConfig = AudioConfiguration.raw(
         format: AudioFormat.wav,
         quality: AudioQuality.high,
+        sampleRate: 44100,
+        bitDepth: 16,
       );
     });
 

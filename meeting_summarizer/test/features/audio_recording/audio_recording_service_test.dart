@@ -47,7 +47,7 @@ void main() {
 
     group('AudioConfiguration', () {
       test('should create default configuration', () {
-        const config = AudioConfiguration();
+        final config = AudioConfiguration();
         expect(config.format, AudioFormat.wav);
         expect(config.quality, AudioQuality.high);
         expect(config.noiseReduction, true);
@@ -55,10 +55,10 @@ void main() {
       });
 
       test('should create custom configuration', () {
-        const config = AudioConfiguration(
+        final config = AudioConfiguration(
           format: AudioFormat.mp3,
           quality: AudioQuality.medium,
-          noiseReduction: false,
+          enableNoiseReduction: false,
         );
         expect(config.format, AudioFormat.mp3);
         expect(config.quality, AudioQuality.medium);
@@ -66,7 +66,7 @@ void main() {
       });
 
       test('should support copyWith', () {
-        const original = AudioConfiguration();
+        final original = AudioConfiguration();
         final modified = original.copyWith(
           format: AudioFormat.aac,
           quality: AudioQuality.low,
