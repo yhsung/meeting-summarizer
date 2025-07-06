@@ -1,0 +1,93 @@
+{
+	"meta": {
+		"generatedAt": "2025-07-06T00:59:12.353Z",
+		"tasksAnalyzed": 10,
+		"totalTasks": 10,
+		"analysisCount": 10,
+		"thresholdScore": 5,
+		"projectName": "Taskmaster",
+		"usedResearch": true
+	},
+	"complexityAnalysis": [
+		{
+			"taskId": 1,
+			"taskTitle": "Setup Flutter Project Architecture",
+			"complexityScore": 6,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Break down Flutter project initialization into: 1) Core project creation and dependency setup, 2) Clean architecture folder structure implementation, 3) Platform-specific configuration for all target platforms, 4) Git setup and initial validation testing",
+			"reasoning": "Moderate complexity due to multi-platform setup and architecture decisions, but well-defined steps with clear deliverables"
+		},
+		{
+			"taskId": 2,
+			"taskTitle": "Implement Core Audio Recording Engine",
+			"complexityScore": 8,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Divide audio engine implementation into: 1) flutter_sound integration and basic recording setup, 2) Real-time audio monitoring and level detection, 3) Multi-format support and quality settings, 4) Background recording and session management, 5) Waveform visualization widget, 6) Platform-specific audio optimizations",
+			"reasoning": "High complexity involving real-time audio processing, platform-specific implementations, and multiple concurrent features requiring deep audio expertise"
+		},
+		{
+			"taskId": 3,
+			"taskTitle": "Integrate OpenAI Whisper API",
+			"complexityScore": 7,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Split API integration into: 1) Basic API service setup with authentication, 2) Multi-language transcription implementation, 3) Error handling and retry mechanisms, 4) Batch processing and request queuing, 5) Usage monitoring and fallback systems",
+			"reasoning": "High complexity due to API integration challenges, error handling requirements, and need for robust networking with security considerations"
+		},
+		{
+			"taskId": 4,
+			"taskTitle": "Build Local Database and Storage System",
+			"complexityScore": 7,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Break database implementation into: 1) SQLite schema design and initial setup, 2) Database encryption and security implementation, 3) Repository pattern and CRUD operations, 4) Migration system and data integrity, 5) Search optimization and backup mechanisms",
+			"reasoning": "High complexity requiring database design expertise, encryption implementation, and performance optimization with data integrity concerns"
+		},
+		{
+			"taskId": 5,
+			"taskTitle": "Develop Real-time Transcription Display",
+			"complexityScore": 8,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Divide real-time transcription into: 1) Basic transcription widget and text display, 2) Real-time audio chunking and processing pipeline, 3) Confidence indicators and text formatting, 4) Auto-scrolling and manual editing capabilities, 5) Speaker identification integration, 6) Timestamp synchronization with audio playback",
+			"reasoning": "High complexity involving real-time data processing, UI responsiveness, and complex state management with multiple concurrent features"
+		},
+		{
+			"taskId": 6,
+			"taskTitle": "Implement AI-Powered Summarization System",
+			"complexityScore": 7,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Split summarization system into: 1) Basic GPT API integration for summarization, 2) Multiple summary format implementation, 3) Topic extraction and keyword identification, 4) Action item detection and meeting notes formatting, 5) Template system and batch processing capabilities",
+			"reasoning": "High complexity requiring NLP expertise, multiple AI integrations, and sophisticated text processing with template management"
+		},
+		{
+			"taskId": 7,
+			"taskTitle": "Create File Management and Export System",
+			"complexityScore": 6,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Break file management into: 1) Basic file organization with tags and categories, 2) Full-text search implementation with FTS, 3) Multi-format export functionality (PDF, TXT, DOCX), 4) Batch operations and sharing capabilities with cleanup tools",
+			"reasoning": "Moderate-high complexity with multiple export formats and search requirements, but well-defined file operations with established patterns"
+		},
+		{
+			"taskId": 8,
+			"taskTitle": "Implement Cloud Synchronization",
+			"complexityScore": 9,
+			"recommendedSubtasks": 7,
+			"expansionPrompt": "Divide cloud sync into: 1) Basic cloud service adapters (iCloud, Google Drive, OneDrive), 2) Two-way synchronization logic implementation, 3) Conflict resolution strategies and UI, 4) Offline-first architecture with sync queue, 5) File compression and bandwidth management, 6) Sync scheduling and progress tracking, 7) Sync history and rollback capabilities",
+			"reasoning": "Very high complexity involving multiple cloud APIs, complex conflict resolution, offline handling, and robust error recovery mechanisms"
+		},
+		{
+			"taskId": 9,
+			"taskTitle": "Build Cross-Platform UI with Accessibility",
+			"complexityScore": 7,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Split UI development into: 1) Platform-adaptive design and responsive layouts, 2) Theme system implementation (dark/light with system detection), 3) Comprehensive accessibility features and screen reader support, 4) Keyboard navigation and gesture controls, 5) Status indicators and contextual help systems",
+			"reasoning": "High complexity requiring platform-specific UI expertise, accessibility compliance knowledge, and responsive design across multiple form factors"
+		},
+		{
+			"taskId": 10,
+			"taskTitle": "Implement Security and Privacy Features",
+			"complexityScore": 9,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Break security implementation into: 1) End-to-end encryption setup with AES-256, 2) Biometric authentication integration across platforms, 3) Secure API key storage and TLS communications, 4) Data anonymization and GDPR compliance features, 5) Privacy controls and data retention policies, 6) Audit logging and secure sharing mechanisms",
+			"reasoning": "Very high complexity requiring deep security expertise, regulatory compliance knowledge, and platform-specific security implementations with audit requirements"
+		}
+	]
+}
