@@ -2,20 +2,19 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:record/record.dart';
 import 'package:uuid/uuid.dart';
 
-import '../../../core/enums/audio_format.dart';
 import '../../../core/enums/recording_state.dart';
 import '../../../core/models/audio_configuration.dart';
 import '../../../core/models/recording_session.dart';
 import '../../../core/services/audio_service_interface.dart';
+import 'platform/audio_recording_platform.dart';
+import 'platform/record_platform_adapter.dart';
 
 class AudioRecordingService implements AudioServiceInterface {
   static const Uuid _uuid = Uuid();
 
-  final AudioRecorder _recorder = AudioRecorder();
+  late final AudioRecordingPlatform _platform;
   final StreamController<RecordingSession> _sessionController =
       StreamController<RecordingSession>.broadcast();
 
@@ -23,6 +22,11 @@ class AudioRecordingService implements AudioServiceInterface {
   Timer? _recordingTimer;
   Timer? _amplitudeTimer;
   String? _recordingPath;
+
+  /// Constructor with optional platform injection for testing
+  AudioRecordingService({AudioRecordingPlatform? platform}) {
+    _platform = platform ?? RecordPlatformAdapter();
+  }
 
   @override
   Stream<RecordingSession> get sessionStream => _sessionController.stream;
@@ -33,8 +37,11 @@ class AudioRecordingService implements AudioServiceInterface {
   @override
   Future<void> initialize() async {
     try {
-      // Check if recorder is available
-      if (!await _recorder.hasPermission()) {
+      // Initialize platform-specific recording engine
+      await _platform.initialize();
+
+      // Check if microphone permission is available
+      if (!await _platform.hasPermission()) {
         debugPrint('AudioRecordingService: No microphone permission');
       }
       debugPrint('AudioRecordingService: Initialized successfully');
@@ -52,7 +59,7 @@ class AudioRecordingService implements AudioServiceInterface {
   @override
   Future<void> dispose() async {
     await _stopTimers();
-    await _recorder.dispose();
+    await _platform.dispose();
     await _sessionController.close();
     debugPrint('AudioRecordingService: Disposed');
   }
@@ -84,19 +91,11 @@ class AudioRecordingService implements AudioServiceInterface {
           fileName ?? 'recording_${DateTime.now().millisecondsSinceEpoch}';
       _recordingPath = '$directory/$filename.${configuration.format.extension}';
 
-      // Configure recording settings
-      final recordConfig = RecordConfig(
-        encoder: _getEncoder(configuration.format),
-        bitRate: configuration.quality.bitRate,
-        sampleRate: configuration.quality.sampleRate,
-        numChannels: 1,
-        autoGain: configuration.autoGainControl,
-        echoCancel: configuration.noiseReduction,
-        noiseSuppress: configuration.noiseReduction,
+      // Start recording using platform implementation
+      await _platform.startRecording(
+        configuration: configuration,
+        filePath: _recordingPath!,
       );
-
-      // Start recording
-      await _recorder.start(recordConfig, path: _recordingPath!);
 
       // Create session
       _currentSession = RecordingSession(
@@ -128,7 +127,7 @@ class AudioRecordingService implements AudioServiceInterface {
         throw Exception('No active recording to pause');
       }
 
-      await _recorder.pause();
+      await _platform.pauseRecording();
       await _stopTimers();
 
       _updateSession(RecordingState.paused);
@@ -147,7 +146,7 @@ class AudioRecordingService implements AudioServiceInterface {
         throw Exception('No paused recording to resume');
       }
 
-      await _recorder.resume();
+      await _platform.resumeRecording();
       _startRecordingTimer();
       _startAmplitudeMonitoring();
 
@@ -171,7 +170,7 @@ class AudioRecordingService implements AudioServiceInterface {
       _updateSession(RecordingState.stopping);
       await _stopTimers();
 
-      final path = await _recorder.stop();
+      final path = await _platform.stopRecording();
 
       if (path != null && await File(path).exists()) {
         final file = File(path);
@@ -204,12 +203,9 @@ class AudioRecordingService implements AudioServiceInterface {
   Future<void> cancelRecording() async {
     try {
       await _stopTimers();
-      await _recorder.stop();
+      await _platform.cancelRecording();
 
-      if (_recordingPath != null && await File(_recordingPath!).exists()) {
-        await File(_recordingPath!).delete();
-        debugPrint('AudioRecordingService: Recording file deleted');
-      }
+      // File cleanup is handled by platform implementation
 
       _currentSession = _currentSession?.copyWith(
         state: RecordingState.stopped,
@@ -228,7 +224,7 @@ class AudioRecordingService implements AudioServiceInterface {
   @override
   Future<bool> isReady() async {
     try {
-      return await _recorder.hasPermission() && !await _recorder.isRecording();
+      return await _platform.hasPermission() && !await _platform.isRecording();
     } catch (e) {
       debugPrint('AudioRecordingService: Ready check failed: $e');
       return false;
@@ -237,20 +233,13 @@ class AudioRecordingService implements AudioServiceInterface {
 
   @override
   List<String> getSupportedFormats() {
-    // Return supported formats based on platform
-    if (Platform.isIOS) {
-      return ['wav', 'm4a', 'aac'];
-    } else if (Platform.isAndroid) {
-      return ['wav', 'mp3', 'm4a', 'aac'];
-    } else {
-      return ['wav', 'mp3'];
-    }
+    return _platform.getSupportedFormats();
   }
 
   @override
   Future<bool> hasPermission() async {
     try {
-      return await _recorder.hasPermission();
+      return await _platform.hasPermission();
     } catch (e) {
       debugPrint('AudioRecordingService: Permission check failed: $e');
       return false;
@@ -260,8 +249,7 @@ class AudioRecordingService implements AudioServiceInterface {
   @override
   Future<bool> requestPermission() async {
     try {
-      final status = await Permission.microphone.request();
-      return status == PermissionStatus.granted;
+      return await _platform.requestPermission();
     } catch (e) {
       debugPrint('AudioRecordingService: Permission request failed: $e');
       return false;
@@ -322,8 +310,7 @@ class AudioRecordingService implements AudioServiceInterface {
     ) async {
       if (_currentSession != null && _currentSession!.state.isActive) {
         try {
-          final amplitude = await _recorder.getAmplitude();
-          final normalizedAmplitude = amplitude.current.clamp(0.0, 1.0);
+          final normalizedAmplitude = await _platform.getAmplitude();
 
           final newWaveformData = List<double>.from(
             _currentSession!.waveformData,
@@ -354,16 +341,5 @@ class AudioRecordingService implements AudioServiceInterface {
     _amplitudeTimer = null;
   }
 
-  AudioEncoder _getEncoder(AudioFormat format) {
-    switch (format) {
-      case AudioFormat.wav:
-        return AudioEncoder.wav;
-      case AudioFormat.mp3:
-        return AudioEncoder.aacLc; // MP3 not directly supported, use AAC
-      case AudioFormat.m4a:
-        return AudioEncoder.aacLc; // M4A container with AAC codec
-      case AudioFormat.aac:
-        return AudioEncoder.aacLc;
-    }
-  }
+  // Note: Encoder selection is now handled by platform-specific implementations
 }

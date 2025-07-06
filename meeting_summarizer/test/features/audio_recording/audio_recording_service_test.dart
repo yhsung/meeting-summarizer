@@ -1,4 +1,3 @@
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_summarizer/core/enums/audio_format.dart';
 import 'package:meeting_summarizer/core/enums/audio_quality.dart';
@@ -6,42 +5,29 @@ import 'package:meeting_summarizer/core/enums/recording_state.dart';
 import 'package:meeting_summarizer/core/models/audio_configuration.dart';
 import 'package:meeting_summarizer/features/audio_recording/data/audio_recording_service.dart';
 
+import 'platform/audio_recording_platform_test.dart';
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group('AudioRecordingService', () {
     late AudioRecordingService audioService;
+    late MockAudioRecordingPlatform mockPlatform;
 
     setUp(() {
-      audioService = AudioRecordingService();
+      mockPlatform = MockAudioRecordingPlatform();
+      audioService = AudioRecordingService(platform: mockPlatform);
 
-      // Mock the method channel for record package
-      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-          .setMockMethodCallHandler(
-            const MethodChannel('com.llfbandit.record'),
-            (MethodCall methodCall) async {
-              switch (methodCall.method) {
-                case 'hasPermission':
-                  return false; // Simulate no permission in tests
-                case 'create':
-                  return null;
-                case 'dispose':
-                  return null;
-                default:
-                  return null;
-              }
-            },
-          );
+      // No need for method channel mocking since we're using mock platform
     });
 
     tearDown(() async {
       await audioService.dispose();
     });
 
-    test('should handle initialization gracefully', () async {
-      // The initialization may fail in test environment due to missing plugins
-      // but should not throw unhandled exceptions
-      expect(() async => await audioService.initialize(), returnsNormally);
+    test('should initialize successfully with mock platform', () async {
+      await audioService.initialize();
+      expect(mockPlatform.isInitialized, true);
     });
 
     test('should have no current session initially', () {
@@ -52,10 +38,11 @@ void main() {
       expect(audioService.sessionStream, isA<Stream>());
     });
 
-    test('should return supported formats', () {
+    test('should return supported formats from platform', () {
       final formats = audioService.getSupportedFormats();
       expect(formats, isNotEmpty);
       expect(formats, contains('wav'));
+      expect(formats, mockPlatform.getSupportedFormats());
     });
 
     group('AudioConfiguration', () {
