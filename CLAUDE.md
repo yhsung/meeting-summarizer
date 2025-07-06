@@ -55,7 +55,7 @@ task-master generate                                         # Update task markd
 ### Directory Structure
 
 ```
-project/
+project/                   # absolute path /Volumes/Samsung970EVOPlus/dev-projects/meeting-summarizer
 ├── .taskmaster/
 │   ├── tasks/              # Task files directory
 │   │   ├── tasks.json      # Main task database
@@ -73,7 +73,51 @@ project/
 │   └── commands/         # Custom slash commands
 ├── .env                  # API keys
 ├── .mcp.json            # MCP configuration
-└── CLAUDE.md            # This file - auto-loaded by Claude Code
+├── meeting_summarizer/   # Flutter app directory
+│   ├── lib/
+│   │   ├── core/
+│   │   │   ├── enums/
+│   │   │   │   ├── audio_format.dart      # Audio format definitions with compression ratios
+│   │   │   │   ├── audio_quality.dart     # Quality levels with detailed properties
+│   │   │   │   └── recording_state.dart   # Recording state management
+│   │   │   ├── models/
+│   │   │   │   ├── audio_configuration.dart  # Enhanced audio config with serialization
+│   │   │   │   └── recording_session.dart     # Recording session management
+│   │   │   └── services/
+│   │   │       ├── audio_service_interface.dart  # Service interface definition
+│   │   │       ├── audio_format_manager.dart     # Platform-aware format selection
+│   │   │       ├── codec_manager.dart            # Codec selection and management
+│   │   │       └── file_size_optimizer.dart      # File size optimization strategies
+│   │   ├── features/
+│   │   │   └── audio_recording/
+│   │   │       ├── data/
+│   │   │       │   ├── audio_recording_service.dart  # Main audio recording service
+│   │   │       │   └── platform/
+│   │   │       │       ├── audio_recording_platform.dart   # Platform abstraction
+│   │   │       │       └── record_platform_adapter.dart    # Record package adapter
+│   │   │       ├── domain/             # Domain layer (to be implemented)
+│   │   │       └── presentation/       # UI layer (to be implemented)
+│   │   └── main.dart                   # Flutter app entry point
+│   ├── test/
+│   │   ├── core/
+│   │   │   └── services/
+│   │   │       ├── audio_format_manager_test.dart    # Format manager tests
+│   │   │       ├── codec_manager_test.dart            # Codec manager tests
+│   │   │       └── file_size_optimizer_test.dart     # Optimizer tests
+│   │   ├── features/
+│   │   │   └── audio_recording/
+│   │   │       ├── audio_recording_service_test.dart
+│   │   │       └── platform/
+│   │   │           └── audio_recording_platform_test.dart
+│   │   └── widget_test.dart            # Basic widget tests
+│   ├── android/                        # Android platform configuration
+│   ├── ios/                           # iOS platform configuration
+│   ├── macos/                         # macOS platform configuration
+│   ├── web/                           # Web platform configuration
+│   ├── windows/                       # Windows platform configuration
+│   ├── pubspec.yaml                   # Flutter dependencies
+│   └── analysis_options.yaml         # Dart analysis configuration
+└── CLAUDE.md                         # This file - auto-loaded by Claude Code
 ```
 
 ## MCP Integration
@@ -168,8 +212,14 @@ flutter build web                         # Verify web compilation
 flutter build apk --debug                 # Verify Android compilation
 flutter build macos                       # Verify macOS compilation (if targeting)
 
-# Track changes with git only after successful builds
-git add .                                 # Stage changes
+# Update documentation to reflect changes
+# CRITICAL: Update CLAUDE.md directory structure to reflect any new files/services
+# - Add new services, models, or enums to the directory tree
+# - Include descriptive comments for new components
+# - Ensure the structure accurately represents current codebase
+
+# Track changes with git only after successful builds and documentation updates
+git add .                                 # Stage changes including CLAUDE.md updates
 git commit -m "feat: task description"    # Commit with task reference
 git push origin main                      # Push and trigger CI/CD
 
@@ -307,6 +357,21 @@ task-master models --set-fallback gpt-4o-mini
 - This CLAUDE.md file is automatically loaded for context
 - Use `task-master show <id>` to pull specific task context when needed
 
+### Documentation Consistency
+
+**CRITICAL**: Maintain accurate documentation at each revision
+
+- **Directory Structure Updates**: Update CLAUDE.md directory structure whenever adding:
+  - New services in `lib/core/services/`
+  - New models in `lib/core/models/`
+  - New enums in `lib/core/enums/`
+  - New feature modules in `lib/features/`
+  - New test files in `test/`
+- **Component Documentation**: Include descriptive comments for each new component
+- **Workflow Updates**: Update workflow sections when introducing new patterns
+- **Integration Points**: Document how new components integrate with existing architecture
+- **Update Timing**: Always update documentation BEFORE git tracking to ensure commits include current structure
+
 ### Iterative Implementation
 
 1. `task-master show <subtask-id>` - Understand requirements
@@ -324,12 +389,18 @@ task-master models --set-fallback gpt-4o-mini
    - `flutter build apk --debug` - Verify Android compilation
    - `flutter build macos` (if targeting macOS) - Verify desktop compilation
    - **CRITICAL**: Only proceed to git if builds are successful
-8. **Track changes with git only after successful builds:**
-   - `git add .` - Stage all changes
+8. **Update documentation to reflect changes:**
+   - **MANDATORY**: Update CLAUDE.md directory structure for any new files
+   - Add new services, models, enums, or test files to the directory tree
+   - Include descriptive comments for new components
+   - Ensure structure accurately represents current codebase state
+   - Update workflow sections if new patterns or processes are introduced
+9. **Track changes with git only after successful builds and docs:**
+   - `git add .` - Stage all changes including CLAUDE.md updates
    - `git commit -m "descriptive message"` - Commit with clear message
    - `git push origin main` - Push to remote and trigger CI/CD
-9. `task-master update-subtask --id=<id> --prompt="what worked/didn't work"` - Log progress
-10. `task-master set-status --id=<id> --status=done` - Complete task
+10. `task-master update-subtask --id=<id> --prompt="what worked/didn't work"` - Log progress
+11. `task-master set-status --id=<id> --status=done` - Complete task
 
 ### Complex Workflows with Checklists
 
@@ -356,8 +427,13 @@ flutter build web                 # Verify web compilation
 flutter build apk --debug         # Verify Android compilation  
 flutter build macos               # Verify macOS compilation (if targeting)
 
-# Track changes with git only after successful builds
-git add .                         # Stage changes
+# Update documentation to reflect structural changes
+# MANDATORY: Update CLAUDE.md directory structure for any new files/services
+# - Add new components to the directory tree with descriptive comments
+# - Ensure documentation accurately represents current codebase state
+
+# Track changes with git only after successful builds and documentation updates
+git add .                         # Stage changes including CLAUDE.md updates
 git commit -m "feat: implement JWT auth (task 1.2)"  # Reference task in commits
 git push origin main              # Push and trigger CI/CD
 
