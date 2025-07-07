@@ -4,6 +4,7 @@ enum RecordingState {
   recording,
   paused,
   stopping,
+  processing,
   stopped,
   error;
 
