@@ -2,6 +2,10 @@
 
 Comprehensive git workflow with quality gates and proper commit messages.
 
+## Update documentation
+
+Update docs/project-structure.md for architectural, file, directory changes
+
 ## Pre-commit Workflow
 
 ```bash
@@ -14,10 +18,6 @@ flutter test
 flutter build web
 flutter build apk --debug
 flutter build macos
-
-# 3. Update documentation if needed
-# Update CLAUDE.md directory structure for any new files
-# Update docs/project-structure.md for architectural changes
 
 # 4. Stage and commit
 git add .
