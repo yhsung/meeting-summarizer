@@ -76,7 +76,7 @@
         "dependencies": [
           1
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -150,7 +150,7 @@
               1
             ],
             "details": "Handle microphone permission requests, permission status monitoring, graceful degradation when permissions denied, permission re-request flows, and platform-specific permission UI integration.",
-            "status": "in-progress",
+            "status": "done",
             "testStrategy": ""
           }
         ]
@@ -165,7 +165,7 @@
         "dependencies": [
           1
         ],
-        "status": "pending",
+        "status": "in-progress",
         "subtasks": [
           {
             "id": 1,
@@ -703,7 +703,7 @@
     ],
     "metadata": {
       "created": "2025-07-06T01:29:26.245Z",
-      "updated": "2025-07-07T02:46:57.058Z",
+      "updated": "2025-07-07T04:54:40.659Z",
       "description": "Tasks for master context"
     }
   }
