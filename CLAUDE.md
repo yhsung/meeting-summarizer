@@ -49,73 +49,17 @@ For detailed project structure, architecture overview, and file organization, se
 - **Features**: `meeting_summarizer/lib/features/` - Feature-specific implementations
 - **Tests**: `meeting_summarizer/test/` - Comprehensive test suite
 
-## Audio Enhancement Capabilities
+## Audio Enhancement
 
-The meeting summarizer now includes comprehensive audio enhancement features powered by FFT-based signal processing:
+The meeting summarizer includes comprehensive audio enhancement capabilities powered by FFT-based signal processing. For detailed information about audio enhancement features, configuration, and usage, see: [`docs/audio-enhancement.md`](docs/audio-enhancement.md)
 
-### Core Audio Enhancement Features
+### Quick Overview
 
-- **Noise Reduction**: Advanced algorithms to reduce background noise while preserving speech clarity
-- **Echo Cancellation**: Removes echo artifacts from recordings to improve audio quality
-- **Automatic Gain Control (AGC)**: Dynamically adjusts audio levels to maintain consistent volume
-- **Spectral Subtraction**: Advanced noise reduction using frequency domain analysis
-- **Frequency Filtering**: High-pass and low-pass filters to remove unwanted frequency components
-- **Real-time Processing**: Stream-based processing for live audio enhancement
-- **Post-processing Mode**: Batch processing for recorded audio files
-
-### Dependencies & Libraries
-
-- **fftea ^1.5.0+1**: Fast Fourier Transform library for frequency domain processing
-- Supports efficient FFT/IFFT operations for real-time audio processing
-- Optimized for power-of-two and arbitrary-sized arrays
-
-### Audio Enhancement Service Usage
-
-```dart
-// Initialize the service
-final enhancementService = AudioEnhancementService();
-await enhancementService.initialize();
-
-// Configure enhancement parameters
-final config = AudioEnhancementConfig(
-  enableNoiseReduction: true,
-  enableEchoCanellation: false,
-  enableAutoGainControl: true,
-  noiseReductionStrength: 0.7,
-  processingMode: ProcessingMode.realTime,
-);
-await enhancementService.configure(config);
-
-// Process audio data
-final result = await enhancementService.processAudio(audioData, sampleRate);
-
-// Stream processing for real-time enhancement
-final enhancedStream = enhancementService.processAudioStream(
-  inputAudioStream, 
-  sampleRate
-);
-
-// Individual enhancement functions
-final noiseCleaned = await enhancementService.applyNoiseReduction(audioData, sampleRate, 0.5);
-final echoFree = await enhancementService.applyEchoCancellation(audioData, sampleRate, 0.3);
-final normalized = await enhancementService.applyAutoGainControl(audioData, sampleRate, 0.8);
-```
-
-### Performance & Metrics
-
-The service includes comprehensive performance tracking:
-- Processing time per audio chunk
-- Total samples processed
-- Average processing latency
-- Enhancement algorithm usage counters
-
-### Integration with Audio Configuration
-
-The existing `AudioConfiguration` class already includes placeholders for enhancement features:
-- `enableNoiseReduction` - boolean flag for noise reduction
-- `enableAutoGainControl` - boolean flag for AGC
-
-The audio enhancement service seamlessly integrates with the existing audio recording pipeline.
+- **Noise Reduction**: Real-time background noise removal
+- **Echo Cancellation**: Echo artifact removal for cleaner audio
+- **Automatic Gain Control**: Dynamic level adjustment
+- **Spectral Subtraction**: Advanced frequency-domain noise reduction
+- **Real-time & Post-processing**: Support for both live and batch enhancement
 
 ## MCP Integration
 
@@ -359,11 +303,6 @@ task-master models --set-fallback gpt-4o-mini
 **CRITICAL**: Maintain accurate documentation at each revision
 
 - **Directory Structure Updates**: Update CLAUDE.md directory structure whenever adding:
-  - New services in `lib/core/services/`
-  - New models in `lib/core/models/`
-  - New enums in `lib/core/enums/`
-  - New feature modules in `lib/features/`
-  - New test files in `test/`
 - **Component Documentation**: Include descriptive comments for each new component
 - **Workflow Updates**: Update workflow sections when introducing new patterns
 - **Integration Points**: Document how new components integrate with existing architecture
@@ -425,9 +364,9 @@ flutter build apk --debug         # Verify Android compilation
 flutter build macos               # Verify macOS compilation (if targeting)
 
 # Update documentation to reflect structural changes
-# MANDATORY: Update CLAUDE.md directory structure for any new files/services
-# - Add new components to the directory tree with descriptive comments
-# - Ensure documentation accurately represents current codebase state
+MANDATORY: Update docs/project-structure.md directory structure for any new files/services
+- Add new components to the directory tree with descriptive comments
+- Ensure documentation accurately represents current codebase state
 
 # Track changes with git only after successful builds and documentation updates
 git add .                         # Stage changes including CLAUDE.md updates
