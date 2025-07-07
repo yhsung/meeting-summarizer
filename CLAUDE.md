@@ -2,37 +2,29 @@
 
 ## Essential Commands
 
-### Core Workflow Commands
+Essential TaskMaster and development commands are available as separate files in `.claude/commands/`:
+
+- **`/taskmaster-setup`** - Initialize TaskMaster and configure models
+- **`/taskmaster-next`** - Find and start next available task
+- **`/taskmaster-complete <task-id>`** - Complete task with quality gates
+- **`/taskmaster-list`** - View all tasks and manage task lifecycle
+- **`/quality-gates`** - Run comprehensive code quality checks
+- **`/git-workflow`** - Git workflow with quality gates and commit standards
+- **`/flutter-debug`** - Flutter debugging and development commands
+
+### Quick Commands
 
 ```bash
-# Project Setup
-task-master init                                    # Initialize Task Master in current project
-task-master parse-prd .taskmaster/docs/prd.txt      # Generate tasks from PRD document
-task-master models --setup                        # Configure AI models interactively
+# Daily workflow
+task-master next                    # Get next task
+task-master show <id>              # View task details
+task-master set-status --id=<id> --status=done  # Complete task
 
-# Daily Development Workflow
-task-master list                                   # Show all tasks with status
-task-master next                                   # Get next available task to work on
-task-master show <id>                             # View detailed task information (e.g., task-master show 1.2)
-task-master set-status --id=<id> --status=done    # Mark task complete
+# Quality gates
+dart format . && flutter analyze && flutter test
 
-# Task Management
-task-master add-task --prompt="description" --research        # Add new task with AI assistance
-task-master expand --id=<id> --research --force              # Break task into subtasks
-task-master update-task --id=<id> --prompt="changes"         # Update specific task
-task-master update --from=<id> --prompt="changes"            # Update multiple tasks from ID onwards
-task-master update-subtask --id=<id> --prompt="notes"        # Add implementation notes to subtask
-
-# Analysis & Planning
-task-master analyze-complexity --research          # Analyze task complexity
-task-master complexity-report                      # View complexity analysis
-task-master expand --all --research               # Expand all eligible tasks
-
-# Dependencies & Organization
-task-master add-dependency --id=<id> --depends-on=<id>       # Add task dependency
-task-master move --from=<id> --to=<id>                       # Reorganize task hierarchy
-task-master validate-dependencies                            # Check for dependency issues
-task-master generate                                         # Update task markdown files (usually auto-called)
+# Build verification
+flutter build web && flutter build apk --debug
 ```
 
 ## Project Structure
@@ -185,32 +177,17 @@ cd project-docs-worktree && claude
 
 ### Custom Slash Commands
 
-Create `.claude/commands/taskmaster-next.md`:
+All essential commands have been moved to `.claude/commands/` directory:
 
-```markdown
-Find the next available Task Master task and show its details.
+- `taskmaster-setup.md` - Project initialization and model configuration
+- `taskmaster-next.md` - Find and start next available task
+- `taskmaster-complete.md` - Complete task with validation
+- `taskmaster-list.md` - Task management and lifecycle
+- `quality-gates.md` - Code quality and testing workflow
+- `git-workflow.md` - Git operations with quality gates
+- `flutter-debug.md` - Flutter development and debugging
 
-Steps:
-
-1. Run `task-master next` to get the next task
-2. If a task is available, run `task-master show <id>` for full details
-3. Provide a summary of what needs to be implemented
-4. Suggest the first implementation step
-```
-
-Create `.claude/commands/taskmaster-complete.md`:
-
-```markdown
-Complete a Task Master task: $ARGUMENTS
-
-Steps:
-
-1. Review the current task with `task-master show $ARGUMENTS`
-2. Verify all implementation is complete
-3. Run any tests related to this task
-4. Mark as complete: `task-master set-status --id=$ARGUMENTS --status=done`
-5. Show the next available task with `task-master next`
-```
+These can be used as `/command-name` in Claude Code sessions.
 
 ## Tool Allowlist Recommendations
 
@@ -310,33 +287,19 @@ task-master models --set-fallback gpt-4o-mini
 
 ### Iterative Implementation
 
-1. `task-master show <subtask-id>` - Understand requirements
-2. Explore codebase and plan implementation
-3. `task-master update-subtask --id=<id> --prompt="detailed plan"` - Log plan
-4. `task-master set-status --id=<id> --status=in-progress` - Start work
-5. Implement code following logged plan
-6. **Format and validate code before tracking:**
-   - `dart format .` - Format source code consistently
-   - `flutter analyze` - Check for static analysis issues
-   - `flutter test` - Run all unit and widget tests
-   - Run any project-specific lint/typecheck commands
-7. **Verify builds before git tracking:**
-   - `flutter build web` - Verify web compilation
-   - `flutter build apk --debug` - Verify Android compilation
-   - `flutter build macos` (if targeting macOS) - Verify desktop compilation
-   - **CRITICAL**: Only proceed to git if builds are successful
-8. **Update documentation to reflect changes:**
-   - **MANDATORY**: Update CLAUDE.md directory structure for any new files
-   - Add new services, models, enums, or test files to the directory tree
-   - Include descriptive comments for new components
-   - Ensure structure accurately represents current codebase state
-   - Update workflow sections if new patterns or processes are introduced
-9. **Track changes with git only after successful builds and docs:**
-   - `git add .` - Stage all changes including CLAUDE.md updates
-   - `git commit -m "descriptive message"` - Commit with clear message
-   - `git push origin main` - Push to remote and trigger CI/CD
-10. `task-master update-subtask --id=<id> --prompt="what worked/didn't work"` - Log progress
-11. `task-master set-status --id=<id> --status=done` - Complete task
+Detailed implementation workflow is available in the command files:
+
+1. **Task Start**: Use `/taskmaster-next` to find and understand next task
+2. **Implementation**: Code following task requirements
+3. **Quality Gates**: Use `/quality-gates` to validate code
+4. **Git Workflow**: Use `/git-workflow` for proper commit process
+5. **Task Completion**: Use `/taskmaster-complete <id>` to finish task
+
+Key principles:
+- Always run quality gates before committing
+- Update documentation for structural changes
+- Use TaskMaster commands to track progress
+- Verify builds on all target platforms
 
 ### Complex Workflows with Checklists
 
@@ -350,32 +313,12 @@ For large migrations or multi-step processes:
 
 ### Git Integration
 
-Task Master works well with `gh` CLI and enforces code quality before commits:
+Git workflow with quality gates is detailed in `/git-workflow` command. Key integration:
 
-```bash
-# Standard development workflow with quality gates
-dart format .                     # Format code consistently
-flutter analyze                   # Check for static analysis issues
-flutter test                      # Run all unit and widget tests
-
-# Verify builds before git tracking
-flutter build web                 # Verify web compilation
-flutter build apk --debug         # Verify Android compilation  
-flutter build macos               # Verify macOS compilation (if targeting)
-
-# Update documentation to reflect structural changes
-MANDATORY: Update docs/project-structure.md directory structure for any new files/services
-- Add new components to the directory tree with descriptive comments
-- Ensure documentation accurately represents current codebase state
-
-# Track changes with git only after successful builds and documentation updates
-git add .                         # Stage changes including CLAUDE.md updates
-git commit -m "feat: implement JWT auth (task 1.2)"  # Reference task in commits
-git push origin main              # Push and trigger CI/CD
-
-# Create PR for completed task
-gh pr create --title "Complete task 1.2: User authentication" --body "Implements JWT auth system as specified in task 1.2"
-```
+- TaskMaster tasks reference in commit messages
+- Quality gates enforced before commits
+- Documentation updates for structural changes
+- GitHub CLI integration for PR creation
 
 ### Parallel Development with Git Worktrees
 
@@ -467,28 +410,12 @@ These commands make AI calls and may take up to a minute:
 
 ### Build Troubleshooting
 
-#### Common Build Issues and Solutions
+Comprehensive build troubleshooting guide is available in `/flutter-debug` command, including:
 
-**Android Build Issues:**
-- **NDK Version Mismatch**: Update `android/app/build.gradle.kts` with correct NDK version
-- **MinSdk Too Low**: Update `minSdk` to meet package requirements (e.g., `minSdk = 23`)
-- **Gradle Sync Issues**: Run `flutter clean && flutter pub get` then retry
-
-**macOS Build Issues:**
-- **Deployment Target**: Update `macos/Podfile` platform version (e.g., `platform :osx, '10.15'`)
-- **Xcode Config**: Add `MACOSX_DEPLOYMENT_TARGET = 10.15` to `.xcconfig` files
-- **Pod Dependencies**: Run `cd macos && pod install` after platform updates
-
-**Web Build Issues:**
-- **Compilation Errors**: Check for platform-specific imports in web context
-- **Asset Issues**: Verify assets are properly configured in `pubspec.yaml`
-
-**General Build Strategy:**
-1. Start with `flutter clean` if builds are failing unexpectedly
-2. Build platforms in order: Web → Android → macOS/iOS → Windows
-3. Fix platform-specific issues one at a time
-4. Use `flutter doctor -v` to diagnose environment issues
-5. Check package compatibility with `flutter pub outdated`
+- Platform-specific build issues (Android, macOS, Web)
+- Common solutions for NDK, MinSdk, Gradle, and Xcode issues
+- General build strategy and debugging workflow
+- Performance analysis and bundle optimization
 
 ---
 
