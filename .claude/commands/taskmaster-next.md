@@ -14,10 +14,11 @@ task-master show <task-id>
 
 ## Workflow
 
-1. Run `task-master next` to identify the next task to work on
-2. If a task is available, run `task-master show <id>` for full implementation details
-3. Begin implementing the task requirements
-4. Use `task-master update-subtask --id=<id> --prompt="progress notes"` to track progress
+1. Change directory to the project root
+2. Run `task-master next` to identify the next task to work on
+3. If a task is available, run `task-master show <id>` for full implementation details
+4. Begin implementing the task requirements
+5. Use `task-master update-subtask --id=<id> --prompt="progress notes"` to track progress
 
 ## Usage
 

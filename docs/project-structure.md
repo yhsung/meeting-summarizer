@@ -43,20 +43,32 @@ project/                   # absolute path /Volumes/Samsung970EVOPlus/dev-projec
 ├── meeting_summarizer/   # Flutter app directory
 │   ├── lib/
 │   │   ├── core/
+│   │   │   ├── database/
+│   │   │   │   ├── database_helper.dart           # Main database operations with migration support
+│   │   │   │   ├── database_schema.dart           # Database schema definitions and versioning
+│   │   │   │   ├── database_migrations.dart       # Database migration system with backup/restore
+│   │   │   │   └── README.md                      # Database architecture documentation
 │   │   │   ├── enums/
 │   │   │   │   ├── audio_format.dart      # Audio format definitions with compression ratios
 │   │   │   │   ├── audio_quality.dart     # Quality levels with detailed properties
 │   │   │   │   └── recording_state.dart   # Recording state management
 │   │   │   ├── models/
 │   │   │   │   ├── audio_configuration.dart  # Enhanced audio config with serialization
-│   │   │   │   └── recording_session.dart     # Recording session management
+│   │   │   │   ├── recording_session.dart     # Recording session management
+│   │   │   │   └── database/
+│   │   │   │       ├── recording.dart         # Recording model with JSON serialization and encryption support
+│   │   │   │       ├── transcription.dart     # Transcription model with status management
+│   │   │   │       ├── summary.dart           # Summary model with sentiment analysis
+│   │   │   │       └── app_settings.dart      # Application settings model with categories
 │   │   │   └── services/
 │   │   │       ├── audio_service_interface.dart           # Service interface definition
 │   │   │       ├── audio_format_manager.dart              # Platform-aware format selection
 │   │   │       ├── codec_manager.dart                     # Codec selection and management
 │   │   │       ├── file_size_optimizer.dart               # File size optimization strategies
 │   │   │       ├── audio_enhancement_service_interface.dart # Audio enhancement interface with noise reduction, echo cancellation, AGC
-│   │   │       └── audio_enhancement_service.dart         # Audio enhancement implementation using FFT-based processing
+│   │   │       ├── audio_enhancement_service.dart         # Audio enhancement implementation using FFT-based processing
+│   │   │       ├── encryption_service.dart                # AES-256-GCM encryption service with secure key management
+│   │   │       └── encrypted_database_service.dart        # Database service with transparent encryption/decryption
 │   │   ├── features/
 │   │   │   └── audio_recording/
 │   │   │       ├── data/
@@ -69,11 +81,16 @@ project/                   # absolute path /Volumes/Samsung970EVOPlus/dev-projec
 │   │   └── main.dart                   # Flutter app entry point
 │   ├── test/
 │   │   ├── core/
+│   │   │   ├── database/
+│   │   │   │   ├── database_helper_migrations_test.dart  # Database helper migration tests
+│   │   │   │   └── database_migrations_test.dart         # Migration system tests
 │   │   │   └── services/
 │   │   │       ├── audio_format_manager_test.dart       # Format manager tests
 │   │   │       ├── codec_manager_test.dart               # Codec manager tests
 │   │   │       ├── file_size_optimizer_test.dart        # Optimizer tests
-│   │   │       └── audio_enhancement_service_test.dart   # Audio enhancement comprehensive tests
+│   │   │       ├── audio_enhancement_service_test.dart   # Audio enhancement comprehensive tests
+│   │   │       ├── encryption_service_test.dart          # Encryption service tests with key management
+│   │   │       └── encrypted_database_service_test.dart  # Encrypted database service integration tests
 │   │   ├── features/
 │   │   │   └── audio_recording/
 │   │   │       ├── audio_recording_service_test.dart
@@ -96,9 +113,10 @@ project/                   # absolute path /Volumes/Samsung970EVOPlus/dev-projec
 
 The core layer contains shared components that can be used across the entire application:
 
+- **Database**: SQLite database management with migration support and encryption
 - **Enums**: Type-safe definitions for audio formats, quality levels, and states
-- **Models**: Data classes for configuration and session management
-- **Services**: Business logic and platform abstractions
+- **Models**: Data classes for configuration, session management, and database entities
+- **Services**: Business logic, platform abstractions, and encryption services
 
 ### Features Layer (`lib/features/`)
 
@@ -115,6 +133,28 @@ Mirrors the main source structure with comprehensive test coverage:
 - **Unit Tests**: Individual component testing
 - **Integration Tests**: Service interaction testing
 - **Widget Tests**: UI component testing
+
+### Database & Encryption Architecture
+
+The application features a comprehensive database system with optional encryption:
+
+#### Database Layer
+- **SQLite Backend**: Cross-platform local database storage
+- **Migration System**: Version-controlled schema upgrades with backup/restore
+- **Transaction Support**: ACID compliance for data integrity
+- **Search Integration**: Full-text search capabilities with FTS5
+
+#### Encryption Layer
+- **AES-256-GCM**: Military-grade encryption for sensitive data
+- **Key Management**: Secure key derivation and storage using Flutter Secure Storage
+- **Transparent Operation**: Automatic encryption/decryption at the service layer
+- **Field-Level Encryption**: Selective encryption of sensitive fields (descriptions, transcriptions)
+
+#### Data Models
+- **Recording**: Audio file metadata with waveform data and encryption support
+- **Transcription**: Speech-to-text results with confidence scores and status tracking
+- **Summary**: AI-generated summaries with sentiment analysis and version control
+- **Settings**: Application configuration with categorization and sensitivity flags
 
 ### Platform Support
 
