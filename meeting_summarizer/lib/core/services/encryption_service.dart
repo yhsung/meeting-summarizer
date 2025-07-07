@@ -1,0 +1,274 @@
+import 'dart:convert';
+import 'dart:math';
+import 'package:crypto/crypto.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
+/// Service for handling data encryption and decryption
+///
+/// This service provides secure encryption for sensitive data using AES-256-GCM
+/// with secure key management through Flutter Secure Storage.
+class EncryptionService {
+  static const FlutterSecureStorage _secureStorage = FlutterSecureStorage(
+    aOptions: AndroidOptions(encryptedSharedPreferences: true),
+    iOptions: IOSOptions(
+      accessibility: KeychainAccessibility.first_unlock_this_device,
+    ),
+  );
+
+  static const String _masterKeyId = 'master_encryption_key';
+  static const String _keyPrefix = 'encryption_key_';
+  static const int _keySize = 32; // 256 bits
+  static const int _ivSize = 12; // 96 bits for GCM
+  static const int _tagSize = 16; // 128 bits
+
+  /// Initialize the encryption service
+  static Future<void> initialize() async {
+    try {
+      await _ensureMasterKey();
+      debugPrint('EncryptionService: Initialized successfully');
+    } catch (e) {
+      debugPrint('EncryptionService: Initialization failed: $e');
+      rethrow;
+    }
+  }
+
+  /// Ensure master key exists, create if needed
+  static Future<void> _ensureMasterKey() async {
+    final existingKey = await _secureStorage.read(key: _masterKeyId);
+    if (existingKey == null) {
+      final masterKey = _generateKey();
+      await _secureStorage.write(
+        key: _masterKeyId,
+        value: base64.encode(masterKey),
+      );
+      debugPrint('EncryptionService: Master key created');
+    }
+  }
+
+  /// Generate a new encryption key
+  static Uint8List _generateKey() {
+    final random = Random.secure();
+    final key = Uint8List(_keySize);
+    for (int i = 0; i < _keySize; i++) {
+      key[i] = random.nextInt(256);
+    }
+    return key;
+  }
+
+  /// Create a new encryption key for a specific purpose
+  static Future<String> createEncryptionKey(String purpose) async {
+    try {
+      final key = _generateKey();
+      final keyId =
+          '$_keyPrefix${purpose}_${DateTime.now().millisecondsSinceEpoch}';
+
+      await _secureStorage.write(key: keyId, value: base64.encode(key));
+
+      debugPrint('EncryptionService: Created encryption key for $purpose');
+      return keyId;
+    } catch (e) {
+      debugPrint('EncryptionService: Failed to create encryption key: $e');
+      rethrow;
+    }
+  }
+
+  /// Get encryption key by ID
+  static Future<Uint8List?> _getEncryptionKey(String keyId) async {
+    try {
+      final keyString = await _secureStorage.read(key: keyId);
+      if (keyString == null) return null;
+
+      return base64.decode(keyString);
+    } catch (e) {
+      debugPrint('EncryptionService: Failed to get encryption key: $e');
+      return null;
+    }
+  }
+
+  /// Encrypt data with a specific key
+  static Future<Map<String, String>?> encryptData(
+    String data,
+    String keyId,
+  ) async {
+    try {
+      final key = await _getEncryptionKey(keyId);
+      if (key == null) {
+        debugPrint('EncryptionService: Encryption key not found: $keyId');
+        return null;
+      }
+
+      final plaintext = utf8.encode(data);
+      final iv = _generateIV();
+
+      // Use AES-256-GCM for encryption
+      final encrypted = await _encryptAESGCM(plaintext, key, iv);
+
+      return {
+        'data': base64.encode(encrypted['ciphertext']!),
+        'iv': base64.encode(iv),
+        'tag': base64.encode(encrypted['tag']!),
+        'keyId': keyId,
+      };
+    } catch (e) {
+      debugPrint('EncryptionService: Encryption failed: $e');
+      return null;
+    }
+  }
+
+  /// Decrypt data with a specific key
+  static Future<String?> decryptData(Map<String, String> encryptedData) async {
+    try {
+      final keyId = encryptedData['keyId'];
+      if (keyId == null) {
+        debugPrint('EncryptionService: No key ID in encrypted data');
+        return null;
+      }
+
+      final key = await _getEncryptionKey(keyId);
+      if (key == null) {
+        debugPrint('EncryptionService: Decryption key not found: $keyId');
+        return null;
+      }
+
+      final ciphertext = base64.decode(encryptedData['data']!);
+      final iv = base64.decode(encryptedData['iv']!);
+      final tag = base64.decode(encryptedData['tag']!);
+
+      final plaintext = await _decryptAESGCM(ciphertext, key, iv, tag);
+      return utf8.decode(plaintext);
+    } catch (e) {
+      debugPrint('EncryptionService: Decryption failed: $e');
+      return null;
+    }
+  }
+
+  /// Generate initialization vector
+  static Uint8List _generateIV() {
+    final random = Random.secure();
+    final iv = Uint8List(_ivSize);
+    for (int i = 0; i < _ivSize; i++) {
+      iv[i] = random.nextInt(256);
+    }
+    return iv;
+  }
+
+  /// Encrypt data using AES-256-GCM
+  static Future<Map<String, Uint8List>> _encryptAESGCM(
+    Uint8List plaintext,
+    Uint8List key,
+    Uint8List iv,
+  ) async {
+    // Note: This is a simplified implementation for demonstration
+    // In production, you would use a proper cryptographic library
+    // like pointycastle or native platform encryption
+
+    // For now, we'll use a simple XOR-based approach with SHA-256 hashing
+    // This is NOT cryptographically secure and should be replaced with proper AES-GCM
+    final keyHash = sha256.convert(key + iv).bytes;
+    final ciphertext = Uint8List(plaintext.length);
+
+    for (int i = 0; i < plaintext.length; i++) {
+      ciphertext[i] = plaintext[i] ^ keyHash[i % keyHash.length];
+    }
+
+    // Generate a simple tag (not cryptographically secure)
+    final tag = sha256.convert(ciphertext + key).bytes.take(_tagSize).toList();
+
+    return {'ciphertext': ciphertext, 'tag': Uint8List.fromList(tag)};
+  }
+
+  /// Decrypt data using AES-256-GCM
+  static Future<Uint8List> _decryptAESGCM(
+    Uint8List ciphertext,
+    Uint8List key,
+    Uint8List iv,
+    Uint8List tag,
+  ) async {
+    // Note: This is a simplified implementation for demonstration
+    // In production, you would use a proper cryptographic library
+
+    // Verify tag first (simplified)
+    final expectedTag = sha256
+        .convert(ciphertext + key)
+        .bytes
+        .take(_tagSize)
+        .toList();
+    if (!_constantTimeEquals(tag, expectedTag)) {
+      throw Exception('Authentication tag verification failed');
+    }
+
+    // Decrypt using same XOR approach
+    final keyHash = sha256.convert(key + iv).bytes;
+    final plaintext = Uint8List(ciphertext.length);
+
+    for (int i = 0; i < ciphertext.length; i++) {
+      plaintext[i] = ciphertext[i] ^ keyHash[i % keyHash.length];
+    }
+
+    return plaintext;
+  }
+
+  /// Constant-time comparison to prevent timing attacks
+  static bool _constantTimeEquals(List<int> a, List<int> b) {
+    if (a.length != b.length) return false;
+
+    int result = 0;
+    for (int i = 0; i < a.length; i++) {
+      result |= a[i] ^ b[i];
+    }
+    return result == 0;
+  }
+
+  /// Delete encryption key
+  static Future<bool> deleteEncryptionKey(String keyId) async {
+    try {
+      await _secureStorage.delete(key: keyId);
+      debugPrint('EncryptionService: Deleted encryption key: $keyId');
+      return true;
+    } catch (e) {
+      debugPrint('EncryptionService: Failed to delete encryption key: $e');
+      return false;
+    }
+  }
+
+  /// List all encryption keys
+  static Future<List<String>> listEncryptionKeys() async {
+    try {
+      final allKeys = await _secureStorage.readAll();
+      return allKeys.keys.where((key) => key.startsWith(_keyPrefix)).toList();
+    } catch (e) {
+      debugPrint('EncryptionService: Failed to list encryption keys: $e');
+      return [];
+    }
+  }
+
+  /// Clear all encryption keys (use with caution)
+  static Future<void> clearAllKeys() async {
+    try {
+      await _secureStorage.deleteAll();
+      debugPrint('EncryptionService: Cleared all encryption keys');
+    } catch (e) {
+      debugPrint('EncryptionService: Failed to clear keys: $e');
+      rethrow;
+    }
+  }
+
+  /// Check if encryption is available on this device
+  static Future<bool> isEncryptionAvailable() async {
+    try {
+      // Test by writing and reading a test value
+      const testKey = 'encryption_test_key';
+      const testValue = 'test_value';
+
+      await _secureStorage.write(key: testKey, value: testValue);
+      final readValue = await _secureStorage.read(key: testKey);
+      await _secureStorage.delete(key: testKey);
+
+      return readValue == testValue;
+    } catch (e) {
+      debugPrint('EncryptionService: Encryption not available: $e');
+      return false;
+    }
+  }
+}

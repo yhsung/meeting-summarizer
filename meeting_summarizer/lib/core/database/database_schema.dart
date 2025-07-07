@@ -8,6 +8,10 @@ class DatabaseSchema {
   static const String databaseName = 'meeting_summarizer.db';
   static const int databaseVersion = 1;
 
+  /// Migration-related constants
+  static const int minSupportedVersion = 1;
+  static const int maxSupportedVersion = 4;
+
   /// Recordings table - stores audio recording metadata
   static const String createRecordingsTable = '''
     CREATE TABLE recordings (

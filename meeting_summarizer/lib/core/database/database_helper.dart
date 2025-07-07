@@ -6,6 +6,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:uuid/uuid.dart';
 
 import 'database_schema.dart';
+import 'database_migrations.dart';
 import '../models/database/recording.dart';
 import '../models/database/transcription.dart';
 import '../models/database/summary.dart' as models;
@@ -111,34 +112,63 @@ class DatabaseHelper {
     }
   }
 
-  /// Handle database upgrades
+  /// Handle database upgrades with proper migration system
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
     debugPrint(
       'DatabaseHelper: Upgrading database from v$oldVersion to v$newVersion',
     );
 
-    // Migration logic will be implemented here
-    // For now, recreate the database
+    // Validate version compatibility
+    if (oldVersion < DatabaseSchema.minSupportedVersion) {
+      throw Exception(
+        'Database version $oldVersion is too old. Minimum supported version is ${DatabaseSchema.minSupportedVersion}',
+      );
+    }
+
+    if (newVersion > DatabaseSchema.maxSupportedVersion) {
+      throw Exception(
+        'Database version $newVersion is not supported. Maximum supported version is ${DatabaseSchema.maxSupportedVersion}',
+      );
+    }
+
     try {
-      await _dropAllTables(db);
-      await _onCreate(db, newVersion);
+      // Create backup before migration
+      final backupPath = await DatabaseMigrations.createBackup(db);
+
+      try {
+        // Execute migration
+        await DatabaseMigrations.migrate(db, oldVersion, newVersion);
+
+        // Validate migration success
+        final isValid = await DatabaseMigrations.validateMigration(
+          db,
+          newVersion,
+        );
+        if (!isValid) {
+          throw Exception('Migration validation failed');
+        }
+
+        debugPrint('DatabaseHelper: Database upgrade completed successfully');
+      } catch (migrationError) {
+        debugPrint(
+          'DatabaseHelper: Migration failed, attempting to restore backup',
+        );
+
+        // Attempt to restore from backup
+        try {
+          await DatabaseMigrations.restoreFromBackup(db.path, backupPath);
+          debugPrint('DatabaseHelper: Backup restored successfully');
+        } catch (restoreError) {
+          debugPrint(
+            'DatabaseHelper: Backup restoration failed: $restoreError',
+          );
+        }
+
+        rethrow;
+      }
     } catch (e) {
       debugPrint('DatabaseHelper: Database upgrade failed: $e');
       rethrow;
-    }
-  }
-
-  /// Drop all tables (used during migrations)
-  Future<void> _dropAllTables(Database db) async {
-    final tables = [
-      'search_index',
-      'summaries',
-      'transcriptions',
-      'recordings',
-      'settings',
-    ];
-    for (final table in tables) {
-      await db.execute('DROP TABLE IF EXISTS $table');
     }
   }
 
@@ -540,11 +570,13 @@ class DatabaseHelper {
     }
   }
 
-  /// Set setting value
+  /// Set setting value (upsert - insert if not exists, update if exists)
   Future<bool> setSetting(String key, String value) async {
     final db = await database;
     try {
       final now = DateTime.now().millisecondsSinceEpoch;
+
+      // Try to update first
       final updated = await db.update(
         'settings',
         {'value': value, 'updated_at': now},
@@ -552,8 +584,25 @@ class DatabaseHelper {
         whereArgs: [key],
       );
 
-      debugPrint('DatabaseHelper: Updated setting $key');
-      return updated > 0;
+      if (updated > 0) {
+        debugPrint('DatabaseHelper: Updated setting $key');
+        return true;
+      }
+
+      // If no rows were updated, insert a new setting
+      await db.insert('settings', {
+        'key': key,
+        'value': value,
+        'type': 'string', // Default type
+        'category': 'general', // Default category
+        'description': 'User setting',
+        'is_sensitive': 0,
+        'created_at': now,
+        'updated_at': now,
+      });
+
+      debugPrint('DatabaseHelper: Inserted new setting $key');
+      return true;
     } catch (e) {
       debugPrint('DatabaseHelper: Failed to set setting $key: $e');
       return false;
@@ -678,6 +727,58 @@ class DatabaseHelper {
       debugPrint('DatabaseHelper: Database vacuumed successfully');
     } catch (e) {
       debugPrint('DatabaseHelper: Database vacuum failed: $e');
+    }
+  }
+
+  /// Get current database version
+  Future<int> getDatabaseVersion() async {
+    final db = await database;
+    final result = await db.rawQuery('PRAGMA user_version');
+    return result.first['user_version'] as int;
+  }
+
+  /// Check if database needs migration
+  Future<bool> needsMigration() async {
+    final currentVersion = await getDatabaseVersion();
+    return currentVersion < DatabaseSchema.databaseVersion;
+  }
+
+  /// Get migration information
+  Future<Map<String, dynamic>> getMigrationInfo() async {
+    final currentVersion = await getDatabaseVersion();
+    final targetVersion = DatabaseSchema.databaseVersion;
+    final needsMigration = currentVersion < targetVersion;
+
+    return {
+      'currentVersion': currentVersion,
+      'targetVersion': targetVersion,
+      'needsMigration': needsMigration,
+      'minSupportedVersion': DatabaseSchema.minSupportedVersion,
+      'maxSupportedVersion': DatabaseSchema.maxSupportedVersion,
+      'isVersionSupported':
+          currentVersion >= DatabaseSchema.minSupportedVersion,
+    };
+  }
+
+  /// Force database recreation (emergency fallback)
+  Future<void> recreateDatabase() async {
+    try {
+      await close();
+
+      final databasesPath = await getDatabasesPath();
+      final path = join(databasesPath, DatabaseSchema.databaseName);
+
+      // Delete existing database
+      await deleteDatabase(path);
+
+      // Reinitialize
+      _database = null;
+      await database;
+
+      debugPrint('DatabaseHelper: Database recreated successfully');
+    } catch (e) {
+      debugPrint('DatabaseHelper: Database recreation failed: $e');
+      rethrow;
     }
   }
 }

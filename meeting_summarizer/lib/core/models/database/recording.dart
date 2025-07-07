@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'recording.g.dart';
@@ -205,16 +206,7 @@ class Recording {
   // Helper methods for JSON encoding/decoding
   static dynamic _parseJsonList(String jsonString) {
     try {
-      return List.from(
-        // Simple JSON array parsing - in production you'd use dart:convert
-        jsonString
-            .replaceAll('[', '')
-            .replaceAll(']', '')
-            .split(',')
-            .map((e) => e.trim().replaceAll('"', ''))
-            .where((e) => e.isNotEmpty)
-            .toList(),
-      );
+      return jsonDecode(jsonString);
     } catch (e) {
       return [];
     }
@@ -222,21 +214,25 @@ class Recording {
 
   static Map<String, dynamic>? _parseJsonMap(String jsonString) {
     try {
-      // Simple JSON object parsing - in production you'd use dart:convert
-      // For now, return empty map to avoid parsing complexity
-      return <String, dynamic>{};
+      return Map<String, dynamic>.from(jsonDecode(jsonString));
     } catch (e) {
       return null;
     }
   }
 
   static String _encodeJsonList(List<dynamic> list) {
-    // Simple JSON array encoding - in production you'd use dart:convert
-    return '[${list.map((e) => '"$e"').join(',')}]';
+    try {
+      return jsonEncode(list);
+    } catch (e) {
+      return '[]';
+    }
   }
 
   static String _encodeJsonMap(Map<String, dynamic> map) {
-    // Simple JSON object encoding - in production you'd use dart:convert
-    return '{}'; // Simplified for now
+    try {
+      return jsonEncode(map);
+    } catch (e) {
+      return '{}';
+    }
   }
 }
