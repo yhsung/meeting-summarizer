@@ -10,6 +10,7 @@ Update docs/project-structure.md for architectural, file, directory changes
 
 ```bash
 # 1. Run quality gates
+cd ${workspaceFolder}/meeting_summarizer
 dart format .
 flutter analyze
 flutter test
@@ -20,7 +21,7 @@ flutter build apk --debug
 flutter build macos
 
 # 4. Stage and commit
-git add .
+git add ${workspaceFolder}
 git status
 git commit -m "descriptive commit message"
 ```
