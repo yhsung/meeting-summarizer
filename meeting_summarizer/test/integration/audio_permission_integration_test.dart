@@ -61,7 +61,7 @@ void main() {
             audioService.currentSession?.state,
             anyOf([RecordingState.stopped, RecordingState.error]),
           );
-          
+
           // Verify error message contains permission information
           expect(
             audioService.currentSession?.errorMessage,
@@ -140,7 +140,11 @@ void main() {
         // Recording should be stopped due to permission revocation
         expect(
           audioService.currentSession?.state,
-          anyOf([RecordingState.stopped, RecordingState.error, RecordingState.paused]),
+          anyOf([
+            RecordingState.stopped,
+            RecordingState.error,
+            RecordingState.paused,
+          ]),
         );
       });
     });
@@ -198,10 +202,7 @@ void main() {
           // Verify error message mentions permanent denial or permission
           expect(
             audioService.currentSession!.errorMessage,
-            anyOf([
-              contains('permanently'),
-              contains('permission'),
-            ]),
+            anyOf([contains('permanently'), contains('permission')]),
           );
         } else {
           // If no session was created, that's also a valid graceful failure response
