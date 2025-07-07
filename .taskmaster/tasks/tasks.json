@@ -139,7 +139,7 @@
               3
             ],
             "details": "Integrate noise suppression algorithms, echo cancellation, automatic gain control, and audio filtering. Support both real-time and post-processing enhancement modes.",
-            "status": "in-progress",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -150,7 +150,7 @@
               1
             ],
             "details": "Handle microphone permission requests, permission status monitoring, graceful degradation when permissions denied, permission re-request flows, and platform-specific permission UI integration.",
-            "status": "pending",
+            "status": "in-progress",
             "testStrategy": ""
           }
         ]
@@ -703,7 +703,7 @@
     ],
     "metadata": {
       "created": "2025-07-06T01:29:26.245Z",
-      "updated": "2025-07-06T16:32:50.281Z",
+      "updated": "2025-07-07T02:46:57.058Z",
       "description": "Tasks for master context"
     }
   }
