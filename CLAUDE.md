@@ -35,93 +35,19 @@ task-master validate-dependencies                            # Check for depende
 task-master generate                                         # Update task markdown files (usually auto-called)
 ```
 
-## Key Files & Project Structure
+## Project Structure
 
-### Core Files
+For detailed project structure, architecture overview, and file organization, see: [`docs/project-structure.md`](docs/project-structure.md)
 
-- `.taskmaster/tasks/tasks.json` - Main task data file (auto-managed)
-- `.taskmaster/config.json` - AI model configuration (use `task-master models` to modify)
-- `.taskmaster/docs/prd.txt` - Product Requirements Document for parsing
-- `.taskmaster/tasks/*.txt` - Individual task files (auto-generated from tasks.json)
-- `.env` - API keys for CLI usage
+### Quick Reference
 
-### Claude Code Integration Files
-
-- `CLAUDE.md` - Auto-loaded context for Claude Code (this file)
-- `.claude/settings.json` - Claude Code tool allowlist and preferences
-- `.claude/commands/` - Custom slash commands for repeated workflows
-- `.mcp.json` - MCP server configuration (project-specific)
-
-### Directory Structure
-
-```
-project/                   # absolute path /Volumes/Samsung970EVOPlus/dev-projects/meeting-summarizer
-├── .taskmaster/
-│   ├── tasks/              # Task files directory
-│   │   ├── tasks.json      # Main task database
-│   │   ├── task-1.md      # Individual task files
-│   │   └── task-2.md
-│   ├── docs/              # Documentation directory
-│   │   ├── prd.txt        # Product requirements
-│   ├── reports/           # Analysis reports directory
-│   │   └── task-complexity-report.json
-│   ├── templates/         # Template files
-│   │   └── example_prd.txt  # Example PRD template
-│   └── config.json        # AI models & settings
-├── .claude/
-│   ├── settings.json      # Claude Code configuration
-│   └── commands/         # Custom slash commands
-├── .env                  # API keys
-├── .mcp.json            # MCP configuration
-├── meeting_summarizer/   # Flutter app directory
-│   ├── lib/
-│   │   ├── core/
-│   │   │   ├── enums/
-│   │   │   │   ├── audio_format.dart      # Audio format definitions with compression ratios
-│   │   │   │   ├── audio_quality.dart     # Quality levels with detailed properties
-│   │   │   │   └── recording_state.dart   # Recording state management
-│   │   │   ├── models/
-│   │   │   │   ├── audio_configuration.dart  # Enhanced audio config with serialization
-│   │   │   │   └── recording_session.dart     # Recording session management
-│   │   │   └── services/
-│   │   │       ├── audio_service_interface.dart           # Service interface definition
-│   │   │       ├── audio_format_manager.dart              # Platform-aware format selection
-│   │   │       ├── codec_manager.dart                     # Codec selection and management
-│   │   │       ├── file_size_optimizer.dart               # File size optimization strategies
-│   │   │       ├── audio_enhancement_service_interface.dart # Audio enhancement interface with noise reduction, echo cancellation, AGC
-│   │   │       └── audio_enhancement_service.dart         # Audio enhancement implementation using FFT-based processing
-│   │   ├── features/
-│   │   │   └── audio_recording/
-│   │   │       ├── data/
-│   │   │       │   ├── audio_recording_service.dart  # Main audio recording service
-│   │   │       │   └── platform/
-│   │   │       │       ├── audio_recording_platform.dart   # Platform abstraction
-│   │   │       │       └── record_platform_adapter.dart    # Record package adapter
-│   │   │       ├── domain/             # Domain layer (to be implemented)
-│   │   │       └── presentation/       # UI layer (to be implemented)
-│   │   └── main.dart                   # Flutter app entry point
-│   ├── test/
-│   │   ├── core/
-│   │   │   └── services/
-│   │   │       ├── audio_format_manager_test.dart       # Format manager tests
-│   │   │       ├── codec_manager_test.dart               # Codec manager tests
-│   │   │       ├── file_size_optimizer_test.dart        # Optimizer tests
-│   │   │       └── audio_enhancement_service_test.dart   # Audio enhancement comprehensive tests
-│   │   ├── features/
-│   │   │   └── audio_recording/
-│   │   │       ├── audio_recording_service_test.dart
-│   │   │       └── platform/
-│   │   │           └── audio_recording_platform_test.dart
-│   │   └── widget_test.dart            # Basic widget tests
-│   ├── android/                        # Android platform configuration
-│   ├── ios/                           # iOS platform configuration
-│   ├── macos/                         # macOS platform configuration
-│   ├── web/                           # Web platform configuration
-│   ├── windows/                       # Windows platform configuration
-│   ├── pubspec.yaml                   # Flutter dependencies
-│   └── analysis_options.yaml         # Dart analysis configuration
-└── CLAUDE.md                         # This file - auto-loaded by Claude Code
-```
+- **Flutter App**: `meeting_summarizer/` - Main application code and tests
+- **Task Management**: `.taskmaster/` - Task Master AI integration files
+- **Claude Integration**: `.claude/` - Claude Code configuration and commands
+- **Documentation**: `docs/` - Project documentation and guides
+- **Core Services**: `meeting_summarizer/lib/core/services/` - Audio processing and business logic
+- **Features**: `meeting_summarizer/lib/features/` - Feature-specific implementations
+- **Tests**: `meeting_summarizer/test/` - Comprehensive test suite
 
 ## Audio Enhancement Capabilities
 
