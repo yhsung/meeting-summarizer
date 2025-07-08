@@ -5,16 +5,17 @@ import 'package:flutter/foundation.dart';
 
 import 'transcription_service_interface.dart';
 import 'openai_whisper_service.dart';
+import 'local_whisper_service.dart';
 import 'api_key_service.dart';
 
 /// Available transcription service providers
 enum TranscriptionProvider {
   openaiWhisper,
+  localWhisper,
   // Future providers can be added here:
   // googleSpeechToText,
   // azureSpeech,
   // awsTranscribe,
-  // localWhisper,
 }
 
 /// Factory for creating transcription service instances
@@ -60,7 +61,14 @@ class TranscriptionServiceFactory {
       return whisperService;
     }
 
-    // Add checks for other providers here when implemented
+    // Fallback to local Whisper if API is unavailable
+    final localService = getService(TranscriptionProvider.localWhisper);
+    if (await localService.isServiceAvailable()) {
+      debugPrint(
+        'TranscriptionServiceFactory: Using Local Whisper service as fallback',
+      );
+      return localService;
+    }
 
     throw StateError('No transcription services are available or configured');
   }
@@ -143,6 +151,20 @@ class TranscriptionServiceFactory {
           averageProcessingSpeed: 1.5, // Roughly 1.5x real-time
           costPerMinute: 0.006, // $0.006 per minute as of 2024
         );
+      case TranscriptionProvider.localWhisper:
+        return ServiceCapabilities(
+          supportsTimestamps: true,
+          supportsWordLevelTimestamps: false, // Local implementation limitation
+          supportsSpeakerDiarization: false,
+          supportsCustomVocabulary: false, // Local implementation limitation
+          supportsLanguageDetection: true,
+          maxFileSizeMB: 100, // More generous for local processing
+          supportedFormats: ['mp3', 'wav', 'm4a', 'flac', 'ogg'],
+          supportedLanguages: 50, // Depends on model
+          qualityLevels: ['tiny', 'base', 'small'],
+          averageProcessingSpeed: 2.0, // Varies by model and hardware
+          costPerMinute: 0.0, // Free local processing
+        );
     }
   }
 
@@ -170,6 +192,8 @@ class TranscriptionServiceFactory {
     switch (provider) {
       case TranscriptionProvider.openaiWhisper:
         return OpenAIWhisperService(apiKeyService: _apiKeyService);
+      case TranscriptionProvider.localWhisper:
+        return LocalWhisperService();
     }
   }
 
@@ -178,6 +202,8 @@ class TranscriptionServiceFactory {
     switch (provider) {
       case TranscriptionProvider.openaiWhisper:
         return 'OpenAI Whisper';
+      case TranscriptionProvider.localWhisper:
+        return 'Local Whisper';
     }
   }
 
@@ -187,6 +213,9 @@ class TranscriptionServiceFactory {
       case TranscriptionProvider.openaiWhisper:
         return 'High-quality speech recognition using OpenAI\'s Whisper model. '
             'Supports 95+ languages with excellent accuracy.';
+      case TranscriptionProvider.localWhisper:
+        return 'Offline speech recognition using local Whisper models. '
+            'No internet required, free processing with configurable quality levels.';
     }
   }
 

@@ -10,9 +10,11 @@ import 'package:http/http.dart' as http;
 import 'transcription_service_interface.dart';
 import '../models/transcription_request.dart';
 import '../models/transcription_result.dart';
+import '../models/transcription_usage_stats.dart';
 import '../enums/transcription_language.dart';
 import 'api_key_service.dart';
 import 'transcription_error_handler.dart';
+import 'transcription_usage_monitor.dart';
 
 /// OpenAI Whisper API service implementation
 class OpenAIWhisperService implements TranscriptionServiceInterface {
@@ -30,16 +32,9 @@ class OpenAIWhisperService implements TranscriptionServiceInterface {
   // Rate limiting tracking
   final List<DateTime> _requestTimestamps = [];
 
-  // Usage statistics
-  TranscriptionUsageStats _usageStats = TranscriptionUsageStats(
-    totalRequests: 0,
-    successfulRequests: 0,
-    failedRequests: 0,
-    totalProcessingTime: Duration.zero,
-    averageProcessingTime: 0.0,
-    totalAudioMinutes: 0,
-    lastRequestTime: DateTime.now(),
-  );
+  // Usage monitoring
+  final TranscriptionUsageMonitor _usageMonitor =
+      TranscriptionUsageMonitor.getInstance();
 
   OpenAIWhisperService({
     required ApiKeyService apiKeyService,
@@ -146,20 +141,37 @@ class OpenAIWhisperService implements TranscriptionServiceInterface {
       );
 
       // Update usage statistics
-      await _updateUsageStats(
+      await _usageMonitor.recordTranscriptionRequest(
         success: true,
         processingTime: processingTime,
         audioDurationMs: audioDurationMs,
+        provider: 'openai_whisper',
+        additionalMetrics: {
+          'api_endpoint': '$_baseUrl/audio/transcriptions',
+          'model': 'whisper-1',
+        },
       );
 
       debugPrint('OpenAIWhisperService: Transcription completed successfully');
       return result;
     } catch (e) {
       final processingTime = DateTime.now().difference(startTime);
-      await _updateUsageStats(
+      // Record failed request
+      String? errorType;
+      if (e is TranscriptionError) {
+        errorType = e.type.name;
+      }
+
+      await _usageMonitor.recordTranscriptionRequest(
         success: false,
         processingTime: processingTime,
         audioDurationMs: 0,
+        provider: 'openai_whisper',
+        errorType: errorType,
+        additionalMetrics: {
+          'api_endpoint': '$_baseUrl/audio/transcriptions',
+          'error_message': e.toString(),
+        },
       );
 
       debugPrint('OpenAIWhisperService: Transcription failed: $e');
@@ -210,20 +222,37 @@ class OpenAIWhisperService implements TranscriptionServiceInterface {
       );
 
       // Update usage statistics
-      await _updateUsageStats(
+      await _usageMonitor.recordTranscriptionRequest(
         success: true,
         processingTime: processingTime,
         audioDurationMs: audioDurationMs,
+        provider: 'openai_whisper',
+        additionalMetrics: {
+          'api_endpoint': '$_baseUrl/audio/transcriptions',
+          'model': 'whisper-1',
+        },
       );
 
       debugPrint('OpenAIWhisperService: Transcription completed successfully');
       return result;
     } catch (e) {
       final processingTime = DateTime.now().difference(startTime);
-      await _updateUsageStats(
+      // Record failed request
+      String? errorType;
+      if (e is TranscriptionError) {
+        errorType = e.type.name;
+      }
+
+      await _usageMonitor.recordTranscriptionRequest(
         success: false,
         processingTime: processingTime,
         audioDurationMs: 0,
+        provider: 'openai_whisper',
+        errorType: errorType,
+        additionalMetrics: {
+          'api_endpoint': '$_baseUrl/audio/transcriptions',
+          'error_message': e.toString(),
+        },
       );
 
       debugPrint('OpenAIWhisperService: Transcription failed: $e');
@@ -265,7 +294,7 @@ class OpenAIWhisperService implements TranscriptionServiceInterface {
 
   @override
   Future<TranscriptionUsageStats> getUsageStats() async {
-    return _usageStats;
+    return _usageMonitor.getCurrentStats();
   }
 
   @override
@@ -573,38 +602,5 @@ class OpenAIWhisperService implements TranscriptionServiceInterface {
     // Calculate duration: (file size in bits) / (bitrate) * 1000 for milliseconds
     final durationMs = (fileSize * 8 / estimatedBitrate * 1000).round();
     return durationMs;
-  }
-
-  /// Update usage statistics
-  Future<void> _updateUsageStats({
-    required bool success,
-    required Duration processingTime,
-    required int audioDurationMs,
-  }) async {
-    final totalRequests = _usageStats.totalRequests + 1;
-    final successfulRequests = success
-        ? _usageStats.successfulRequests + 1
-        : _usageStats.successfulRequests;
-    final failedRequests = success
-        ? _usageStats.failedRequests
-        : _usageStats.failedRequests + 1;
-
-    final totalProcessingTime =
-        _usageStats.totalProcessingTime + processingTime;
-    final averageProcessingTime =
-        totalProcessingTime.inMilliseconds / totalRequests;
-
-    final totalAudioMinutes =
-        _usageStats.totalAudioMinutes + (audioDurationMs / 60000).round();
-
-    _usageStats = TranscriptionUsageStats(
-      totalRequests: totalRequests,
-      successfulRequests: successfulRequests,
-      failedRequests: failedRequests,
-      totalProcessingTime: totalProcessingTime,
-      averageProcessingTime: averageProcessingTime,
-      totalAudioMinutes: totalAudioMinutes,
-      lastRequestTime: DateTime.now(),
-    );
   }
 }
