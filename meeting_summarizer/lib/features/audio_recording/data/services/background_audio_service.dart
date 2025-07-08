@@ -43,7 +43,9 @@ class BackgroundAudioService implements AudioServiceInterface {
   /// Safely add session update to stream controller if not disposed
   void _addSessionUpdate(RecordingSession session) {
     if (_isDisposed || _sessionController.isClosed) {
-      debugPrint('BackgroundAudioService: Cannot add session update after disposal');
+      debugPrint(
+        'BackgroundAudioService: Cannot add session update after disposal',
+      );
       return;
     }
     _sessionController.add(session);
@@ -52,7 +54,9 @@ class BackgroundAudioService implements AudioServiceInterface {
   /// Safely add background event to stream controller if not disposed
   void _addBackgroundEvent(BackgroundRecordingEvent event) {
     if (_isDisposed || _backgroundEventController.isClosed) {
-      debugPrint('BackgroundAudioService: Cannot add background event after disposal: $event');
+      debugPrint(
+        'BackgroundAudioService: Cannot add background event after disposal: $event',
+      );
       return;
     }
     _backgroundEventController.add(event);
@@ -110,11 +114,11 @@ class BackgroundAudioService implements AudioServiceInterface {
   @override
   Future<void> dispose() async {
     _isDisposed = true;
-    
+
     // Cancel subscriptions first to prevent new events
     await _baseServiceSubscription?.cancel();
     await _backgroundEventSubscription?.cancel();
-    
+
     // Close controllers safely
     if (!_sessionController.isClosed) {
       await _sessionController.close();
@@ -122,7 +126,7 @@ class BackgroundAudioService implements AudioServiceInterface {
     if (!_backgroundEventController.isClosed) {
       await _backgroundEventController.close();
     }
-    
+
     // Dispose dependencies
     await _backgroundManager.dispose();
     await _baseService.dispose();

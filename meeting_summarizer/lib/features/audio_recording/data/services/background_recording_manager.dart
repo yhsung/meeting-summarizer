@@ -45,7 +45,9 @@ class BackgroundRecordingManager {
   /// Safely add event to stream controller if not disposed
   void _addEvent(BackgroundRecordingEvent event) {
     if (_isDisposed || _eventController.isClosed) {
-      debugPrint('BackgroundRecordingManager: Cannot add event after disposal: $event');
+      debugPrint(
+        'BackgroundRecordingManager: Cannot add event after disposal: $event',
+      );
       return;
     }
     _eventController.add(event);
@@ -178,9 +180,7 @@ class BackgroundRecordingManager {
     } else if (_audioService?.currentSession?.isActive == true) {
       // Background not enabled - pause recording
       await _audioService?.pauseRecording();
-      _addEvent(
-        BackgroundRecordingEvent.recordingPausedForBackground,
-      );
+      _addEvent(BackgroundRecordingEvent.recordingPausedForBackground);
     }
   }
 
@@ -199,9 +199,7 @@ class BackgroundRecordingManager {
     // Resume paused recording if applicable
     if (_audioService?.currentSession?.isPaused == true) {
       await _audioService?.resumeRecording();
-      _addEvent(
-        BackgroundRecordingEvent.recordingResumedFromBackground,
-      );
+      _addEvent(BackgroundRecordingEvent.recordingResumedFromBackground);
     }
   }
 
@@ -212,9 +210,7 @@ class BackgroundRecordingManager {
     // Save any ongoing recording before termination
     if (_audioService?.currentSession?.isActive == true) {
       await _audioService?.stopRecording();
-      _addEvent(
-        BackgroundRecordingEvent.recordingStoppedForTermination,
-      );
+      _addEvent(BackgroundRecordingEvent.recordingStoppedForTermination);
     }
   }
 
@@ -330,7 +326,7 @@ class BackgroundRecordingManager {
   /// Dispose resources
   Future<void> dispose() async {
     _isDisposed = true;
-    
+
     if (!_eventController.isClosed) {
       await _eventController.close();
     }

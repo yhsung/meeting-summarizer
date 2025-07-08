@@ -58,7 +58,7 @@ void main() {
 
       // Create a unique database for each test to enable parallel execution
       final testId = DateTime.now().microsecondsSinceEpoch;
-      
+
       // Initialize the encrypted database service for each test
       await EncryptedDatabaseService.initialize(
         customDatabaseName: 'test_encrypted_$testId.db',

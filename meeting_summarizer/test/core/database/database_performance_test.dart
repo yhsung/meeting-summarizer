@@ -19,7 +19,9 @@ void main() {
     setUp(() async {
       // Create a unique database for each test to enable parallel execution
       final testId = DateTime.now().microsecondsSinceEpoch;
-      dbHelper = DatabaseHelper(customDatabaseName: 'test_performance_$testId.db');
+      dbHelper = DatabaseHelper(
+        customDatabaseName: 'test_performance_$testId.db',
+      );
       await dbHelper.recreateDatabase();
     });
 

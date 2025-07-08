@@ -20,13 +20,13 @@ class DatabaseHelper {
   static const Uuid _uuid = Uuid();
   static DatabaseHelper? _instance;
   static Database? _database;
-  
+
   // Instance fields for test isolation
   Database? _instanceDatabase;
   final String? _customDatabaseName;
 
-  DatabaseHelper._internal({String? customDatabaseName}) 
-      : _customDatabaseName = customDatabaseName;
+  DatabaseHelper._internal({String? customDatabaseName})
+    : _customDatabaseName = customDatabaseName;
 
   /// Get singleton instance of DatabaseHelper
   factory DatabaseHelper({String? customDatabaseName}) {
@@ -34,7 +34,7 @@ class DatabaseHelper {
     if (customDatabaseName != null) {
       return DatabaseHelper._internal(customDatabaseName: customDatabaseName);
     }
-    
+
     _instance ??= DatabaseHelper._internal();
     return _instance!;
   }
@@ -45,7 +45,7 @@ class DatabaseHelper {
       _instanceDatabase ??= await _initDatabase();
       return _instanceDatabase!;
     }
-    
+
     _database ??= await _initDatabase();
     return _database!;
   }
