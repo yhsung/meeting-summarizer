@@ -760,6 +760,407 @@ class DatabaseHelper {
     };
   }
 
+  // Performance Monitoring and Optimization Methods
+
+  /// Get database performance statistics
+  Future<Map<String, dynamic>> getPerformanceStats() async {
+    final db = await database;
+    try {
+      final stats = <String, dynamic>{};
+
+      // Database size information
+      final sizeResult = await db.rawQuery('PRAGMA page_count');
+      final pageSizeResult = await db.rawQuery('PRAGMA page_size');
+      final pageCount = sizeResult.first['page_count'] as int;
+      final pageSize = pageSizeResult.first['page_size'] as int;
+      stats['database_size_bytes'] = pageCount * pageSize;
+      stats['page_count'] = pageCount;
+      stats['page_size'] = pageSize;
+
+      // Index usage statistics
+      final indexStats = await _getIndexUsageStats();
+      stats['index_usage'] = indexStats;
+
+      // Query performance metrics
+      final queryStats = await _getQueryPerformanceStats();
+      stats['query_performance'] = queryStats;
+
+      // Table statistics
+      final tableStats = await _getTableStatistics();
+      stats['table_statistics'] = tableStats;
+
+      // Cache hit ratio
+      final cacheStats = await _getCacheStatistics();
+      stats['cache_statistics'] = cacheStats;
+
+      return stats;
+    } catch (e) {
+      debugPrint('DatabaseHelper: Failed to get performance stats: $e');
+      return {};
+    }
+  }
+
+  /// Get index usage statistics
+  Future<Map<String, dynamic>> _getIndexUsageStats() async {
+    final db = await database;
+    try {
+      final result = await db.rawQuery('''
+        SELECT name, tbl_name 
+        FROM sqlite_master 
+        WHERE type = 'index' AND name NOT LIKE 'sqlite_%'
+        ORDER BY name
+      ''');
+
+      final indexInfo = <String, Map<String, dynamic>>{};
+      for (final row in result) {
+        final indexName = row['name'] as String;
+        final tableName = row['tbl_name'] as String;
+
+        // Get index info
+        final indexDetails = await db.rawQuery('PRAGMA index_info($indexName)');
+        indexInfo[indexName] = {
+          'table': tableName,
+          'columns': indexDetails.map((col) => col['name']).toList(),
+          'column_count': indexDetails.length,
+        };
+      }
+
+      return {'total_indexes': result.length, 'index_details': indexInfo};
+    } catch (e) {
+      debugPrint('DatabaseHelper: Failed to get index usage stats: $e');
+      return {};
+    }
+  }
+
+  /// Get query performance statistics
+  Future<Map<String, dynamic>> _getQueryPerformanceStats() async {
+    final db = await database;
+    try {
+      // Enable query planner for analysis
+      await db.execute('PRAGMA query_only = ON');
+
+      final stats = <String, dynamic>{};
+
+      // Test common query patterns and measure performance
+      final testQueries = [
+        'SELECT COUNT(*) FROM recordings WHERE is_deleted = 0',
+        'SELECT * FROM recordings WHERE is_deleted = 0 ORDER BY created_at DESC LIMIT 10',
+        'SELECT * FROM transcriptions WHERE recording_id = ? ORDER BY created_at DESC',
+        'SELECT * FROM summaries WHERE transcription_id = ? ORDER BY created_at DESC',
+        'SELECT * FROM settings WHERE category = ?',
+      ];
+
+      final queryPlans = <String, String>{};
+      for (final query in testQueries) {
+        try {
+          final plan = await db.rawQuery('EXPLAIN QUERY PLAN $query');
+          queryPlans[query] = plan
+              .map((row) => row.values.join(' '))
+              .join('\n');
+        } catch (e) {
+          queryPlans[query] = 'Analysis failed: $e';
+        }
+      }
+
+      await db.execute('PRAGMA query_only = OFF');
+
+      stats['query_plans'] = queryPlans;
+      return stats;
+    } catch (e) {
+      debugPrint('DatabaseHelper: Failed to get query performance stats: $e');
+      await db.execute('PRAGMA query_only = OFF'); // Ensure it's turned off
+      return {};
+    }
+  }
+
+  /// Get table statistics
+  Future<Map<String, dynamic>> _getTableStatistics() async {
+    final db = await database;
+    try {
+      final tables = [
+        'recordings',
+        'transcriptions',
+        'summaries',
+        'settings',
+        'search_index',
+      ];
+      final tableStats = <String, Map<String, dynamic>>{};
+
+      for (final table in tables) {
+        // Row count
+        final countResult = await db.rawQuery(
+          'SELECT COUNT(*) as count FROM $table',
+        );
+        final rowCount = countResult.first['count'] as int;
+
+        // Table info
+        final tableInfo = await db.rawQuery('PRAGMA table_info($table)');
+        final columnCount = tableInfo.length;
+
+        tableStats[table] = {
+          'row_count': rowCount,
+          'column_count': columnCount,
+          'columns': tableInfo
+              .map(
+                (col) => {
+                  'name': col['name'],
+                  'type': col['type'],
+                  'nullable': col['notnull'] == 0,
+                  'primary_key': col['pk'] == 1,
+                },
+              )
+              .toList(),
+        };
+      }
+
+      return tableStats;
+    } catch (e) {
+      debugPrint('DatabaseHelper: Failed to get table statistics: $e');
+      return {};
+    }
+  }
+
+  /// Get cache statistics
+  Future<Map<String, dynamic>> _getCacheStatistics() async {
+    final db = await database;
+    try {
+      final cacheSize = await db.rawQuery('PRAGMA cache_size');
+      final cacheSpill = await db.rawQuery('PRAGMA cache_spill');
+
+      return {
+        'cache_size': cacheSize.first['cache_size'],
+        'cache_spill': cacheSpill.first['cache_spill'],
+      };
+    } catch (e) {
+      debugPrint('DatabaseHelper: Failed to get cache statistics: $e');
+      return {};
+    }
+  }
+
+  /// Optimize database performance
+  Future<Map<String, dynamic>> optimizeDatabase() async {
+    final optimizations = <String, dynamic>{};
+
+    try {
+      final db = await database;
+      final startTime = DateTime.now();
+
+      // Analyze tables for optimization opportunities
+      debugPrint('DatabaseHelper: Starting database optimization');
+
+      // Update table statistics
+      await db.execute('ANALYZE');
+      optimizations['analyze_completed'] = true;
+
+      // Optimize cache settings
+      await db.execute('PRAGMA cache_size = -32768'); // 32MB cache
+      await db.execute('PRAGMA temp_store = MEMORY');
+      optimizations['cache_optimized'] = true;
+
+      // Optimize journal mode if not already set
+      final journalMode = await db.rawQuery('PRAGMA journal_mode');
+      if (journalMode.first['journal_mode'] != 'wal') {
+        await db.execute('PRAGMA journal_mode = WAL');
+        optimizations['journal_mode_optimized'] = true;
+      }
+
+      // Optimize synchronous mode
+      await db.execute('PRAGMA synchronous = NORMAL');
+      optimizations['synchronous_optimized'] = true;
+
+      // Vacuum if needed (only if database is large)
+      final pageCount = await db.rawQuery('PRAGMA page_count');
+      final pages = pageCount.first['page_count'] as int;
+
+      if (pages > 1000) {
+        // Only vacuum if database has more than 1000 pages
+        await vacuum();
+        optimizations['vacuum_completed'] = true;
+      }
+
+      final endTime = DateTime.now();
+      optimizations['optimization_time_ms'] = endTime
+          .difference(startTime)
+          .inMilliseconds;
+      optimizations['success'] = true;
+
+      debugPrint(
+        'DatabaseHelper: Database optimization completed in ${optimizations['optimization_time_ms']}ms',
+      );
+
+      return optimizations;
+    } catch (e) {
+      debugPrint('DatabaseHelper: Database optimization failed: $e');
+      optimizations['success'] = false;
+      optimizations['error'] = e.toString();
+      return optimizations;
+    }
+  }
+
+  /// Benchmark query performance
+  Future<Map<String, dynamic>> benchmarkQueries({int iterations = 100}) async {
+    final db = await database;
+    final benchmarks = <String, Map<String, dynamic>>{};
+
+    try {
+      debugPrint(
+        'DatabaseHelper: Starting query benchmarks with $iterations iterations',
+      );
+
+      // Define benchmark queries
+      final queries = {
+        'simple_count': 'SELECT COUNT(*) FROM recordings WHERE is_deleted = 0',
+        'recent_recordings':
+            'SELECT * FROM recordings WHERE is_deleted = 0 ORDER BY created_at DESC LIMIT 10',
+        'filtered_recordings':
+            'SELECT * FROM recordings WHERE is_deleted = 0 AND format = ? LIMIT 20',
+        'transcription_lookup':
+            'SELECT * FROM transcriptions WHERE recording_id = ? LIMIT 5',
+        'summary_lookup':
+            'SELECT * FROM summaries WHERE transcription_id = ? LIMIT 5',
+        'settings_by_category': 'SELECT * FROM settings WHERE category = ?',
+        'search_query':
+            'SELECT * FROM search_index WHERE search_index MATCH ? LIMIT 10',
+      };
+
+      // Sample data for parameterized queries
+      final sampleData = {
+        'format': 'wav',
+        'recording_id': 'sample-recording-id',
+        'transcription_id': 'sample-transcription-id',
+        'category': 'general',
+        'search_term': 'test',
+      };
+
+      for (final entry in queries.entries) {
+        final queryName = entry.key;
+        final query = entry.value;
+
+        final times = <int>[];
+
+        for (int i = 0; i < iterations; i++) {
+          final start = DateTime.now().microsecondsSinceEpoch;
+
+          try {
+            if (query.contains('?')) {
+              // Parameterized query
+              final param = _getParameterForQuery(queryName, sampleData);
+              await db.rawQuery(query, [param]);
+            } else {
+              // Simple query
+              await db.rawQuery(query);
+            }
+          } catch (e) {
+            // Skip errors for sample queries
+            continue;
+          }
+
+          final end = DateTime.now().microsecondsSinceEpoch;
+          times.add(end - start);
+        }
+
+        if (times.isNotEmpty) {
+          times.sort();
+          benchmarks[queryName] = {
+            'iterations': times.length,
+            'avg_microseconds': times.reduce((a, b) => a + b) / times.length,
+            'min_microseconds': times.first,
+            'max_microseconds': times.last,
+            'median_microseconds': times[times.length ~/ 2],
+            'p95_microseconds': times[(times.length * 0.95).floor()],
+          };
+        }
+      }
+
+      debugPrint('DatabaseHelper: Query benchmarks completed');
+      return benchmarks;
+    } catch (e) {
+      debugPrint('DatabaseHelper: Query benchmarking failed: $e');
+      return {};
+    }
+  }
+
+  /// Helper method to get appropriate parameter for benchmark queries
+  String _getParameterForQuery(
+    String queryName,
+    Map<String, String> sampleData,
+  ) {
+    switch (queryName) {
+      case 'filtered_recordings':
+        return sampleData['format']!;
+      case 'transcription_lookup':
+        return sampleData['recording_id']!;
+      case 'summary_lookup':
+        return sampleData['transcription_id']!;
+      case 'settings_by_category':
+        return sampleData['category']!;
+      case 'search_query':
+        return sampleData['search_term']!;
+      default:
+        return '';
+    }
+  }
+
+  /// Get optimized query suggestions
+  Future<List<String>> getOptimizationSuggestions() async {
+    final suggestions = <String>[];
+
+    try {
+      final stats = await getPerformanceStats();
+      final tableStats =
+          stats['table_statistics'] as Map<String, dynamic>? ?? {};
+
+      // Analyze table sizes and suggest optimizations
+      for (final entry in tableStats.entries) {
+        final tableName = entry.key;
+        final tableData = entry.value as Map<String, dynamic>;
+        final rowCount = tableData['row_count'] as int? ?? 0;
+
+        if (rowCount > 10000) {
+          suggestions.add(
+            'Consider partitioning large table: $tableName ($rowCount rows)',
+          );
+        }
+
+        if (rowCount > 1000 && tableName == 'recordings') {
+          suggestions.add(
+            'Consider archiving old recordings to improve query performance',
+          );
+        }
+      }
+
+      // Check database size
+      final dbSize = stats['database_size_bytes'] as int? ?? 0;
+      if (dbSize > 100 * 1024 * 1024) {
+        // 100MB
+        suggestions.add(
+          'Database size is large (${(dbSize / 1024 / 1024).toStringAsFixed(1)}MB). Consider running VACUUM',
+        );
+      }
+
+      // Check for missing indexes based on common patterns
+      final indexUsage = stats['index_usage'] as Map<String, dynamic>? ?? {};
+      final indexCount = indexUsage['total_indexes'] as int? ?? 0;
+
+      if (indexCount < 10) {
+        suggestions.add(
+          'Consider adding more indexes for frequently queried columns',
+        );
+      }
+
+      if (suggestions.isEmpty) {
+        suggestions.add('Database performance appears to be well optimized');
+      }
+
+      return suggestions;
+    } catch (e) {
+      debugPrint(
+        'DatabaseHelper: Failed to generate optimization suggestions: $e',
+      );
+      return ['Unable to analyze performance - check database integrity'];
+    }
+  }
+
   /// Force database recreation (emergency fallback)
   Future<void> recreateDatabase() async {
     try {

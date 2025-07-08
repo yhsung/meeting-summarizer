@@ -107,29 +107,58 @@ class DatabaseSchema {
 
   /// Performance indexes for optimized queries
   static const List<String> createIndexes = [
-    // Recordings indexes
+    // Recordings indexes - Basic
     'CREATE INDEX idx_recordings_created_at ON recordings (created_at DESC);',
     'CREATE INDEX idx_recordings_duration ON recordings (duration);',
     'CREATE INDEX idx_recordings_format ON recordings (format);',
     'CREATE INDEX idx_recordings_deleted ON recordings (is_deleted);',
     'CREATE INDEX idx_recordings_title ON recordings (title);',
 
-    // Transcriptions indexes
+    // Recordings indexes - Composite for complex queries
+    'CREATE INDEX idx_recordings_deleted_created ON recordings (is_deleted, created_at DESC);',
+    'CREATE INDEX idx_recordings_format_created ON recordings (format, created_at DESC);',
+    'CREATE INDEX idx_recordings_deleted_format ON recordings (is_deleted, format);',
+    'CREATE INDEX idx_recordings_duration_created ON recordings (duration, created_at DESC);',
+    'CREATE INDEX idx_recordings_search_text ON recordings (title, description);',
+
+    // Recordings indexes - Performance optimized
+    'CREATE INDEX idx_recordings_file_lookup ON recordings (file_path, is_deleted);',
+    'CREATE INDEX idx_recordings_metadata_search ON recordings (quality, sample_rate, channels);',
+    'CREATE INDEX idx_recordings_date_range ON recordings (created_at, updated_at);',
+
+    // Transcriptions indexes - Basic
     'CREATE INDEX idx_transcriptions_recording_id ON transcriptions (recording_id);',
     'CREATE INDEX idx_transcriptions_status ON transcriptions (status);',
     'CREATE INDEX idx_transcriptions_language ON transcriptions (language);',
     'CREATE INDEX idx_transcriptions_confidence ON transcriptions (confidence DESC);',
     'CREATE INDEX idx_transcriptions_created_at ON transcriptions (created_at DESC);',
 
-    // Summaries indexes
+    // Transcriptions indexes - Composite
+    'CREATE INDEX idx_transcriptions_recording_status ON transcriptions (recording_id, status);',
+    'CREATE INDEX idx_transcriptions_status_created ON transcriptions (status, created_at DESC);',
+    'CREATE INDEX idx_transcriptions_language_confidence ON transcriptions (language, confidence DESC);',
+    'CREATE INDEX idx_transcriptions_provider_status ON transcriptions (provider, status);',
+
+    // Summaries indexes - Basic
     'CREATE INDEX idx_summaries_transcription_id ON summaries (transcription_id);',
     'CREATE INDEX idx_summaries_type ON summaries (type);',
     'CREATE INDEX idx_summaries_created_at ON summaries (created_at DESC);',
     'CREATE INDEX idx_summaries_confidence ON summaries (confidence DESC);',
 
-    // Settings indexes
+    // Summaries indexes - Composite
+    'CREATE INDEX idx_summaries_type_created ON summaries (type, created_at DESC);',
+    'CREATE INDEX idx_summaries_provider_type ON summaries (provider, type);',
+    'CREATE INDEX idx_summaries_transcription_type ON summaries (transcription_id, type);',
+    'CREATE INDEX idx_summaries_sentiment_confidence ON summaries (sentiment, confidence DESC);',
+
+    // Settings indexes - Enhanced
     'CREATE INDEX idx_settings_category ON settings (category);',
     'CREATE INDEX idx_settings_sensitive ON settings (is_sensitive);',
+    'CREATE INDEX idx_settings_category_sensitive ON settings (category, is_sensitive);',
+    'CREATE INDEX idx_settings_key_category ON settings (key, category);',
+
+    // Note: FTS virtual tables (search_index) cannot have regular indexes
+    // FTS has its own internal indexing mechanism
   ];
 
   /// Database triggers for automatic timestamp updates
