@@ -26,9 +26,9 @@ class EncryptedDatabaseService {
   }
 
   /// Initialize the encrypted database service
-  static Future<void> initialize() async {
+  static Future<void> initialize({String? customDatabaseName}) async {
     try {
-      _databaseHelper = DatabaseHelper();
+      _databaseHelper = DatabaseHelper(customDatabaseName: customDatabaseName);
       await EncryptionService.initialize();
 
       // Check if encryption is enabled in settings

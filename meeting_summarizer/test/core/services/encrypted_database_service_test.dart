@@ -56,8 +56,13 @@ void main() {
       // Clear mock storage before each test
       mockStorage.clear();
 
+      // Create a unique database for each test to enable parallel execution
+      final testId = DateTime.now().microsecondsSinceEpoch;
+      
       // Initialize the encrypted database service for each test
-      await EncryptedDatabaseService.initialize();
+      await EncryptedDatabaseService.initialize(
+        customDatabaseName: 'test_encrypted_$testId.db',
+      );
       encryptedDbService = EncryptedDatabaseService();
 
       // Ensure we have a clean database for this test

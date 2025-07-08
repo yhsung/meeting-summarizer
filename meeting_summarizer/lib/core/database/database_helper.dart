@@ -20,17 +20,32 @@ class DatabaseHelper {
   static const Uuid _uuid = Uuid();
   static DatabaseHelper? _instance;
   static Database? _database;
+  
+  // Instance fields for test isolation
+  Database? _instanceDatabase;
+  final String? _customDatabaseName;
 
-  DatabaseHelper._internal();
+  DatabaseHelper._internal({String? customDatabaseName}) 
+      : _customDatabaseName = customDatabaseName;
 
   /// Get singleton instance of DatabaseHelper
-  factory DatabaseHelper() {
+  factory DatabaseHelper({String? customDatabaseName}) {
+    // If a custom database name is provided, create a new instance
+    if (customDatabaseName != null) {
+      return DatabaseHelper._internal(customDatabaseName: customDatabaseName);
+    }
+    
     _instance ??= DatabaseHelper._internal();
     return _instance!;
   }
 
   /// Get database instance, initializing if necessary
   Future<Database> get database async {
+    if (_customDatabaseName != null) {
+      _instanceDatabase ??= await _initDatabase();
+      return _instanceDatabase!;
+    }
+    
     _database ??= await _initDatabase();
     return _database!;
   }
@@ -39,7 +54,8 @@ class DatabaseHelper {
   Future<Database> _initDatabase() async {
     try {
       final databasesPath = await getDatabasesPath();
-      final path = join(databasesPath, DatabaseSchema.databaseName);
+      final databaseName = _customDatabaseName ?? DatabaseSchema.databaseName;
+      final path = join(databasesPath, databaseName);
 
       debugPrint('DatabaseHelper: Initializing database at $path');
 
@@ -174,7 +190,11 @@ class DatabaseHelper {
 
   /// Close database connection
   Future<void> close() async {
-    if (_database != null) {
+    if (_customDatabaseName != null && _instanceDatabase != null) {
+      await _instanceDatabase!.close();
+      _instanceDatabase = null;
+      debugPrint('DatabaseHelper: Instance database connection closed');
+    } else if (_database != null) {
       await _database!.close();
       _database = null;
       debugPrint('DatabaseHelper: Database connection closed');
@@ -1167,13 +1187,18 @@ class DatabaseHelper {
       await close();
 
       final databasesPath = await getDatabasesPath();
-      final path = join(databasesPath, DatabaseSchema.databaseName);
+      final databaseName = _customDatabaseName ?? DatabaseSchema.databaseName;
+      final path = join(databasesPath, databaseName);
 
       // Delete existing database
       await deleteDatabase(path);
 
       // Reinitialize
-      _database = null;
+      if (_customDatabaseName != null) {
+        _instanceDatabase = null;
+      } else {
+        _database = null;
+      }
       await database;
 
       debugPrint('DatabaseHelper: Database recreated successfully');
