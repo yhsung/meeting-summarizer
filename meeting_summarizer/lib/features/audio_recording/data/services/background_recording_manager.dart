@@ -30,6 +30,7 @@ class BackgroundRecordingManager {
   AppLifecycleState? _lastLifecycleState;
   bool _isBackgroundRecordingEnabled = false;
   bool _isInBackground = false;
+  bool _isDisposed = false;
 
   // Audio service reference
   AudioRecordingService? _audioService;
@@ -40,6 +41,15 @@ class BackgroundRecordingManager {
       StreamController<BackgroundRecordingEvent>.broadcast();
 
   Stream<BackgroundRecordingEvent> get eventStream => _eventController.stream;
+
+  /// Safely add event to stream controller if not disposed
+  void _addEvent(BackgroundRecordingEvent event) {
+    if (_isDisposed || _eventController.isClosed) {
+      debugPrint('BackgroundRecordingManager: Cannot add event after disposal: $event');
+      return;
+    }
+    _eventController.add(event);
+  }
 
   /// Initialize background recording capabilities
   Future<void> initialize(AudioRecordingService audioService) async {
@@ -91,7 +101,7 @@ class BackgroundRecordingManager {
       }
 
       if (_isBackgroundRecordingEnabled) {
-        _eventController.add(BackgroundRecordingEvent.enabled);
+        _addEvent(BackgroundRecordingEvent.enabled);
       }
 
       return _isBackgroundRecordingEnabled;
@@ -113,7 +123,7 @@ class BackgroundRecordingManager {
       }
 
       _isBackgroundRecordingEnabled = false;
-      _eventController.add(BackgroundRecordingEvent.disabled);
+      _addEvent(BackgroundRecordingEvent.disabled);
     } catch (e) {
       debugPrint(
         'BackgroundRecordingManager: Failed to disable background: $e',
@@ -164,11 +174,11 @@ class BackgroundRecordingManager {
         _isBackgroundRecordingEnabled) {
       _backgroundSession = _audioService!.currentSession;
       await _startBackgroundRecording();
-      _eventController.add(BackgroundRecordingEvent.backgroundRecordingStarted);
+      _addEvent(BackgroundRecordingEvent.backgroundRecordingStarted);
     } else if (_audioService?.currentSession?.isActive == true) {
       // Background not enabled - pause recording
       await _audioService?.pauseRecording();
-      _eventController.add(
+      _addEvent(
         BackgroundRecordingEvent.recordingPausedForBackground,
       );
     }
@@ -182,14 +192,14 @@ class BackgroundRecordingManager {
     // If we had a background session, transition back to foreground
     if (_backgroundSession != null) {
       await _stopBackgroundRecording();
-      _eventController.add(BackgroundRecordingEvent.backgroundRecordingStopped);
+      _addEvent(BackgroundRecordingEvent.backgroundRecordingStopped);
       _backgroundSession = null;
     }
 
     // Resume paused recording if applicable
     if (_audioService?.currentSession?.isPaused == true) {
       await _audioService?.resumeRecording();
-      _eventController.add(
+      _addEvent(
         BackgroundRecordingEvent.recordingResumedFromBackground,
       );
     }
@@ -202,7 +212,7 @@ class BackgroundRecordingManager {
     // Save any ongoing recording before termination
     if (_audioService?.currentSession?.isActive == true) {
       await _audioService?.stopRecording();
-      _eventController.add(
+      _addEvent(
         BackgroundRecordingEvent.recordingStoppedForTermination,
       );
     }
@@ -319,7 +329,11 @@ class BackgroundRecordingManager {
 
   /// Dispose resources
   Future<void> dispose() async {
-    await _eventController.close();
+    _isDisposed = true;
+    
+    if (!_eventController.isClosed) {
+      await _eventController.close();
+    }
 
     if (Platform.isAndroid) {
       await _androidChannel.invokeMethod('dispose');

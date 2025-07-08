@@ -20,6 +20,7 @@ class BackgroundAudioService implements AudioServiceInterface {
 
   RecordingSession? _currentSession;
   bool _isBackgroundModeEnabled = false;
+  bool _isDisposed = false;
   StreamSubscription<RecordingSession>? _baseServiceSubscription;
   StreamSubscription<BackgroundRecordingEvent>? _backgroundEventSubscription;
 
@@ -38,6 +39,24 @@ class BackgroundAudioService implements AudioServiceInterface {
   /// Stream of background recording events
   Stream<BackgroundRecordingEvent> get backgroundEventStream =>
       _backgroundEventController.stream;
+
+  /// Safely add session update to stream controller if not disposed
+  void _addSessionUpdate(RecordingSession session) {
+    if (_isDisposed || _sessionController.isClosed) {
+      debugPrint('BackgroundAudioService: Cannot add session update after disposal');
+      return;
+    }
+    _sessionController.add(session);
+  }
+
+  /// Safely add background event to stream controller if not disposed
+  void _addBackgroundEvent(BackgroundRecordingEvent event) {
+    if (_isDisposed || _backgroundEventController.isClosed) {
+      debugPrint('BackgroundAudioService: Cannot add background event after disposal: $event');
+      return;
+    }
+    _backgroundEventController.add(event);
+  }
 
   @override
   RecordingSession? get currentSession => _currentSession;
@@ -90,10 +109,21 @@ class BackgroundAudioService implements AudioServiceInterface {
 
   @override
   Future<void> dispose() async {
+    _isDisposed = true;
+    
+    // Cancel subscriptions first to prevent new events
     await _baseServiceSubscription?.cancel();
     await _backgroundEventSubscription?.cancel();
-    await _sessionController.close();
-    await _backgroundEventController.close();
+    
+    // Close controllers safely
+    if (!_sessionController.isClosed) {
+      await _sessionController.close();
+    }
+    if (!_backgroundEventController.isClosed) {
+      await _backgroundEventController.close();
+    }
+    
+    // Dispose dependencies
     await _backgroundManager.dispose();
     await _baseService.dispose();
     debugPrint('BackgroundAudioService: Disposed');
@@ -216,17 +246,17 @@ class BackgroundAudioService implements AudioServiceInterface {
   /// Handle session updates from base service
   void _handleBaseServiceSessionUpdate(RecordingSession session) {
     _currentSession = _enhanceSessionWithBackgroundInfo(session);
-    _sessionController.add(_currentSession!);
+    _addSessionUpdate(_currentSession!);
   }
 
   /// Handle background recording events
   void _handleBackgroundEvent(BackgroundRecordingEvent event) {
-    _backgroundEventController.add(event);
+    _addBackgroundEvent(event);
 
     // Update current session with background status if applicable
     if (_currentSession != null) {
       _currentSession = _enhanceSessionWithBackgroundInfo(_currentSession!);
-      _sessionController.add(_currentSession!);
+      _addSessionUpdate(_currentSession!);
     }
   }
 
