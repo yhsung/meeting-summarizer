@@ -1,0 +1,49 @@
+# Task ID: 6
+# Title: Build Core User Interface Components
+# Status: pending
+# Dependencies: 2
+# Priority: high
+# Description: Create main UI components following platform design guidelines with accessibility support
+# Details:
+Implement main UI using Flutter Material Design 3 (material_design_3) with platform-specific adaptations using flutter_platform_widgets ^7.0.1. Create RecordingScreen with large record button, real-time waveform display, recording controls (pause/resume/stop), and audio quality selector. Implement TranscriptionScreen with text display, confidence indicators, and editing capabilities. Build SummaryScreen with different summary type tabs and export options. Add responsive design for tablets and desktop using flutter_adaptive_scaffold. Implement dark/light theme support using dynamic_color ^1.7.0. Add accessibility features: semantic labels, screen reader support, high contrast mode, and font scaling using accessibility_tools ^2.1.0.
+
+# Test Strategy:
+Widget test all UI components, test theme switching, verify accessibility features with screen readers, test responsive design on different screen sizes, golden file tests for UI consistency
+
+# Subtasks:
+## 1. Recording Screen Component [pending]
+### Dependencies: None
+### Description: Implement the main recording interface with start/stop/pause controls, audio level indicators, and recording status display
+### Details:
+Create the recording screen component with audio controls, visual feedback for recording state, microphone input level visualization, and recording timer display
+
+## 2. Transcription Screen Component [pending]
+### Dependencies: 6.1
+### Description: Build the transcription display interface with real-time text updates, editing capabilities, and progress indicators
+### Details:
+Develop the transcription screen showing live text conversion, editing tools, confidence indicators, and speaker identification if applicable
+
+## 3. Summary Screen Component [pending]
+### Dependencies: 6.2
+### Description: Create the summary display interface with formatted output, export options, and action items highlighting
+### Details:
+Design the summary screen with structured output display, export functionality, key points highlighting, and action item extraction
+
+## 4. Responsive Design Implementation [pending]
+### Dependencies: 6.1, 6.2, 6.3
+### Description: Implement responsive layouts and mobile-first design across all screen components
+### Details:
+Apply responsive design principles, mobile-first approach, flexible layouts, and touch-friendly interactions for all screen components
+
+## 5. Real-time Waveform Display Integration [pending]
+### Dependencies: 6.1
+### Description: Integrate waveform visualization component into the recording interface for real-time audio feedback
+### Details:
+Add real-time audio waveform visualization to the recording screen, showing amplitude levels and audio activity patterns
+
+## 6. Theme System and Accessibility Features [pending]
+### Dependencies: 6.4
+### Description: Implement theme switching (light/dark mode), accessibility features, and platform-specific UI adaptations
+### Details:
+Create comprehensive theme system, implement WCAG accessibility guidelines, add keyboard navigation, screen reader support, and platform-specific UI adaptations
+
