@@ -23,7 +23,7 @@ void main() {
       } catch (e) {
         // Instance might not exist, that's okay
       }
-      
+
       // Create a unique database for each test to enable parallel execution
       final testId = DateTime.now().microsecondsSinceEpoch;
       dbHelper = DatabaseHelper(
@@ -218,7 +218,7 @@ void main() {
         expect(report.containsKey('generated_at'), isTrue);
         expect(report.containsKey('database_stats'), isTrue);
         expect(report.containsKey('performance_level'), isTrue);
-        
+
         // Should not contain an error since database reopens successfully
         expect(report.containsKey('error'), isFalse);
       });
