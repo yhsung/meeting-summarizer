@@ -219,6 +219,11 @@ class TranscriptionServiceFactory {
     }
   }
 
+  /// Create a transcription service instance using the default provider
+  static TranscriptionServiceInterface create() {
+    return getDefaultService();
+  }
+
   /// Get the API key service instance
   static ApiKeyService get apiKeyService => _apiKeyService;
 }
