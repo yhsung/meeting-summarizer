@@ -181,7 +181,10 @@ class AudioRecordingService implements AudioServiceInterface {
       final sessionId = _uuid.v4();
       final filename =
           fileName ?? 'recording_${DateTime.now().millisecondsSinceEpoch}';
-      _recordingPath = '$directory/$filename.${configuration.format.extension}';
+      
+      // Use appropriate extension based on platform
+      final extension = Platform.isMacOS ? 'aac' : configuration.format.extension;
+      _recordingPath = '$directory/$filename.$extension';
 
       // Start recording using platform implementation with graceful fallback
       try {
@@ -352,8 +355,13 @@ class AudioRecordingService implements AudioServiceInterface {
       final path = await _platform.stopRecording();
 
       if (path != null && await File(path).exists()) {
-        // Apply post-processing enhancement if enabled
+        // For debugging, let's skip enhancement and use original file
         String finalPath = path;
+        debugPrint('AudioRecordingService: Using original file for now - $finalPath');
+        
+        // Apply post-processing enhancement if enabled
+        // TODO: Re-enable enhancement after fixing silence issue
+        /*
         if (_shouldApplyEnhancement(_currentSession!.configuration)) {
           try {
             _updateSession(RecordingState.processing);
@@ -367,6 +375,7 @@ class AudioRecordingService implements AudioServiceInterface {
             finalPath = path;
           }
         }
+        */
 
         final finalFile = File(finalPath);
         final finalFileSize = await finalFile.length();

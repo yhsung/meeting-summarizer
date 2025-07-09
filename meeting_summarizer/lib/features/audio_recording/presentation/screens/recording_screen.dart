@@ -12,6 +12,7 @@ import '../widgets/circular_waveform_visualizer.dart';
 import '../../../../core/enums/recording_state.dart';
 import '../../../../core/enums/audio_quality.dart';
 import '../../../../core/models/audio_configuration.dart';
+import '../../utils/audio_file_analyzer.dart';
 
 /// Main recording screen with audio controls and visualization
 class RecordingScreen extends StatefulWidget {
@@ -138,8 +139,23 @@ class _RecordingScreenState extends State<RecordingScreen>
       _pulseController.reset();
 
       if (filePath != null) {
-        // Navigate to transcription screen or show success message
-        _showSuccessSnackBar('Recording saved successfully');
+        // Analyze the recorded file to check if it contains audio
+        final analysisResult = await AudioFileAnalyzer.analyzeAudioFile(filePath);
+        
+        if (analysisResult.hasAudio) {
+          _showSuccessSnackBar(
+            'Recording saved successfully! '
+            'File size: ${(analysisResult.fileSize / 1024).toStringAsFixed(1)}KB, '
+            'Audio data: ${analysisResult.nonZeroPercentage.toStringAsFixed(1)}% active'
+          );
+        } else {
+          _showErrorSnackBar(
+            'Recording file is silent! '
+            'File size: ${(analysisResult.fileSize / 1024).toStringAsFixed(1)}KB. '
+            'Please check microphone permissions and try again.'
+          );
+          debugPrint('AudioAnalysis: $analysisResult');
+        }
       }
     } catch (e) {
       _showErrorSnackBar('Failed to stop recording: $e');

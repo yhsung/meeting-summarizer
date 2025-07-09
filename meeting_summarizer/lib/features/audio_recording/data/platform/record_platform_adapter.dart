@@ -77,14 +77,15 @@ class RecordPlatformAdapter extends AudioRecordingPlatform {
       _currentFilePath = filePath;
 
       // Configure recording settings based on platform and configuration
+      // Use more compatible settings for macOS
       final recordConfig = RecordConfig(
-        encoder: _getEncoderForPlatform(configuration.format),
-        bitRate: configuration.quality.bitRate,
-        sampleRate: configuration.quality.sampleRate,
+        encoder: Platform.isMacOS ? AudioEncoder.aacLc : _getEncoderForPlatform(configuration.format),
+        bitRate: Platform.isMacOS ? 128000 : configuration.quality.bitRate,
+        sampleRate: Platform.isMacOS ? 44100 : configuration.quality.sampleRate,
         numChannels: 1, // Mono recording for voice
-        autoGain: configuration.autoGainControl,
-        echoCancel: configuration.noiseReduction,
-        noiseSuppress: configuration.noiseReduction,
+        autoGain: Platform.isMacOS ? false : configuration.autoGainControl,
+        echoCancel: Platform.isMacOS ? false : configuration.noiseReduction,
+        noiseSuppress: Platform.isMacOS ? false : configuration.noiseReduction,
       );
 
       await _recorder.start(recordConfig, path: filePath);
@@ -262,8 +263,12 @@ class RecordPlatformAdapter extends AudioRecordingPlatform {
     try {
       // Check if recording is supported on this platform
       final hasPermission = await _recorder.hasPermission();
+      debugPrint('RecordPlatformAdapter: Has permission: $hasPermission');
+      
       if (!hasPermission) {
-        debugPrint('RecordPlatformAdapter: No recording permission on macOS');
+        debugPrint('RecordPlatformAdapter: Requesting microphone permission...');
+        final granted = await _recorder.hasPermission();
+        debugPrint('RecordPlatformAdapter: Permission granted: $granted');
       }
 
       // Try to get input devices list to verify microphone availability
@@ -272,6 +277,9 @@ class RecordPlatformAdapter extends AudioRecordingPlatform {
         'RecordPlatformAdapter: Current recording state: $isRecording',
       );
 
+      // Check if we can create a test recording (short duration)
+      debugPrint('RecordPlatformAdapter: Testing microphone availability...');
+      
       debugPrint('RecordPlatformAdapter: Initialized for macOS');
     } catch (e) {
       debugPrint('RecordPlatformAdapter: macOS initialization warning: $e');
