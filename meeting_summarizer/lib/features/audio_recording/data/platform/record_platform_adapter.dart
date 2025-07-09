@@ -79,7 +79,9 @@ class RecordPlatformAdapter extends AudioRecordingPlatform {
       // Configure recording settings based on platform and configuration
       // Use more compatible settings for macOS
       final recordConfig = RecordConfig(
-        encoder: Platform.isMacOS ? AudioEncoder.aacLc : _getEncoderForPlatform(configuration.format),
+        encoder: Platform.isMacOS
+            ? AudioEncoder.aacLc
+            : _getEncoderForPlatform(configuration.format),
         bitRate: Platform.isMacOS ? 128000 : configuration.quality.bitRate,
         sampleRate: Platform.isMacOS ? 44100 : configuration.quality.sampleRate,
         numChannels: 1, // Mono recording for voice
@@ -264,9 +266,11 @@ class RecordPlatformAdapter extends AudioRecordingPlatform {
       // Check if recording is supported on this platform
       final hasPermission = await _recorder.hasPermission();
       debugPrint('RecordPlatformAdapter: Has permission: $hasPermission');
-      
+
       if (!hasPermission) {
-        debugPrint('RecordPlatformAdapter: Requesting microphone permission...');
+        debugPrint(
+          'RecordPlatformAdapter: Requesting microphone permission...',
+        );
         final granted = await _recorder.hasPermission();
         debugPrint('RecordPlatformAdapter: Permission granted: $granted');
       }
@@ -279,7 +283,7 @@ class RecordPlatformAdapter extends AudioRecordingPlatform {
 
       // Check if we can create a test recording (short duration)
       debugPrint('RecordPlatformAdapter: Testing microphone availability...');
-      
+
       debugPrint('RecordPlatformAdapter: Initialized for macOS');
     } catch (e) {
       debugPrint('RecordPlatformAdapter: macOS initialization warning: $e');

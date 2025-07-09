@@ -10,7 +10,7 @@ class AudioFileAnalyzer {
   static Future<AudioAnalysisResult> analyzeAudioFile(String filePath) async {
     try {
       final file = File(filePath);
-      
+
       if (!await file.exists()) {
         return AudioAnalysisResult(
           hasAudio: false,
@@ -22,7 +22,7 @@ class AudioFileAnalyzer {
       final bytes = await file.readAsBytes();
       final fileSize = bytes.length;
       final extension = filePath.split('.').last.toLowerCase();
-      
+
       if (fileSize < 100) {
         return AudioAnalysisResult(
           hasAudio: false,
@@ -43,7 +43,7 @@ class AudioFileAnalyzer {
 
         // Analyze the audio data portion
         final audioDataInfo = _analyzeAudioData(bytes);
-        
+
         return AudioAnalysisResult(
           hasAudio: audioDataInfo.hasNonZeroData,
           fileSize: fileSize,
@@ -58,7 +58,7 @@ class AudioFileAnalyzer {
       } else {
         // For other formats (AAC, MP3, etc.), use heuristic analysis
         final hasAudio = _analyzeNonWavFile(bytes, extension);
-        
+
         return AudioAnalysisResult(
           hasAudio: hasAudio,
           fileSize: fileSize,
@@ -83,15 +83,15 @@ class AudioFileAnalyzer {
   /// Checks if the file has a valid WAV header
   static bool _isValidWavFile(Uint8List bytes) {
     if (bytes.length < 44) return false;
-    
+
     // Check RIFF header
     final riffHeader = String.fromCharCodes(bytes.sublist(0, 4));
     if (riffHeader != 'RIFF') return false;
-    
+
     // Check WAVE header
     final waveHeader = String.fromCharCodes(bytes.sublist(8, 12));
     if (waveHeader != 'WAVE') return false;
-    
+
     return true;
   }
 
@@ -103,20 +103,20 @@ class AudioFileAnalyzer {
     int sampleRate = 0;
     int channels = 0;
     int bitDepth = 0;
-    
+
     // Parse format chunk
     if (bytes.length >= 44) {
       sampleRate = _readLittleEndianInt32(bytes, 24);
       channels = _readLittleEndianInt16(bytes, 22);
       bitDepth = _readLittleEndianInt16(bytes, 34);
     }
-    
+
     // Find data chunk
     int offset = 36;
     while (offset < bytes.length - 8) {
       final chunkId = String.fromCharCodes(bytes.sublist(offset, offset + 4));
       final chunkSize = _readLittleEndianInt32(bytes, offset + 4);
-      
+
       if (chunkId == 'data') {
         dataOffset = offset + 8;
         audioDataSize = chunkSize;
@@ -124,7 +124,7 @@ class AudioFileAnalyzer {
       }
       offset += 8 + chunkSize;
     }
-    
+
     if (audioDataSize == 0) {
       return _AudioDataInfo(
         hasNonZeroData: false,
@@ -137,13 +137,13 @@ class AudioFileAnalyzer {
         bitDepth: bitDepth,
       );
     }
-    
+
     // Analyze audio samples
     final audioData = bytes.sublist(dataOffset, dataOffset + audioDataSize);
     int nonZeroSamples = 0;
     int maxAmplitude = 0;
     int totalSamples = audioDataSize ~/ (bitDepth ~/ 8);
-    
+
     // Analyze samples based on bit depth
     if (bitDepth == 16) {
       for (int i = 0; i < audioData.length - 1; i += 2) {
@@ -158,7 +158,8 @@ class AudioFileAnalyzer {
       }
     } else if (bitDepth == 8) {
       for (int i = 0; i < audioData.length; i++) {
-        final sample = audioData[i] - 128; // 8-bit is unsigned, convert to signed
+        final sample =
+            audioData[i] - 128; // 8-bit is unsigned, convert to signed
         final amplitude = sample.abs();
         if (amplitude > 0) {
           nonZeroSamples++;
@@ -168,7 +169,7 @@ class AudioFileAnalyzer {
         }
       }
     }
-    
+
     return _AudioDataInfo(
       hasNonZeroData: nonZeroSamples > 0,
       audioDataSize: audioDataSize,
@@ -198,11 +199,13 @@ class AudioFileAnalyzer {
     if (extension == 'aac' || extension == 'm4a') {
       // Look for AAC/MP4 markers
       final content = String.fromCharCodes(bytes.take(1000).toList());
-      if (content.contains('ftyp') || content.contains('mp4a') || content.contains('M4A')) {
+      if (content.contains('ftyp') ||
+          content.contains('mp4a') ||
+          content.contains('M4A')) {
         return bytes.length > 1000; // Reasonable size for AAC
       }
     }
-    
+
     if (extension == 'mp3') {
       // Look for MP3 frame headers
       for (int i = 0; i < bytes.length - 1; i++) {
@@ -211,7 +214,7 @@ class AudioFileAnalyzer {
         }
       }
     }
-    
+
     // Default heuristic: if file is reasonably sized, assume it has audio
     return bytes.length > 5000;
   }
@@ -271,7 +274,7 @@ class AudioAnalysisResult {
     if (error != null) {
       return 'AudioAnalysisResult(error: $error)';
     }
-    
+
     return 'AudioAnalysisResult('
         'hasAudio: $hasAudio, '
         'fileSize: ${fileSize}B, '
@@ -285,6 +288,6 @@ class AudioAnalysisResult {
   }
 
   /// Gets a percentage of non-zero samples
-  double get nonZeroPercentage => 
+  double get nonZeroPercentage =>
       totalSamples > 0 ? (nonZeroSamples / totalSamples) * 100 : 0;
 }

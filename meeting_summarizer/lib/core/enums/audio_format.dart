@@ -50,4 +50,37 @@ enum AudioFormat {
         return 'Advanced Audio Coding with excellent compression';
     }
   }
+
+  String get displayName {
+    switch (this) {
+      case AudioFormat.wav:
+        return 'WAV (Uncompressed)';
+      case AudioFormat.mp3:
+        return 'MP3 (Compressed)';
+      case AudioFormat.m4a:
+        return 'M4A (Apple)';
+      case AudioFormat.aac:
+        return 'AAC (Advanced)';
+    }
+  }
+
+  String get detailedDescription {
+    switch (this) {
+      case AudioFormat.wav:
+        return 'Highest quality, larger file size (~10MB/min)';
+      case AudioFormat.mp3:
+        return 'Good quality, smaller file size (~1MB/min)';
+      case AudioFormat.m4a:
+        return 'High quality, optimized for Apple devices (~1.2MB/min)';
+      case AudioFormat.aac:
+        return 'Excellent compression, modern standard (~1.1MB/min)';
+    }
+  }
+
+  /// Check if format is supported on current platform
+  bool get isSupportedOnCurrentPlatform {
+    // For now, assume all formats are supported
+    // TODO: Add platform-specific checks if needed
+    return true;
+  }
 }
