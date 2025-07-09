@@ -262,6 +262,10 @@ class AudioRecordingService implements AudioServiceInterface {
         technicalDetails.contains('device')) {
       userMessage =
           'Recording failed: Microphone is currently in use by another app.';
+    } else if (technicalDetails.contains('Input device not found') ||
+        technicalDetails.contains('device not found')) {
+      userMessage =
+          'Recording failed: No microphone detected. Please connect a microphone or check system audio settings.';
     } else if (technicalDetails.contains('format') ||
         technicalDetails.contains('codec')) {
       userMessage =

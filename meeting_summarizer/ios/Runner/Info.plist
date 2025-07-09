@@ -45,5 +45,8 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<!-- Microphone usage description for permission_handler -->
+	<key>NSMicrophoneUsageDescription</key>
+	<string>This app needs access to your microphone to record meetings and conversations for transcription and summarization.</string>
 </dict>
 </plist>

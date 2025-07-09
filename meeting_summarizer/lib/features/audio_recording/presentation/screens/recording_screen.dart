@@ -351,31 +351,43 @@ class _RecordingScreenState extends State<RecordingScreen>
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
-          child: Column(
-            children: [
-              // Recording Status
-              _buildRecordingStatus(theme),
-              
-              const SizedBox(height: 40),
-              
-              // Waveform Visualizer
-              _buildWaveformVisualizer(screenSize),
-              
-              const SizedBox(height: 60),
-              
-              // Recording Controls
-              _buildRecordingControls(theme),
-              
-              const SizedBox(height: 40),
-              
-              // Audio Quality Selector
-              _buildAudioQualitySelector(theme),
-              
-              const Spacer(),
-              
-              // Recording Tips
-              _buildRecordingTips(theme),
-            ],
+          child: SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: MediaQuery.of(context).size.height - 
+                    MediaQuery.of(context).padding.top - 
+                    MediaQuery.of(context).padding.bottom - 
+                    kToolbarHeight - 48, // Account for padding and app bar
+              ),
+              child: IntrinsicHeight(
+                child: Column(
+                  children: [
+                    // Recording Status
+                    _buildRecordingStatus(theme),
+                    
+                    const SizedBox(height: 40),
+                    
+                    // Waveform Visualizer
+                    _buildWaveformVisualizer(screenSize),
+                    
+                    const SizedBox(height: 60),
+                    
+                    // Recording Controls
+                    _buildRecordingControls(theme),
+                    
+                    const SizedBox(height: 40),
+                    
+                    // Audio Quality Selector
+                    _buildAudioQualitySelector(theme),
+                    
+                    const Spacer(),
+                    
+                    // Recording Tips
+                    _buildRecordingTips(theme),
+                  ],
+                ),
+              ),
+            ),
           ),
         ),
       ),

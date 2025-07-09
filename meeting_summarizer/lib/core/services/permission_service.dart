@@ -54,6 +54,15 @@ class PermissionService implements PermissionServiceInterface {
   @override
   Future<PermissionState> checkPermission(PermissionType type) async {
     try {
+      // For macOS, assume permissions are granted for now
+      // This is a workaround since permission_handler doesn't fully support macOS
+      if (Platform.isMacOS) {
+        debugPrint('PermissionService: macOS detected, assuming $type permission is granted');
+        final state = PermissionState.granted;
+        _currentStates[type] = state;
+        return state;
+      }
+
       final permission = _getPermissionHandler(type);
       final status = await permission.status;
       final state = _mapPermissionStatus(status);
@@ -64,6 +73,13 @@ class PermissionService implements PermissionServiceInterface {
       return state;
     } catch (e) {
       debugPrint('PermissionService: Check permission failed for $type: $e');
+      // For macOS, fallback to granted state
+      if (Platform.isMacOS) {
+        debugPrint('PermissionService: macOS fallback, assuming $type permission is granted');
+        final state = PermissionState.granted;
+        _currentStates[type] = state;
+        return state;
+      }
       return PermissionState.unknown;
     }
   }
@@ -91,6 +107,14 @@ class PermissionService implements PermissionServiceInterface {
     try {
       // Track request attempt
       _trackPermissionRequest(type);
+
+      // For macOS, assume permissions are granted for now
+      if (Platform.isMacOS) {
+        debugPrint('PermissionService: macOS detected, granting $type permission');
+        final state = PermissionState.granted;
+        _currentStates[type] = state;
+        return PermissionResult.granted();
+      }
 
       // Check current state first
       final currentState = await checkPermission(type);

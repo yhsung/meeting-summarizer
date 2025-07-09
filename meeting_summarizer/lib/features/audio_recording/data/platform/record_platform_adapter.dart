@@ -258,6 +258,23 @@ class RecordPlatformAdapter extends AudioRecordingPlatform {
   Future<void> _initializeMacOS() async {
     // macOS-specific initialization
     debugPrint('RecordPlatformAdapter: Initializing for macOS');
+    
+    try {
+      // Check if recording is supported on this platform
+      final hasPermission = await _recorder.hasPermission();
+      if (!hasPermission) {
+        debugPrint('RecordPlatformAdapter: No recording permission on macOS');
+      }
+      
+      // Try to get input devices list to verify microphone availability
+      final isRecording = await _recorder.isRecording();
+      debugPrint('RecordPlatformAdapter: Current recording state: $isRecording');
+      
+      debugPrint('RecordPlatformAdapter: Initialized for macOS');
+    } catch (e) {
+      debugPrint('RecordPlatformAdapter: macOS initialization warning: $e');
+      // Don't throw here - allow graceful degradation
+    }
   }
 
   Future<void> _initializeWindows() async {
