@@ -6,7 +6,6 @@ Run comprehensive quality checks before committing code changes.
 
 ```bash
 # Format code consistently
-cd ${workspaceFolder}/meeting_summarizer
 dart format .
 
 # Check for static analysis issues

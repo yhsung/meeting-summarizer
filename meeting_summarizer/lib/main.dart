@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'core/services/theme_service.dart';
 import 'features/audio_recording/presentation/screens/recording_screen.dart';
 
 void main() {
@@ -11,26 +12,20 @@ class MeetingSummarizerApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Meeting Summarizer',
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.blue,
-          brightness: Brightness.light,
-        ),
-        appBarTheme: const AppBarTheme(centerTitle: true, elevation: 0),
-      ),
-      darkTheme: ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.blue,
-          brightness: Brightness.dark,
-        ),
-        appBarTheme: const AppBarTheme(centerTitle: true, elevation: 0),
-      ),
-      home: const RecordingScreen(),
-      debugShowCheckedModeBanner: false,
+    final themeService = ThemeService.instance;
+
+    return ListenableBuilder(
+      listenable: themeService,
+      builder: (context, child) {
+        return MaterialApp(
+          title: 'Meeting Summarizer',
+          theme: themeService.lightTheme,
+          darkTheme: themeService.darkTheme,
+          themeMode: themeService.themeMode,
+          home: const RecordingScreen(),
+          debugShowCheckedModeBanner: false,
+        );
+      },
     );
   }
 }
