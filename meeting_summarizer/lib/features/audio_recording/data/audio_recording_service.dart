@@ -566,65 +566,6 @@ class AudioRecordingService implements AudioServiceInterface {
 
   // Note: Encoder selection is now handled by platform-specific implementations
 
-  /// Determines if audio enhancement should be applied based on configuration
-  bool _shouldApplyEnhancement(AudioConfiguration config) {
-    return config.enableNoiseReduction || config.enableAutoGainControl;
-  }
-
-  /// Applies post-processing enhancement to the recorded audio file
-  Future<String> _applyPostProcessingEnhancement(String originalPath) async {
-    try {
-      // For now, we'll create a simple implementation that works with WAV files
-      // In a production app, you'd want to use a proper audio processing library
-
-      // Create enhanced file path
-      final file = File(originalPath);
-      final directory = file.parent;
-      final baseName = file.uri.pathSegments.last.replaceAll('.wav', '');
-      final enhancedPath = '${directory.path}/${baseName}_enhanced.wav';
-
-      // For demonstration, we'll create a simple processing pipeline
-      // In a real implementation, you'd convert the audio file to Float32List,
-      // apply enhancement, and convert back to the audio file format
-
-      // Create audio configuration for enhancement
-      final enhancementConfig = AudioEnhancementConfig(
-        enableNoiseReduction:
-            _currentSession!.configuration.enableNoiseReduction,
-        enableAutoGainControl:
-            _currentSession!.configuration.enableAutoGainControl,
-        enableEchoCanellation: true,
-        enableSpectralSubtraction: true,
-        enableFrequencyFiltering: true,
-        noiseReductionStrength: 0.5,
-        gainControlThreshold: 0.5,
-        echoCancellationStrength: 0.3,
-        spectralSubtractionAlpha: 2.0,
-        spectralSubtractionBeta: 0.1,
-        highPassCutoff: 80.0,
-        lowPassCutoff: 8000.0,
-        processingMode: ProcessingMode.postProcessing,
-      );
-
-      // Configure enhancement service
-      await _enhancementService.configure(enhancementConfig);
-
-      // For now, just copy the original file as we need proper audio decoding
-      // In a real implementation, you'd:
-      // 1. Decode the audio file to Float32List
-      // 2. Apply enhancement using _enhancementService.processAudio()
-      // 3. Encode back to the original format
-
-      await file.copy(enhancedPath);
-
-      debugPrint('AudioRecordingService: Audio enhancement completed');
-      return enhancedPath;
-    } catch (e) {
-      debugPrint('AudioRecordingService: Enhancement failed: $e');
-      rethrow;
-    }
-  }
-
   /// Generates dummy audio stream for demonstration
   /// In a real implementation, this would be replaced with actual audio data from the microphone
   Stream<Float32List> _generateDummyAudioStream(int sampleRate) async* {

@@ -76,14 +76,14 @@ class AppTheme {
     return baseTheme.copyWith(
       colorScheme: AppColorSchemes.highContrastLightColorScheme,
       textTheme: AppTextThemes.highContrastLightTextTheme,
-      appBarTheme: baseTheme.appBarTheme?.copyWith(
+      appBarTheme: baseTheme.appBarTheme.copyWith(
         backgroundColor: AppColorSchemes.highContrastLightColorScheme.surface,
         foregroundColor: AppColorSchemes.highContrastLightColorScheme.onSurface,
       ),
-      cardTheme: baseTheme.cardTheme?.copyWith(
+      cardTheme: baseTheme.cardTheme.copyWith(
         color: AppColorSchemes.highContrastLightColorScheme.surface,
       ),
-      dividerTheme: baseTheme.dividerTheme?.copyWith(
+      dividerTheme: baseTheme.dividerTheme.copyWith(
         color: AppColorSchemes.highContrastLightColorScheme.outline,
         thickness: 2.0,
       ),
@@ -96,14 +96,14 @@ class AppTheme {
     return baseTheme.copyWith(
       colorScheme: AppColorSchemes.highContrastDarkColorScheme,
       textTheme: AppTextThemes.highContrastDarkTextTheme,
-      appBarTheme: baseTheme.appBarTheme?.copyWith(
+      appBarTheme: baseTheme.appBarTheme.copyWith(
         backgroundColor: AppColorSchemes.highContrastDarkColorScheme.surface,
         foregroundColor: AppColorSchemes.highContrastDarkColorScheme.onSurface,
       ),
-      cardTheme: baseTheme.cardTheme?.copyWith(
+      cardTheme: baseTheme.cardTheme.copyWith(
         color: AppColorSchemes.highContrastDarkColorScheme.surface,
       ),
-      dividerTheme: baseTheme.dividerTheme?.copyWith(
+      dividerTheme: baseTheme.dividerTheme.copyWith(
         color: AppColorSchemes.highContrastDarkColorScheme.outline,
         thickness: 2.0,
       ),
