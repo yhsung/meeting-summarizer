@@ -25,24 +25,24 @@ class _RecordingScreenState extends State<RecordingScreen>
     with TickerProviderStateMixin {
   // Services
   late final AudioRecordingService _audioService;
-  
+
   // State management
   RecordingState _recordingState = RecordingState.idle;
   Duration _recordingDuration = Duration.zero;
   double _currentAmplitude = 0.0;
   final List<double> _waveformData = [];
   AudioQuality _selectedQuality = AudioQuality.high;
-  
+
   // Animation controllers
   late AnimationController _pulseController;
   late AnimationController _scaleController;
   late Animation<double> _pulseAnimation;
   late Animation<double> _scaleAnimation;
-  
+
   // Timers
   Timer? _recordingTimer;
   Timer? _amplitudeTimer;
-  
+
   // Constants
   static const Duration _timerInterval = Duration(milliseconds: 100);
   static const Duration _amplitudeInterval = Duration(milliseconds: 50);
@@ -68,11 +68,14 @@ class _RecordingScreenState extends State<RecordingScreen>
   /// Initialize audio recording service
   void _initializeServices() {
     _audioService = AudioRecordingService();
-    _audioService.initialize().then((_) {
-      setState(() {});
-    }).catchError((error) {
-      _showErrorSnackBar('Failed to initialize audio service: $error');
-    });
+    _audioService
+        .initialize()
+        .then((_) {
+          setState(() {});
+        })
+        .catchError((error) {
+          _showErrorSnackBar('Failed to initialize audio service: $error');
+        });
   }
 
   /// Initialize animation controllers
@@ -81,40 +84,30 @@ class _RecordingScreenState extends State<RecordingScreen>
       duration: const Duration(milliseconds: 1000),
       vsync: this,
     );
-    
+
     _scaleController = AnimationController(
       duration: const Duration(milliseconds: 200),
       vsync: this,
     );
 
-    _pulseAnimation = Tween<double>(
-      begin: 1.0,
-      end: 1.3,
-    ).animate(CurvedAnimation(
-      parent: _pulseController,
-      curve: Curves.easeInOut,
-    ));
+    _pulseAnimation = Tween<double>(begin: 1.0, end: 1.3).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
 
-    _scaleAnimation = Tween<double>(
-      begin: 1.0,
-      end: 0.95,
-    ).animate(CurvedAnimation(
-      parent: _scaleController,
-      curve: Curves.easeInOut,
-    ));
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
+      CurvedAnimation(parent: _scaleController, curve: Curves.easeInOut),
+    );
   }
 
   /// Start recording audio
   Future<void> _startRecording() async {
     try {
       await HapticFeedback.mediumImpact();
-      
-      final configuration = AudioConfiguration(
-        quality: _selectedQuality,
-      );
+
+      final configuration = AudioConfiguration(quality: _selectedQuality);
 
       await _audioService.startRecording(configuration: configuration);
-      
+
       setState(() {
         _recordingState = RecordingState.recording;
         _recordingDuration = Duration.zero;
@@ -124,7 +117,6 @@ class _RecordingScreenState extends State<RecordingScreen>
       _startRecordingTimer();
       _startAmplitudeMonitoring();
       _pulseController.repeat(reverse: true);
-      
     } catch (e) {
       _showErrorSnackBar('Failed to start recording: $e');
     }
@@ -134,9 +126,9 @@ class _RecordingScreenState extends State<RecordingScreen>
   Future<void> _stopRecording() async {
     try {
       await HapticFeedback.lightImpact();
-      
+
       final filePath = await _audioService.stopRecording();
-      
+
       setState(() {
         _recordingState = RecordingState.stopped;
       });
@@ -144,12 +136,11 @@ class _RecordingScreenState extends State<RecordingScreen>
       _stopTimers();
       _pulseController.stop();
       _pulseController.reset();
-      
+
       if (filePath != null) {
         // Navigate to transcription screen or show success message
         _showSuccessSnackBar('Recording saved successfully');
       }
-      
     } catch (e) {
       _showErrorSnackBar('Failed to stop recording: $e');
     }
@@ -160,14 +151,13 @@ class _RecordingScreenState extends State<RecordingScreen>
     try {
       await HapticFeedback.lightImpact();
       await _audioService.pauseRecording();
-      
+
       setState(() {
         _recordingState = RecordingState.paused;
       });
 
       _stopTimers();
       _pulseController.stop();
-      
     } catch (e) {
       _showErrorSnackBar('Failed to pause recording: $e');
     }
@@ -178,7 +168,7 @@ class _RecordingScreenState extends State<RecordingScreen>
     try {
       await HapticFeedback.mediumImpact();
       await _audioService.resumeRecording();
-      
+
       setState(() {
         _recordingState = RecordingState.recording;
       });
@@ -186,7 +176,6 @@ class _RecordingScreenState extends State<RecordingScreen>
       _startRecordingTimer();
       _startAmplitudeMonitoring();
       _pulseController.repeat(reverse: true);
-      
     } catch (e) {
       _showErrorSnackBar('Failed to resume recording: $e');
     }
@@ -212,10 +201,13 @@ class _RecordingScreenState extends State<RecordingScreen>
           setState(() {
             _currentAmplitude = amplitude;
             _waveformData.addAll(session.waveformData);
-            
+
             // Keep only recent data points
             if (_waveformData.length > _maxWaveformDataPoints) {
-              _waveformData.removeRange(0, _waveformData.length - _maxWaveformDataPoints);
+              _waveformData.removeRange(
+                0,
+                _waveformData.length - _maxWaveformDataPoints,
+              );
             }
           });
         }
@@ -354,34 +346,36 @@ class _RecordingScreenState extends State<RecordingScreen>
           child: SingleChildScrollView(
             child: ConstrainedBox(
               constraints: BoxConstraints(
-                minHeight: MediaQuery.of(context).size.height - 
-                    MediaQuery.of(context).padding.top - 
-                    MediaQuery.of(context).padding.bottom - 
-                    kToolbarHeight - 48, // Account for padding and app bar
+                minHeight:
+                    MediaQuery.of(context).size.height -
+                    MediaQuery.of(context).padding.top -
+                    MediaQuery.of(context).padding.bottom -
+                    kToolbarHeight -
+                    48, // Account for padding and app bar
               ),
               child: IntrinsicHeight(
                 child: Column(
                   children: [
                     // Recording Status
                     _buildRecordingStatus(theme),
-                    
+
                     const SizedBox(height: 40),
-                    
+
                     // Waveform Visualizer
                     _buildWaveformVisualizer(screenSize),
-                    
+
                     const SizedBox(height: 60),
-                    
+
                     // Recording Controls
                     _buildRecordingControls(theme),
-                    
+
                     const SizedBox(height: 40),
-                    
+
                     // Audio Quality Selector
                     _buildAudioQualitySelector(theme),
-                    
+
                     const Spacer(),
-                    
+
                     // Recording Tips
                     _buildRecordingTips(theme),
                   ],
@@ -417,9 +411,9 @@ class _RecordingScreenState extends State<RecordingScreen>
             ),
           ),
         ),
-        
+
         const SizedBox(height: 16),
-        
+
         // Recording State Text
         Text(
           _getStatusText(),
@@ -455,13 +449,13 @@ class _RecordingScreenState extends State<RecordingScreen>
   /// Build waveform visualizer
   Widget _buildWaveformVisualizer(Size screenSize) {
     final radius = math.min(screenSize.width, screenSize.height) * 0.25;
-    
+
     return AnimatedBuilder(
       animation: _pulseAnimation,
       builder: (context, child) {
         return Transform.scale(
-          scale: _recordingState == RecordingState.recording 
-              ? _pulseAnimation.value 
+          scale: _recordingState == RecordingState.recording
+              ? _pulseAnimation.value
               : 1.0,
           child: CircularWaveformVisualizer(
             waveformData: _waveformData,
@@ -497,7 +491,9 @@ class _RecordingScreenState extends State<RecordingScreen>
                     BoxShadow(
                       color: _getRecordButtonColor().withValues(alpha: 0.4),
                       blurRadius: 20,
-                      spreadRadius: _recordingState == RecordingState.recording ? 5 : 0,
+                      spreadRadius: _recordingState == RecordingState.recording
+                          ? 5
+                          : 0,
                     ),
                   ],
                 ),
@@ -523,7 +519,8 @@ class _RecordingScreenState extends State<RecordingScreen>
 
   /// Build audio quality selector
   Widget _buildAudioQualitySelector(ThemeData theme) {
-    if (_recordingState != RecordingState.stopped && _recordingState != RecordingState.idle) {
+    if (_recordingState != RecordingState.stopped &&
+        _recordingState != RecordingState.idle) {
       return const SizedBox.shrink();
     }
 

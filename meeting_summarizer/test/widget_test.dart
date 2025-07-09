@@ -18,7 +18,7 @@ void main() {
     // Verify that recording screen is displayed
     expect(find.text('Meeting Recorder'), findsOneWidget);
     expect(find.text('Ready to record'), findsOneWidget);
-    
+
     // Verify recording button is present
     expect(find.byIcon(Icons.mic), findsOneWidget);
   });

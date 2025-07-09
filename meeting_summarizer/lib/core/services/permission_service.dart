@@ -57,7 +57,9 @@ class PermissionService implements PermissionServiceInterface {
       // For macOS, assume permissions are granted for now
       // This is a workaround since permission_handler doesn't fully support macOS
       if (Platform.isMacOS) {
-        debugPrint('PermissionService: macOS detected, assuming $type permission is granted');
+        debugPrint(
+          'PermissionService: macOS detected, assuming $type permission is granted',
+        );
         final state = PermissionState.granted;
         _currentStates[type] = state;
         return state;
@@ -75,7 +77,9 @@ class PermissionService implements PermissionServiceInterface {
       debugPrint('PermissionService: Check permission failed for $type: $e');
       // For macOS, fallback to granted state
       if (Platform.isMacOS) {
-        debugPrint('PermissionService: macOS fallback, assuming $type permission is granted');
+        debugPrint(
+          'PermissionService: macOS fallback, assuming $type permission is granted',
+        );
         final state = PermissionState.granted;
         _currentStates[type] = state;
         return state;
@@ -110,7 +114,9 @@ class PermissionService implements PermissionServiceInterface {
 
       // For macOS, assume permissions are granted for now
       if (Platform.isMacOS) {
-        debugPrint('PermissionService: macOS detected, granting $type permission');
+        debugPrint(
+          'PermissionService: macOS detected, granting $type permission',
+        );
         final state = PermissionState.granted;
         _currentStates[type] = state;
         return PermissionResult.granted();

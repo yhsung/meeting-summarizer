@@ -19,10 +19,7 @@ class MeetingSummarizerApp extends StatelessWidget {
           seedColor: Colors.blue,
           brightness: Brightness.light,
         ),
-        appBarTheme: const AppBarTheme(
-          centerTitle: true,
-          elevation: 0,
-        ),
+        appBarTheme: const AppBarTheme(centerTitle: true, elevation: 0),
       ),
       darkTheme: ThemeData(
         useMaterial3: true,
@@ -30,10 +27,7 @@ class MeetingSummarizerApp extends StatelessWidget {
           seedColor: Colors.blue,
           brightness: Brightness.dark,
         ),
-        appBarTheme: const AppBarTheme(
-          centerTitle: true,
-          elevation: 0,
-        ),
+        appBarTheme: const AppBarTheme(centerTitle: true, elevation: 0),
       ),
       home: const RecordingScreen(),
       debugShowCheckedModeBanner: false,
