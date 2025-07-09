@@ -340,64 +340,201 @@ class _RecordingScreenState extends State<RecordingScreen>
             ),
         ],
       ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: SingleChildScrollView(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                minHeight:
-                    MediaQuery.of(context).size.height -
-                    MediaQuery.of(context).padding.top -
-                    MediaQuery.of(context).padding.bottom -
-                    kToolbarHeight -
-                    48, // Account for padding and app bar
-              ),
-              child: IntrinsicHeight(
-                child: Column(
-                  children: [
-                    // Recording Status
-                    _buildRecordingStatus(theme),
+      body: SafeArea(child: _buildResponsiveLayout(theme, screenSize)),
+    );
+  }
 
-                    const SizedBox(height: 40),
+  /// Build responsive layout that adapts to different screen sizes
+  Widget _buildResponsiveLayout(ThemeData theme, Size screenSize) {
+    final screenWidth = screenSize.width;
+    final screenHeight = screenSize.height;
 
-                    // Waveform Visualizer
-                    _buildWaveformVisualizer(screenSize),
+    // Calculate responsive spacing and padding
+    final EdgeInsets padding;
+    final double verticalSpacing;
+    final double majorSpacing;
 
-                    const SizedBox(height: 60),
+    if (screenWidth > 1200) {
+      // Large desktop screens
+      padding = const EdgeInsets.symmetric(horizontal: 80.0, vertical: 40.0);
+      verticalSpacing = 50.0;
+      majorSpacing = 80.0;
+    } else if (screenWidth > 800) {
+      // Medium desktop/tablet screens
+      padding = const EdgeInsets.symmetric(horizontal: 60.0, vertical: 32.0);
+      verticalSpacing = 40.0;
+      majorSpacing = 70.0;
+    } else if (screenWidth > 600) {
+      // Small desktop/large tablet
+      padding = const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0);
+      verticalSpacing = 35.0;
+      majorSpacing = 60.0;
+    } else {
+      // Mobile screens
+      padding = const EdgeInsets.all(24.0);
+      verticalSpacing = 30.0;
+      majorSpacing = 50.0;
+    }
 
-                    // Recording Controls
-                    _buildRecordingControls(theme),
+    // Determine if we should use a wide layout (side-by-side) or narrow layout (stacked)
+    final bool useWideLayout = screenWidth > 800 && screenHeight > 600;
 
-                    const SizedBox(height: 40),
+    if (useWideLayout) {
+      return _buildWideLayout(
+        theme,
+        screenSize,
+        padding,
+        verticalSpacing,
+        majorSpacing,
+      );
+    } else {
+      return _buildNarrowLayout(
+        theme,
+        screenSize,
+        padding,
+        verticalSpacing,
+        majorSpacing,
+      );
+    }
+  }
 
-                    // Audio Quality Selector
-                    _buildAudioQualitySelector(theme),
-
-                    const Spacer(),
-
-                    // Recording Tips
-                    _buildRecordingTips(theme),
-                  ],
-                ),
-              ),
+  /// Build layout for wide screens (desktop/tablet landscape)
+  Widget _buildWideLayout(
+    ThemeData theme,
+    Size screenSize,
+    EdgeInsets padding,
+    double verticalSpacing,
+    double majorSpacing,
+  ) {
+    return Padding(
+      padding: padding,
+      child: Row(
+        children: [
+          // Left column - Recording status and controls
+          Expanded(
+            flex: 1,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildRecordingStatus(theme),
+                SizedBox(height: majorSpacing),
+                _buildRecordingControls(theme),
+                SizedBox(height: verticalSpacing),
+                _buildAudioQualitySelector(theme),
+              ],
             ),
           ),
+
+          SizedBox(width: majorSpacing),
+
+          // Right column - Waveform visualizer and tips
+          Expanded(
+            flex: 1,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildWaveformVisualizer(screenSize),
+                SizedBox(height: majorSpacing),
+                _buildRecordingTips(theme),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Build layout for narrow screens (mobile/tablet portrait)
+  Widget _buildNarrowLayout(
+    ThemeData theme,
+    Size screenSize,
+    EdgeInsets padding,
+    double verticalSpacing,
+    double majorSpacing,
+  ) {
+    return Padding(
+      padding: padding,
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            // Recording Status
+            _buildRecordingStatus(theme),
+
+            SizedBox(height: verticalSpacing),
+
+            // Waveform Visualizer
+            _buildWaveformVisualizer(screenSize),
+
+            SizedBox(height: majorSpacing),
+
+            // Recording Controls
+            _buildRecordingControls(theme),
+
+            SizedBox(height: verticalSpacing),
+
+            // Audio Quality Selector
+            _buildAudioQualitySelector(theme),
+
+            SizedBox(height: majorSpacing),
+
+            // Recording Tips
+            _buildRecordingTips(theme),
+            
+            // Add bottom padding for safe area
+            SizedBox(height: MediaQuery.of(context).padding.bottom + 20),
+          ],
         ),
       ),
     );
   }
 
-  /// Build recording status display
+  /// Build recording status display with responsive text sizing
   Widget _buildRecordingStatus(ThemeData theme) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    // Responsive text scaling
+    final double textScale;
+    final EdgeInsets containerPadding;
+    final double borderRadius;
+
+    if (screenWidth > 1200) {
+      textScale = 1.2;
+      containerPadding = const EdgeInsets.symmetric(
+        horizontal: 32,
+        vertical: 16,
+      );
+      borderRadius = 24;
+    } else if (screenWidth > 800) {
+      textScale = 1.1;
+      containerPadding = const EdgeInsets.symmetric(
+        horizontal: 28,
+        vertical: 14,
+      );
+      borderRadius = 22;
+    } else if (screenWidth > 600) {
+      textScale = 1.0;
+      containerPadding = const EdgeInsets.symmetric(
+        horizontal: 24,
+        vertical: 12,
+      );
+      borderRadius = 20;
+    } else {
+      textScale = 0.9;
+      containerPadding = const EdgeInsets.symmetric(
+        horizontal: 20,
+        vertical: 10,
+      );
+      borderRadius = 18;
+    }
+
     return Column(
       children: [
         // Recording Duration
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          padding: containerPadding,
           decoration: BoxDecoration(
             color: theme.colorScheme.primaryContainer.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(borderRadius),
             border: Border.all(
               color: theme.colorScheme.primary.withValues(alpha: 0.2),
             ),
@@ -408,18 +545,22 @@ class _RecordingScreenState extends State<RecordingScreen>
               fontWeight: FontWeight.bold,
               fontFeatures: const [FontFeature.tabularFigures()],
               color: theme.colorScheme.primary,
+              fontSize:
+                  (theme.textTheme.headlineMedium?.fontSize ?? 28) * textScale,
             ),
           ),
         ),
 
-        const SizedBox(height: 16),
+        SizedBox(height: 16 * textScale),
 
         // Recording State Text
         Text(
           _getStatusText(),
           style: theme.textTheme.titleMedium?.copyWith(
             color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+            fontSize: (theme.textTheme.titleMedium?.fontSize ?? 16) * textScale,
           ),
+          textAlign: TextAlign.center,
         ),
       ],
     );
@@ -446,9 +587,32 @@ class _RecordingScreenState extends State<RecordingScreen>
     }
   }
 
-  /// Build waveform visualizer
+  /// Build waveform visualizer with responsive sizing
   Widget _buildWaveformVisualizer(Size screenSize) {
-    final radius = math.min(screenSize.width, screenSize.height) * 0.25;
+    // Responsive radius calculation
+    final double baseRadius;
+    final double strokeWidth;
+
+    if (screenSize.width > 1200) {
+      // Large desktop screens
+      baseRadius = math.min(screenSize.width, screenSize.height) * 0.2;
+      strokeWidth = 6.0;
+    } else if (screenSize.width > 800) {
+      // Medium desktop/tablet screens
+      baseRadius = math.min(screenSize.width, screenSize.height) * 0.22;
+      strokeWidth = 5.0;
+    } else if (screenSize.width > 600) {
+      // Small desktop/large tablet
+      baseRadius = math.min(screenSize.width, screenSize.height) * 0.25;
+      strokeWidth = 4.0;
+    } else {
+      // Mobile screens
+      baseRadius = math.min(screenSize.width, screenSize.height) * 0.3;
+      strokeWidth = 3.0;
+    }
+
+    // Ensure minimum and maximum radius
+    final radius = math.max(80.0, math.min(200.0, baseRadius));
 
     return AnimatedBuilder(
       animation: _pulseAnimation,
@@ -461,7 +625,7 @@ class _RecordingScreenState extends State<RecordingScreen>
             waveformData: _waveformData,
             currentAmplitude: _currentAmplitude,
             radius: radius,
-            strokeWidth: 4.0,
+            strokeWidth: strokeWidth,
             waveColor: _getRecordButtonColor(),
             showCurrentAmplitude: _recordingState == RecordingState.recording,
           ),
@@ -470,8 +634,37 @@ class _RecordingScreenState extends State<RecordingScreen>
     );
   }
 
-  /// Build recording controls
+  /// Build recording controls with responsive sizing
   Widget _buildRecordingControls(ThemeData theme) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    // Responsive button sizing
+    final double buttonSize;
+    final double iconSize;
+    final double borderRadius;
+
+    if (screenWidth > 1200) {
+      // Large desktop screens
+      buttonSize = 100;
+      iconSize = 50;
+      borderRadius = 50;
+    } else if (screenWidth > 800) {
+      // Medium desktop/tablet screens
+      buttonSize = 90;
+      iconSize = 45;
+      borderRadius = 45;
+    } else if (screenWidth > 600) {
+      // Small desktop/large tablet
+      buttonSize = 80;
+      iconSize = 40;
+      borderRadius = 40;
+    } else {
+      // Mobile screens
+      buttonSize = 70;
+      iconSize = 35;
+      borderRadius = 35;
+    }
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -482,8 +675,8 @@ class _RecordingScreenState extends State<RecordingScreen>
             return Transform.scale(
               scale: _scaleAnimation.value,
               child: Container(
-                width: 80,
-                height: 80,
+                width: buttonSize,
+                height: buttonSize,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: _getRecordButtonColor(),
@@ -500,11 +693,11 @@ class _RecordingScreenState extends State<RecordingScreen>
                 child: Material(
                   color: Colors.transparent,
                   child: InkWell(
-                    borderRadius: BorderRadius.circular(40),
+                    borderRadius: BorderRadius.circular(borderRadius),
                     onTap: _handleRecordButton,
                     child: Icon(
                       _getRecordButtonIcon(),
-                      size: 40,
+                      size: iconSize,
                       color: Colors.white,
                     ),
                   ),
@@ -517,47 +710,96 @@ class _RecordingScreenState extends State<RecordingScreen>
     );
   }
 
-  /// Build audio quality selector
+  /// Build audio quality selector with responsive design
   Widget _buildAudioQualitySelector(ThemeData theme) {
     if (_recordingState != RecordingState.stopped &&
         _recordingState != RecordingState.idle) {
       return const SizedBox.shrink();
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Audio Quality',
-          style: theme.textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        const SizedBox(height: 12),
-        Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: theme.colorScheme.outline.withValues(alpha: 0.2),
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    // Responsive sizing for quality selector
+    final double textScale;
+    final double borderRadius;
+    final EdgeInsets tilePadding;
+
+    if (screenWidth > 1200) {
+      textScale = 1.1;
+      borderRadius = 16;
+      tilePadding = const EdgeInsets.symmetric(horizontal: 16, vertical: 8);
+    } else if (screenWidth > 800) {
+      textScale = 1.05;
+      borderRadius = 14;
+      tilePadding = const EdgeInsets.symmetric(horizontal: 12, vertical: 6);
+    } else if (screenWidth > 600) {
+      textScale = 1.0;
+      borderRadius = 12;
+      tilePadding = const EdgeInsets.symmetric(horizontal: 8, vertical: 4);
+    } else {
+      textScale = 0.95;
+      borderRadius = 10;
+      tilePadding = const EdgeInsets.symmetric(horizontal: 4, vertical: 2);
+    }
+
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        maxWidth: screenWidth > 800 ? 400 : double.infinity,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Audio Quality',
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+              fontSize:
+                  (theme.textTheme.titleMedium?.fontSize ?? 16) * textScale,
             ),
           ),
-          child: Column(
-            children: AudioQuality.values.map((quality) {
-              return RadioListTile<AudioQuality>(
-                title: Text(_getQualityDisplayName(quality)),
-                subtitle: Text(_getQualityDescription(quality)),
-                value: quality,
-                groupValue: _selectedQuality,
-                onChanged: (value) {
-                  setState(() {
-                    _selectedQuality = value!;
-                  });
-                },
-              );
-            }).toList(),
+          SizedBox(height: 12 * textScale),
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(borderRadius),
+              border: Border.all(
+                color: theme.colorScheme.outline.withValues(alpha: 0.2),
+              ),
+            ),
+            child: Column(
+              children: AudioQuality.values.map((quality) {
+                return Padding(
+                  padding: tilePadding,
+                  child: RadioListTile<AudioQuality>(
+                    title: Text(
+                      _getQualityDisplayName(quality),
+                      style: TextStyle(
+                        fontSize:
+                            (theme.textTheme.bodyLarge?.fontSize ?? 14) *
+                            textScale,
+                      ),
+                    ),
+                    subtitle: Text(
+                      _getQualityDescription(quality),
+                      style: TextStyle(
+                        fontSize:
+                            (theme.textTheme.bodyMedium?.fontSize ?? 12) *
+                            textScale,
+                      ),
+                    ),
+                    value: quality,
+                    groupValue: _selectedQuality,
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedQuality = value!;
+                      });
+                    },
+                  ),
+                );
+              }).toList(),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -589,44 +831,87 @@ class _RecordingScreenState extends State<RecordingScreen>
     }
   }
 
-  /// Build recording tips
+  /// Build recording tips with responsive design
   Widget _buildRecordingTips(ThemeData theme) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(12),
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    // Responsive sizing for tips section
+    final double textScale;
+    final EdgeInsets padding;
+    final double borderRadius;
+    final double iconSize;
+
+    if (screenWidth > 1200) {
+      textScale = 1.1;
+      padding = const EdgeInsets.all(20);
+      borderRadius = 16;
+      iconSize = 24;
+    } else if (screenWidth > 800) {
+      textScale = 1.05;
+      padding = const EdgeInsets.all(18);
+      borderRadius = 14;
+      iconSize = 22;
+    } else if (screenWidth > 600) {
+      textScale = 1.0;
+      padding = const EdgeInsets.all(16);
+      borderRadius = 12;
+      iconSize = 20;
+    } else {
+      textScale = 0.95;
+      padding = const EdgeInsets.all(14);
+      borderRadius = 10;
+      iconSize = 18;
+    }
+
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        maxWidth: screenWidth > 800 ? 500 : double.infinity,
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(
-                Icons.lightbulb_outline,
-                size: 20,
-                color: theme.colorScheme.primary,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                'Recording Tips',
-                style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
+      child: Container(
+        padding: padding,
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerHighest.withValues(
+            alpha: 0.3,
+          ),
+          borderRadius: BorderRadius.circular(borderRadius),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.lightbulb_outline,
+                  size: iconSize,
                   color: theme.colorScheme.primary,
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            '• Keep device close to speakers for best quality\n'
-            '• Ensure quiet environment for optimal transcription\n'
-            '• Higher quality settings provide better accuracy',
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                SizedBox(width: 8 * textScale),
+                Text(
+                  'Recording Tips',
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: theme.colorScheme.primary,
+                    fontSize:
+                        (theme.textTheme.titleSmall?.fontSize ?? 14) *
+                        textScale,
+                  ),
+                ),
+              ],
             ),
-          ),
-        ],
+            SizedBox(height: 8 * textScale),
+            Text(
+              '• Keep device close to speakers for best quality\n'
+              '• Ensure quiet environment for optimal transcription\n'
+              '• Higher quality settings provide better accuracy',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                fontSize:
+                    (theme.textTheme.bodySmall?.fontSize ?? 12) * textScale,
+                height: 1.4,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
