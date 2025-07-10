@@ -29,7 +29,7 @@ class TranscriptionControls extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(12),
@@ -43,7 +43,7 @@ class TranscriptionControls extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
 
           // Primary action button
           SizedBox(
@@ -87,7 +87,7 @@ class TranscriptionControls extends StatelessWidget {
             ],
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
 
           // Service status
           Row(

@@ -541,7 +541,7 @@ class _SummaryScreenState extends State<SummaryScreen>
             summary: _currentSummary!,
             onDelete: () => _deleteSummary(_currentSummary!.id),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           if (_currentSummary!.actionItems?.isNotEmpty ?? false)
             ActionItemsList(
               actionItems: _currentSummary!.actionItems!,
@@ -560,7 +560,7 @@ class _SummaryScreenState extends State<SummaryScreen>
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(Icons.summarize, size: 64, color: Colors.grey[400]),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           Text(
             'No Summaries Available',
             style: Theme.of(

@@ -186,7 +186,7 @@ class _WaveformSettingsState extends State<WaveformSettings>
                     contentPadding: EdgeInsets.zero,
                   ),
 
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
 
                   // Color Selection
                   Text(
@@ -235,7 +235,7 @@ class _WaveformSettingsState extends State<WaveformSettings>
                     }).toList(),
                   ),
 
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
 
                   // Performance Info
                   Container(

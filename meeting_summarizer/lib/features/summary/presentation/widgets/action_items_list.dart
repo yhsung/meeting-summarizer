@@ -37,7 +37,7 @@ class _ActionItemsListState extends State<ActionItemsList> {
     return Card(
       elevation: 2,
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -53,7 +53,7 @@ class _ActionItemsListState extends State<ActionItemsList> {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             ListView.separated(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),

@@ -95,15 +95,15 @@ class _SummaryControlsState extends State<SummaryControls>
     return Card(
       elevation: 2,
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildHeader(),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             if (widget.isGenerating) _buildGenerationProgress(),
             _buildTypeSelector(),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             _buildActionButtons(),
           ],
         ),
@@ -149,7 +149,7 @@ class _SummaryControlsState extends State<SummaryControls>
             context,
           ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
       ],
     );
   }

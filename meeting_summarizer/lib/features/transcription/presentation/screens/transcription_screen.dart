@@ -367,23 +367,23 @@ class _TranscriptionScreenState extends State<TranscriptionScreen>
     if (screenWidth > 1200) {
       // Large desktop screens
       padding = const EdgeInsets.symmetric(horizontal: 80.0, vertical: 40.0);
-      verticalSpacing = 30.0;
-      majorSpacing = 40.0;
+      verticalSpacing = 24.0;
+      majorSpacing = 30.0;
     } else if (screenWidth > 800) {
       // Medium desktop/tablet screens
       padding = const EdgeInsets.symmetric(horizontal: 60.0, vertical: 32.0);
-      verticalSpacing = 25.0;
-      majorSpacing = 35.0;
+      verticalSpacing = 20.0;
+      majorSpacing = 26.0;
     } else if (screenWidth > 600) {
       // Small desktop/large tablet
       padding = const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0);
-      verticalSpacing = 20.0;
-      majorSpacing = 30.0;
+      verticalSpacing = 16.0;
+      majorSpacing = 22.0;
     } else {
       // Mobile screens
       padding = const EdgeInsets.all(24.0);
-      verticalSpacing = 16.0;
-      majorSpacing = 24.0;
+      verticalSpacing = 12.0;
+      majorSpacing = 18.0;
     }
 
     // Determine if we should use a wide layout
@@ -759,7 +759,7 @@ class _TranscriptionScreenState extends State<TranscriptionScreen>
             size: 80,
             color: theme.colorScheme.outline,
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           Text(
             'No Transcription Yet',
             style: theme.textTheme.headlineSmall?.copyWith(

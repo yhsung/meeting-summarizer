@@ -33,7 +33,7 @@ class TranscriptionSettings extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(12),
@@ -55,7 +55,7 @@ class TranscriptionSettings extends StatelessWidget {
             ],
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
 
           // Language selection
           Text(
@@ -84,7 +84,7 @@ class TranscriptionSettings extends StatelessWidget {
             }).toList(),
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
 
           // Feature toggles
           Text(

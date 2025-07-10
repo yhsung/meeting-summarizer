@@ -53,7 +53,7 @@ class _SummaryViewerState extends State<SummaryViewer> {
 
   Widget _buildHeader() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
         borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
@@ -162,12 +162,12 @@ class _SummaryViewerState extends State<SummaryViewer> {
   List<Widget> _buildContent() {
     return [
       Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildSummaryContent(),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             if (widget.summary.keyPoints?.isNotEmpty ?? false)
               _buildKeyPoints(),
             if (widget.summary.sentiment != SentimentType.neutral)
@@ -213,7 +213,7 @@ class _SummaryViewerState extends State<SummaryViewer> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
         Text(
           'Key Points',
           style: Theme.of(context).textTheme.titleSmall?.copyWith(
@@ -305,7 +305,7 @@ class _SummaryViewerState extends State<SummaryViewer> {
 
   Widget _buildMetadata() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.grey[50],
         borderRadius: const BorderRadius.vertical(bottom: Radius.circular(4)),
@@ -320,14 +320,14 @@ class _SummaryViewerState extends State<SummaryViewer> {
                 Icons.verified,
                 Colors.green,
               ),
-              const SizedBox(width: 24),
+              const SizedBox(width: 16),
               _buildMetadataItem(
                 'Words',
                 widget.summary.wordCount.toString(),
                 Icons.text_fields,
                 Colors.blue,
               ),
-              const SizedBox(width: 24),
+              const SizedBox(width: 16),
               _buildMetadataItem(
                 'Length',
                 widget.summary.lengthCategory,
@@ -345,7 +345,7 @@ class _SummaryViewerState extends State<SummaryViewer> {
                 Icons.smart_toy,
                 Colors.purple,
               ),
-              const SizedBox(width: 24),
+              const SizedBox(width: 16),
               _buildMetadataItem(
                 'Reading Time',
                 '${widget.summary.estimatedReadingTime} min',

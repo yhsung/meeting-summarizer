@@ -450,23 +450,23 @@ class _RecordingScreenState extends State<RecordingScreen>
     if (screenWidth > 1200) {
       // Large desktop screens
       padding = const EdgeInsets.symmetric(horizontal: 80.0, vertical: 40.0);
-      verticalSpacing = 50.0;
-      majorSpacing = 80.0;
+      verticalSpacing = 40.0;
+      majorSpacing = 60.0;
     } else if (screenWidth > 800) {
       // Medium desktop/tablet screens
       padding = const EdgeInsets.symmetric(horizontal: 60.0, vertical: 32.0);
-      verticalSpacing = 40.0;
-      majorSpacing = 70.0;
+      verticalSpacing = 32.0;
+      majorSpacing = 50.0;
     } else if (screenWidth > 600) {
       // Small desktop/large tablet
       padding = const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0);
-      verticalSpacing = 35.0;
-      majorSpacing = 60.0;
+      verticalSpacing = 28.0;
+      majorSpacing = 40.0;
     } else {
       // Mobile screens
       padding = const EdgeInsets.all(24.0);
-      verticalSpacing = 30.0;
-      majorSpacing = 50.0;
+      verticalSpacing = 24.0;
+      majorSpacing = 30.0;
     }
 
     // Determine if we should use a wide layout (side-by-side) or narrow layout (stacked)
@@ -844,7 +844,7 @@ class _RecordingScreenState extends State<RecordingScreen>
           ),
         ),
 
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
 
         // Waveform Visualizer
         AnimatedSwitcher(
@@ -1217,7 +1217,7 @@ class _RecordingScreenState extends State<RecordingScreen>
       iconSize = 22;
     } else if (screenWidth > 600) {
       textScale = 1.0;
-      padding = const EdgeInsets.all(16);
+      padding = const EdgeInsets.all(12);
       borderRadius = 12;
       iconSize = 20;
     } else {

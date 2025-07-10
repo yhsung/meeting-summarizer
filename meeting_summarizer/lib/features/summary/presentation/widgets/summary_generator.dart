@@ -286,17 +286,17 @@ class _SummaryGeneratorState extends State<SummaryGenerator>
         child: Card(
           elevation: 4,
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildHeader(),
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
                 _buildProgressIndicator(),
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
                 _buildStatusMessage(),
                 if (widget.isGenerating) ...[
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
                   _buildGenerationSteps(),
                 ],
               ],

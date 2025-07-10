@@ -96,7 +96,7 @@ class WaveformStats extends StatelessWidget {
               ],
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
 
             // Duration and Format Info
             Row(
@@ -121,7 +121,7 @@ class WaveformStats extends StatelessWidget {
               ],
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
 
             // Amplitude Information
             Column(
@@ -160,7 +160,7 @@ class WaveformStats extends StatelessWidget {
               ],
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
 
             // Data Points and Performance
             Row(

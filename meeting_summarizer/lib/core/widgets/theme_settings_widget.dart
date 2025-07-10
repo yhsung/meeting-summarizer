@@ -197,7 +197,7 @@ class _ThemeSettingsWidgetState extends State<ThemeSettingsWidget> {
         ),
         const SizedBox(height: 12),
         Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: theme.colorScheme.surfaceContainerHighest.withValues(
               alpha: 0.5,

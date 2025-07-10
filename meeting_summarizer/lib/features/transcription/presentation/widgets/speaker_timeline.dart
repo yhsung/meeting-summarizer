@@ -58,7 +58,7 @@ class SpeakerTimeline extends StatelessWidget {
               size: 48,
               color: theme.colorScheme.outline,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             Text(
               'No Speaker Data Available',
               style: theme.textTheme.titleMedium?.copyWith(
@@ -88,7 +88,7 @@ class SpeakerTimeline extends StatelessWidget {
             fontWeight: FontWeight.bold,
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
 
         // Timeline
         Expanded(

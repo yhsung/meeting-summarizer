@@ -235,7 +235,7 @@ class _TranscriptionViewerState extends State<TranscriptionViewer> {
           ),
         ],
 
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
 
         // Transcription content
         Expanded(child: _buildTranscriptionContent(theme)),
@@ -263,7 +263,7 @@ class _TranscriptionViewerState extends State<TranscriptionViewer> {
 
         return Container(
           margin: const EdgeInsets.only(bottom: 16),
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: theme.colorScheme.surfaceContainerHighest.withValues(
               alpha: 0.3,
@@ -360,7 +360,7 @@ class _TranscriptionViewerState extends State<TranscriptionViewer> {
   /// Build plain text view
   Widget _buildPlainTextView(ThemeData theme) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(12),
