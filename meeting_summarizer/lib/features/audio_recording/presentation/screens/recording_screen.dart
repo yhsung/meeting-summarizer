@@ -37,9 +37,9 @@ class _RecordingScreenState extends State<RecordingScreen>
   double _currentAmplitude = 0.0;
   final List<double> _waveformData = [];
   AudioQuality _selectedQuality = AudioQuality.high;
-  AudioFormat _selectedFormat = AudioFormat.wav;
+  AudioFormat _selectedFormat = AudioFormat.aac;
   WaveformType _waveformType = WaveformType.circular;
-  bool _showAdvancedWaveform = false;
+  bool _showAdvancedWaveform = true;
   bool _showWaveformSettings = false;
   bool _showWaveformStats = false;
   Color _waveformColor = Colors.blue;
@@ -390,6 +390,72 @@ class _RecordingScreenState extends State<RecordingScreen>
     );
   }
 
+  /// Show dialog to select audio quality
+  Future<void> _showQualityDialog() async {
+    final selected = await showDialog<AudioQuality>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Select Audio Quality'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: AudioQuality.values.map((quality) {
+              return RadioListTile<AudioQuality>(
+                title: Text(_getQualityDisplayName(quality)),
+                subtitle: Text(_getQualityDescription(quality)),
+                value: quality,
+                groupValue: _selectedQuality,
+                onChanged: (value) {
+                  Navigator.of(context).pop(value);
+                },
+              );
+            }).toList(),
+          ),
+        );
+      },
+    );
+
+    if (selected != null) {
+      setState(() {
+        _selectedQuality = selected;
+      });
+    }
+  }
+
+  /// Show dialog to select audio format
+  Future<void> _showFormatDialog() async {
+    final selected = await showDialog<AudioFormat>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Select Audio Format'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: AudioFormat.values
+                .where((f) => f.isSupportedOnCurrentPlatform)
+                .map((format) {
+              return RadioListTile<AudioFormat>(
+                title: Text(format.displayName),
+                subtitle: Text(format.detailedDescription),
+                value: format,
+                groupValue: _selectedFormat,
+                onChanged: (value) {
+                  Navigator.of(context).pop(value);
+                },
+              );
+            }).toList(),
+          ),
+        );
+      },
+    );
+
+    if (selected != null) {
+      setState(() {
+        _selectedFormat = selected;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -410,14 +476,20 @@ class _RecordingScreenState extends State<RecordingScreen>
               tooltip: 'Stop Recording',
             ),
           PopupMenuButton<int>(
-            onSelected: (value) {
-              setState(() {
-                if (value == 0) {
+            onSelected: (value) async {
+              if (value == 0) {
+                setState(() {
                   _showWaveformStats = !_showWaveformStats;
-                } else if (value == 1) {
+                });
+              } else if (value == 1) {
+                setState(() {
                   _showWaveformSettings = !_showWaveformSettings;
-                }
-              });
+                });
+              } else if (value == 2) {
+                await _showQualityDialog();
+              } else if (value == 3) {
+                await _showFormatDialog();
+              }
             },
             itemBuilder: (context) => [
               PopupMenuItem(
@@ -446,6 +518,23 @@ class _RecordingScreenState extends State<RecordingScreen>
                         ? 'Hide Settings'
                         : 'Show Settings',
                   ),
+                ),
+              ),
+              const PopupMenuDivider(),
+              PopupMenuItem(
+                value: 2,
+                child: ListTile(
+                  leading: const Icon(Icons.high_quality),
+                  title: const Text('Audio Quality'),
+                  subtitle: Text(_getQualityDisplayName(_selectedQuality)),
+                ),
+              ),
+              PopupMenuItem(
+                value: 3,
+                child: ListTile(
+                  leading: const Icon(Icons.music_note),
+                  title: const Text('Audio Format'),
+                  subtitle: Text(_selectedFormat.displayName),
                 ),
               ),
             ],
@@ -532,9 +621,6 @@ class _RecordingScreenState extends State<RecordingScreen>
                 SizedBox(height: majorSpacing),
                 _buildRecordingControls(theme),
                 SizedBox(height: verticalSpacing),
-                _buildAudioQualitySelector(theme),
-                SizedBox(height: verticalSpacing),
-                _buildAudioFormatSelector(theme),
               ],
             ),
           ),
@@ -655,16 +741,6 @@ class _RecordingScreenState extends State<RecordingScreen>
 
             // Recording Controls
             _buildRecordingControls(theme),
-
-            SizedBox(height: verticalSpacing),
-
-            // Audio Quality Selector
-            _buildAudioQualitySelector(theme),
-
-            SizedBox(height: verticalSpacing),
-
-            // Audio Format Selector
-            _buildAudioFormatSelector(theme),
 
             SizedBox(height: majorSpacing),
 
