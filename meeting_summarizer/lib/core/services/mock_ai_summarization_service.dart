@@ -11,6 +11,10 @@ import 'ai_summarization_service_interface.dart';
 import '../models/summarization_configuration.dart';
 import '../models/summarization_result.dart';
 import '../enums/summary_type.dart';
+import 'summary_type_processors.dart';
+import 'specialized_summary_processors.dart';
+import 'topical_summary_processor.dart';
+import 'meeting_notes_processor.dart';
 
 /// Mock implementation for testing and development
 class MockAISummarizationService extends BaseAISummarizationService {
@@ -23,7 +27,150 @@ class MockAISummarizationService extends BaseAISummarizationService {
   Future<void> initializeProvider() async {
     // Simulate initialization delay
     await Future.delayed(const Duration(milliseconds: 100));
-    debugPrint('MockAISummarizationService: Initialized');
+
+    // Register specialized processors
+    _registerSpecializedProcessors();
+
+    debugPrint(
+      'MockAISummarizationService: Initialized with specialized processors',
+    );
+  }
+
+  /// Register specialized processors for different summary types
+  void _registerSpecializedProcessors() {
+    SummaryTypeProcessorFactory.registerProcessor(
+      SummaryType.actionItems,
+      ActionItemsProcessor(),
+    );
+    SummaryTypeProcessorFactory.registerProcessor(
+      SummaryType.executive,
+      ExecutiveSummaryProcessor(),
+    );
+    SummaryTypeProcessorFactory.registerProcessor(
+      SummaryType.topical,
+      TopicalSummaryProcessor(),
+    );
+    SummaryTypeProcessorFactory.registerProcessor(
+      SummaryType.meetingNotes,
+      MeetingNotesProcessor(),
+    );
+  }
+
+  /// Mock AI call function for specialized processors
+  Future<String> _mockAiCall(String prompt, String systemPrompt) async {
+    // Simulate AI processing delay
+    await Future.delayed(Duration(milliseconds: 200 + _random.nextInt(300)));
+
+    // Generate mock response based on prompt content
+    if (prompt.toLowerCase().contains('action item')) {
+      return _generateMockActionItemResponse();
+    } else if (prompt.toLowerCase().contains('executive')) {
+      return _generateMockExecutiveResponse();
+    } else if (prompt.toLowerCase().contains('meeting notes') ||
+        prompt.toLowerCase().contains('formal meeting')) {
+      return _generateMockMeetingNotesResponse();
+    } else if (prompt.toLowerCase().contains('decision')) {
+      return _generateMockDecisionResponse();
+    } else if (prompt.toLowerCase().contains('topic')) {
+      return _generateMockTopicResponse();
+    } else {
+      return _generateMockGeneralResponse();
+    }
+  }
+
+  String _generateMockActionItemResponse() {
+    return '''1. Finalize project requirements document
+   Assignee: Project Manager
+   Due: End of week
+   Priority: High
+   Context: Critical for project kick-off
+
+2. Schedule stakeholder review meeting
+   Assignee: Team Lead
+   Due: Next Tuesday
+   Priority: Medium
+   Context: Need approval before proceeding
+
+3. Prepare budget allocation proposal
+   Due: Next Friday
+   Priority: High
+   Context: Required for Q1 planning''';
+  }
+
+  String _generateMockExecutiveResponse() {
+    return '''## Executive Overview
+Strategic planning session focused on Q1 initiatives with key decisions on resource allocation and project prioritization.
+
+## Key Decisions
+- Approved 15% budget increase for critical projects
+- Established three priority workstreams for Q1
+- Committed to accelerated delivery timeline
+
+## Business Impact
+Resource allocation optimized for maximum ROI with minimal risk exposure.
+
+## Recommendations
+Proceed with implementation as planned with weekly progress reviews.
+
+## Next Steps
+- Board approval for budget increase
+- Team assignments by end of week
+- Kick-off meetings scheduled for next month''';
+  }
+
+  String _generateMockDecisionResponse() {
+    return '''- Decided to proceed with Option A for project implementation
+- Decision made by: Project Manager
+- Impact: 20% faster delivery timeline
+
+- Approved budget allocation for Q1 initiatives
+- Decision made by: Leadership Team
+- Impact: Full resource availability for critical projects''';
+  }
+
+  String _generateMockTopicResponse() {
+    return '''- Project Planning: Comprehensive discussion on scope and timeline
+- Budget Allocation: Resource distribution across workstreams  
+- Team Coordination: Role assignments and responsibilities
+- Risk Assessment: Identified key risks and mitigation strategies
+- Timeline Management: Milestone review and deadline confirmation''';
+  }
+
+  String _generateMockMeetingNotesResponse() {
+    return '''## Project Planning Discussion
+
+**10:00 AM** - Meeting opened by Project Manager
+- Review of current project status
+- Discussion of upcoming milestones
+
+**10:15 AM** - Budget Review
+- Finance Team presented Q1 budget analysis
+- **Decision:** Approved 15% increase for critical initiatives
+- **Action:** Finance to prepare detailed allocation by Friday
+
+**10:30 AM** - Timeline Assessment
+- Engineering Lead discussed technical challenges
+- Identified potential delays in Phase 2
+- **Decision:** Agreed to parallel development approach
+
+**10:45 AM** - Resource Allocation
+- HR Manager presented staffing updates
+- **Action:** Hire 2 additional developers by month-end
+- **Action:** Schedule training sessions for new framework
+
+**11:00 AM** - Risk Management
+- Risk assessment of external dependencies
+- **Decision:** Implement backup vendor strategy
+- Contingency planning for Q2 deliverables
+
+**11:15 AM** - Next Steps
+- **Action:** Project Manager to update timeline documentation
+- **Action:** Team Leads to provide weekly status reports
+- Next meeting scheduled for following Tuesday''';
+  }
+
+  String _generateMockGeneralResponse() {
+    return '''This meeting covered important strategic topics including project planning, resource allocation, and timeline management. Key decisions were made regarding budget approval and team assignments. The discussion focused on ensuring successful delivery while managing identified risks.''';
   }
 
   @override
@@ -59,6 +206,22 @@ class MockAISummarizationService extends BaseAISummarizationService {
     required SummarizationConfiguration configuration,
     String? sessionId,
   }) async {
+    // Check if we have a specialized processor for this summary type
+    final processor = SummaryTypeProcessorFactory.getProcessor(
+      configuration.summaryType,
+    );
+
+    if (processor != null) {
+      // Use specialized processor with mock AI call
+      return await processor.process(
+        transcriptionText: transcriptionText,
+        configuration: configuration,
+        aiCall: _mockAiCall,
+        sessionId: sessionId,
+      );
+    }
+
+    // Fallback to original mock generation
     // Simulate processing delay
     final processingTime = 500 + _random.nextInt(1000);
     await Future.delayed(Duration(milliseconds: processingTime));
