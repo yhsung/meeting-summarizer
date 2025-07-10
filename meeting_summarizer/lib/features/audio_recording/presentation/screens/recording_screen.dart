@@ -403,34 +403,53 @@ class _RecordingScreenState extends State<RecordingScreen>
         elevation: 0,
         centerTitle: true,
         actions: [
-          IconButton(
-            onPressed: () {
-              setState(() {
-                _showWaveformStats = !_showWaveformStats;
-              });
-            },
-            icon: Icon(
-              _showWaveformStats ? Icons.analytics : Icons.analytics_outlined,
-            ),
-            tooltip: 'Toggle Waveform Statistics',
-          ),
-          IconButton(
-            onPressed: () {
-              setState(() {
-                _showWaveformSettings = !_showWaveformSettings;
-              });
-            },
-            icon: Icon(
-              _showWaveformSettings ? Icons.tune : Icons.tune_outlined,
-            ),
-            tooltip: 'Toggle Waveform Settings',
-          ),
           if (_recordingState != RecordingState.stopped)
             IconButton(
               onPressed: _stopRecording,
               icon: const Icon(Icons.stop),
               tooltip: 'Stop Recording',
             ),
+          PopupMenuButton<int>(
+            onSelected: (value) {
+              setState(() {
+                if (value == 0) {
+                  _showWaveformStats = !_showWaveformStats;
+                } else if (value == 1) {
+                  _showWaveformSettings = !_showWaveformSettings;
+                }
+              });
+            },
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: 0,
+                child: ListTile(
+                  leading: Icon(
+                    _showWaveformStats
+                        ? Icons.analytics
+                        : Icons.analytics_outlined,
+                  ),
+                  title: Text(
+                    _showWaveformStats
+                        ? 'Hide Statistics'
+                        : 'Show Statistics',
+                  ),
+                ),
+              ),
+              PopupMenuItem(
+                value: 1,
+                child: ListTile(
+                  leading: Icon(
+                    _showWaveformSettings ? Icons.tune : Icons.tune_outlined,
+                  ),
+                  title: Text(
+                    _showWaveformSettings
+                        ? 'Hide Settings'
+                        : 'Show Settings',
+                  ),
+                ),
+              ),
+            ],
+          ),
         ],
       ),
       body: SafeArea(child: _buildResponsiveLayout(theme, screenSize)),
@@ -449,24 +468,24 @@ class _RecordingScreenState extends State<RecordingScreen>
 
     if (screenWidth > 1200) {
       // Large desktop screens
-      padding = const EdgeInsets.symmetric(horizontal: 80.0, vertical: 40.0);
-      verticalSpacing = 50.0;
-      majorSpacing = 80.0;
-    } else if (screenWidth > 800) {
-      // Medium desktop/tablet screens
-      padding = const EdgeInsets.symmetric(horizontal: 60.0, vertical: 32.0);
-      verticalSpacing = 40.0;
-      majorSpacing = 70.0;
-    } else if (screenWidth > 600) {
-      // Small desktop/large tablet
-      padding = const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0);
-      verticalSpacing = 35.0;
-      majorSpacing = 60.0;
-    } else {
-      // Mobile screens
-      padding = const EdgeInsets.all(24.0);
+      padding = const EdgeInsets.symmetric(horizontal: 60.0, vertical: 24.0);
       verticalSpacing = 30.0;
       majorSpacing = 50.0;
+    } else if (screenWidth > 800) {
+      // Medium desktop/tablet screens
+      padding = const EdgeInsets.symmetric(horizontal: 45.0, vertical: 20.0);
+      verticalSpacing = 24.0;
+      majorSpacing = 40.0;
+    } else if (screenWidth > 600) {
+      // Small desktop/large tablet
+      padding = const EdgeInsets.symmetric(horizontal: 30.0, vertical: 16.0);
+      verticalSpacing = 20.0;
+      majorSpacing = 32.0;
+    } else {
+      // Mobile screens
+      padding = const EdgeInsets.all(16.0);
+      verticalSpacing = 16.0;
+      majorSpacing = 24.0;
     }
 
     // Determine if we should use a wide layout (side-by-side) or narrow layout (stacked)
@@ -670,33 +689,33 @@ class _RecordingScreenState extends State<RecordingScreen>
     final double borderRadius;
 
     if (screenWidth > 1200) {
-      textScale = 1.2;
-      containerPadding = const EdgeInsets.symmetric(
-        horizontal: 32,
-        vertical: 16,
-      );
-      borderRadius = 24;
-    } else if (screenWidth > 800) {
       textScale = 1.1;
-      containerPadding = const EdgeInsets.symmetric(
-        horizontal: 28,
-        vertical: 14,
-      );
-      borderRadius = 22;
-    } else if (screenWidth > 600) {
-      textScale = 1.0;
       containerPadding = const EdgeInsets.symmetric(
         horizontal: 24,
         vertical: 12,
       );
-      borderRadius = 20;
-    } else {
-      textScale = 0.9;
+      borderRadius = 18;
+    } else if (screenWidth > 800) {
+      textScale = 1.0;
       containerPadding = const EdgeInsets.symmetric(
         horizontal: 20,
         vertical: 10,
       );
-      borderRadius = 18;
+      borderRadius = 16;
+    } else if (screenWidth > 600) {
+      textScale = 0.95;
+      containerPadding = const EdgeInsets.symmetric(
+        horizontal: 16,
+        vertical: 8,
+      );
+      borderRadius = 14;
+    } else {
+      textScale = 0.85;
+      containerPadding = const EdgeInsets.symmetric(
+        horizontal: 12,
+        vertical: 6,
+      );
+      borderRadius = 12;
     }
 
     return Column(
@@ -913,24 +932,24 @@ class _RecordingScreenState extends State<RecordingScreen>
 
     if (screenWidth > 1200) {
       // Large desktop screens
-      buttonSize = 100;
-      iconSize = 50;
-      borderRadius = 50;
-    } else if (screenWidth > 800) {
-      // Medium desktop/tablet screens
-      buttonSize = 90;
-      iconSize = 45;
-      borderRadius = 45;
-    } else if (screenWidth > 600) {
-      // Small desktop/large tablet
       buttonSize = 80;
       iconSize = 40;
       borderRadius = 40;
-    } else {
-      // Mobile screens
+    } else if (screenWidth > 800) {
+      // Medium desktop/tablet screens
       buttonSize = 70;
       iconSize = 35;
       borderRadius = 35;
+    } else if (screenWidth > 600) {
+      // Small desktop/large tablet
+      buttonSize = 60;
+      iconSize = 30;
+      borderRadius = 30;
+    } else {
+      // Mobile screens
+      buttonSize = 56;
+      iconSize = 28;
+      borderRadius = 28;
     }
 
     return Row(

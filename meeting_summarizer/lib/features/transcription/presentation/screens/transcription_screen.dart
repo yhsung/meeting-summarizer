@@ -332,14 +332,25 @@ class _TranscriptionScreenState extends State<TranscriptionScreen>
             icon: const Icon(Icons.download),
             tooltip: 'Export Transcription',
           ),
-          IconButton(
-            onPressed: () {
-              setState(() {
-                _showSettings = !_showSettings;
-              });
+          PopupMenuButton<int>(
+            onSelected: (value) {
+              if (value == 0) {
+                setState(() {
+                  _showSettings = !_showSettings;
+                });
+              }
             },
-            icon: const Icon(Icons.settings),
-            tooltip: 'Settings',
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: 0,
+                child: ListTile(
+                  leading: const Icon(Icons.settings),
+                  title: Text(
+                    _showSettings ? 'Hide Settings' : 'Show Settings',
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -366,24 +377,24 @@ class _TranscriptionScreenState extends State<TranscriptionScreen>
 
     if (screenWidth > 1200) {
       // Large desktop screens
-      padding = const EdgeInsets.symmetric(horizontal: 80.0, vertical: 40.0);
-      verticalSpacing = 30.0;
-      majorSpacing = 40.0;
-    } else if (screenWidth > 800) {
-      // Medium desktop/tablet screens
-      padding = const EdgeInsets.symmetric(horizontal: 60.0, vertical: 32.0);
-      verticalSpacing = 25.0;
-      majorSpacing = 35.0;
-    } else if (screenWidth > 600) {
-      // Small desktop/large tablet
-      padding = const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0);
+      padding = const EdgeInsets.symmetric(horizontal: 60.0, vertical: 24.0);
       verticalSpacing = 20.0;
       majorSpacing = 30.0;
+    } else if (screenWidth > 800) {
+      // Medium desktop/tablet screens
+      padding = const EdgeInsets.symmetric(horizontal: 45.0, vertical: 20.0);
+      verticalSpacing = 18.0;
+      majorSpacing = 26.0;
+    } else if (screenWidth > 600) {
+      // Small desktop/large tablet
+      padding = const EdgeInsets.symmetric(horizontal: 30.0, vertical: 16.0);
+      verticalSpacing = 15.0;
+      majorSpacing = 22.0;
     } else {
       // Mobile screens
-      padding = const EdgeInsets.all(24.0);
-      verticalSpacing = 16.0;
-      majorSpacing = 24.0;
+      padding = const EdgeInsets.all(16.0);
+      verticalSpacing = 12.0;
+      majorSpacing = 16.0;
     }
 
     // Determine if we should use a wide layout

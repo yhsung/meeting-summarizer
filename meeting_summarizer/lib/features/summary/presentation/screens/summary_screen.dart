@@ -64,7 +64,7 @@ class _SummaryScreenState extends State<SummaryScreen>
   // Constants
   static const Duration _animationDuration = Duration(milliseconds: 300);
   static const double _cardElevation = 4.0;
-  static const EdgeInsets _screenPadding = EdgeInsets.all(16.0);
+  static const EdgeInsets _screenPadding = EdgeInsets.all(12.0);
 
   @override
   void initState() {
