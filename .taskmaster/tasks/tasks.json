@@ -485,7 +485,7 @@
           3,
           6
         ],
-        "status": "pending",
+        "status": "in-progress",
         "subtasks": [
           {
             "id": 1,
@@ -493,7 +493,7 @@
             "description": "Create a structured file storage system with categorization, metadata management, and folder hierarchy for organizing files locally",
             "dependencies": [],
             "details": "Design and implement a local storage system that can organize files by type, date, tags, and custom categories. Include metadata storage for file properties, creation dates, and user-defined attributes. Create folder hierarchy management with support for nested structures.",
-            "status": "pending",
+            "status": "in-progress",
             "testStrategy": ""
           },
           {
@@ -703,7 +703,7 @@
     ],
     "metadata": {
       "created": "2025-07-06T01:29:26.245Z",
-      "updated": "2025-07-10T11:30:45.231Z",
+      "updated": "2025-07-10T11:35:34.224Z",
       "description": "Tasks for master context"
     }
   }

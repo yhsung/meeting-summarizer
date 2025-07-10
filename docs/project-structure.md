@@ -51,10 +51,13 @@ project/                   # absolute path /Volumes/Samsung970EVOPlus/dev-projec
 │   │   │   ├── enums/
 │   │   │   │   ├── audio_format.dart      # Audio format definitions with compression ratios
 │   │   │   │   ├── audio_quality.dart     # Quality levels with detailed properties
-│   │   │   │   └── recording_state.dart   # Recording state management
+│   │   │   │   ├── recording_state.dart   # Recording state management
+│   │   │   │   └── summary_type.dart      # AI summary type definitions (brief, detailed, executive, etc.)
 │   │   │   ├── models/
 │   │   │   │   ├── audio_configuration.dart  # Enhanced audio config with serialization
 │   │   │   │   ├── recording_session.dart     # Recording session management
+│   │   │   │   ├── summarization_configuration.dart # AI summarization configuration with 200+ lines
+│   │   │   │   ├── summarization_result.dart         # Comprehensive summarization results with metadata
 │   │   │   │   └── database/
 │   │   │   │       ├── recording.dart         # Recording model with JSON serialization and encryption support
 │   │   │   │       ├── transcription.dart     # Transcription model with status management
@@ -68,7 +71,17 @@ project/                   # absolute path /Volumes/Samsung970EVOPlus/dev-projec
 │   │   │       ├── audio_enhancement_service_interface.dart # Audio enhancement interface with noise reduction, echo cancellation, AGC
 │   │   │       ├── audio_enhancement_service.dart         # Audio enhancement implementation using FFT-based processing
 │   │   │       ├── encryption_service.dart                # AES-256-GCM encryption service with secure key management
-│   │   │       └── encrypted_database_service.dart        # Database service with transparent encryption/decryption
+│   │   │       ├── encrypted_database_service.dart        # Database service with transparent encryption/decryption
+│   │   │       ├── ai_summarization_service_interface.dart # AI summarization service interface
+│   │   │       ├── base_ai_summarization_service.dart     # Base implementation with common functionality
+│   │   │       ├── mock_ai_summarization_service.dart     # Mock implementation for testing and development
+│   │   │       ├── summary_type_processors.dart           # Factory pattern for summary type processors
+│   │   │       ├── specialized_summary_processors.dart    # Executive and action item processors
+│   │   │       ├── topical_summary_processor.dart         # Topic-based summary formatting
+│   │   │       ├── meeting_notes_processor.dart           # Professional meeting notes with timestamp processing
+│   │   │       ├── prompt_template_service.dart           # Advanced prompt engineering with template system
+│   │   │       ├── topic_extraction_service.dart          # AI-powered topic analysis and keyword identification
+│   │   │       └── quality_scoring_service.dart           # Quality assessment with feedback integration (1,146 lines)
 │   │   ├── features/
 │   │   │   └── audio_recording/
 │   │   │       ├── data/
@@ -90,7 +103,8 @@ project/                   # absolute path /Volumes/Samsung970EVOPlus/dev-projec
 │   │   │       ├── file_size_optimizer_test.dart        # Optimizer tests
 │   │   │       ├── audio_enhancement_service_test.dart   # Audio enhancement comprehensive tests
 │   │   │       ├── encryption_service_test.dart          # Encryption service tests with key management
-│   │   │       └── encrypted_database_service_test.dart  # Encrypted database service integration tests
+│   │   │       ├── encrypted_database_service_test.dart  # Encrypted database service integration tests
+│   │   │       └── quality_scoring_service_test.dart     # Quality scoring comprehensive tests (15 test cases)
 │   │   ├── features/
 │   │   │   └── audio_recording/
 │   │   │       ├── audio_recording_service_test.dart
@@ -114,9 +128,9 @@ project/                   # absolute path /Volumes/Samsung970EVOPlus/dev-projec
 The core layer contains shared components that can be used across the entire application:
 
 - **Database**: SQLite database management with migration support and encryption
-- **Enums**: Type-safe definitions for audio formats, quality levels, and states
-- **Models**: Data classes for configuration, session management, and database entities
-- **Services**: Business logic, platform abstractions, and encryption services
+- **Enums**: Type-safe definitions for audio formats, quality levels, states, and summary types
+- **Models**: Data classes for configuration, session management, database entities, and AI summarization
+- **Services**: Business logic, platform abstractions, encryption services, and AI summarization engine
 
 ### Features Layer (`lib/features/`)
 
@@ -155,6 +169,36 @@ The application features a comprehensive database system with optional encryptio
 - **Transcription**: Speech-to-text results with confidence scores and status tracking
 - **Summary**: AI-generated summaries with sentiment analysis and version control
 - **Settings**: Application configuration with categorization and sensitivity flags
+
+### AI Summarization Engine Architecture
+
+The application features a comprehensive AI summarization system implemented in Task 5:
+
+#### Core Components
+- **Service Interface**: Abstract interface defining summarization capabilities and service contracts
+- **Base Implementation**: Common functionality shared across all AI providers
+- **Mock Service**: Testing and development implementation with realistic data generation
+- **Factory Pattern**: Dynamic processor selection based on summary type requirements
+
+#### Specialized Processors
+- **Summary Type Processors**: Factory-managed processors for different summary formats
+- **Executive Summary**: High-level business summaries with decision focus
+- **Meeting Notes**: Professional formatted notes with timestamp integration
+- **Action Items**: Structured task extraction with assignments and deadlines
+- **Topical Summary**: Topic-based organization with keyword analysis
+
+#### Advanced Features
+- **Prompt Engineering**: Template-based prompt generation with context injection
+- **Topic Extraction**: AI-powered topic analysis with relevance scoring
+- **Quality Scoring**: Multi-dimensional assessment with feedback integration
+- **Metadata Processing**: Comprehensive result tracking with confidence scores
+
+#### Quality Assessment System
+- **Multi-dimensional Scoring**: Accuracy, completeness, clarity, relevance, structure
+- **AI-powered Evaluation**: Advanced assessment with fallback mechanisms
+- **User Feedback Integration**: Rating collection with sentiment analysis
+- **Reference Comparison**: Benchmarking against reference summaries
+- **Improvement Recommendations**: Automated suggestions based on quality analysis
 
 ### Platform Support
 
