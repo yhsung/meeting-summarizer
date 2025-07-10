@@ -38,7 +38,8 @@ project/                   # absolute path /Volumes/Samsung970EVOPlus/dev-projec
 │   └── commands/         # Custom slash commands
 ├── .env                  # API keys
 ├── .mcp.json            # MCP configuration
-├── docs/                 # Project documentation
+├── docs/                 # Project documentation and architecture
+│   ├── architecture.md       # Software architecture diagrams and explanation
 │   └── project-structure.md  # This file - detailed project structure
 ├── meeting_summarizer/   # Flutter app directory
 │   ├── lib/
