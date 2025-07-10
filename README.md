@@ -2,7 +2,8 @@
 
 **An intelligent, cross-platform application to record, enhance, transcribe, and summarize your meetings using advanced AI.**
 
-[![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com)
+[![Build Status](https://github.com/yhsung/meeting-summarizer/actions/workflows/ci.yml/badge.svg)
+](https://github.com/yhsung/meeting-summarizer/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Flutter Version](https://img.shields.io/badge/Flutter-3.x-blue)](https://flutter.dev)
 [![Architecture](https://img.shields.io/badge/Architecture-Clean%20%26%20Layered-orange)](docs/architecture.md)
