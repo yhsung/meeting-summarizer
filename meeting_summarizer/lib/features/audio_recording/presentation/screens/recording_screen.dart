@@ -434,16 +434,17 @@ class _RecordingScreenState extends State<RecordingScreen>
             children: AudioFormat.values
                 .where((f) => f.isSupportedOnCurrentPlatform)
                 .map((format) {
-              return RadioListTile<AudioFormat>(
-                title: Text(format.displayName),
-                subtitle: Text(format.detailedDescription),
-                value: format,
-                groupValue: _selectedFormat,
-                onChanged: (value) {
-                  Navigator.of(context).pop(value);
-                },
-              );
-            }).toList(),
+                  return RadioListTile<AudioFormat>(
+                    title: Text(format.displayName),
+                    subtitle: Text(format.detailedDescription),
+                    value: format,
+                    groupValue: _selectedFormat,
+                    onChanged: (value) {
+                      Navigator.of(context).pop(value);
+                    },
+                  );
+                })
+                .toList(),
           ),
         );
       },
@@ -501,9 +502,7 @@ class _RecordingScreenState extends State<RecordingScreen>
                         : Icons.analytics_outlined,
                   ),
                   title: Text(
-                    _showWaveformStats
-                        ? 'Hide Statistics'
-                        : 'Show Statistics',
+                    _showWaveformStats ? 'Hide Statistics' : 'Show Statistics',
                   ),
                 ),
               ),
@@ -514,9 +513,7 @@ class _RecordingScreenState extends State<RecordingScreen>
                     _showWaveformSettings ? Icons.tune : Icons.tune_outlined,
                   ),
                   title: Text(
-                    _showWaveformSettings
-                        ? 'Hide Settings'
-                        : 'Show Settings',
+                    _showWaveformSettings ? 'Hide Settings' : 'Show Settings',
                   ),
                 ),
               ),
@@ -1073,194 +1070,6 @@ class _RecordingScreenState extends State<RecordingScreen>
     );
   }
 
-  /// Build audio format selector with responsive design
-  Widget _buildAudioFormatSelector(ThemeData theme) {
-    if (_recordingState != RecordingState.stopped &&
-        _recordingState != RecordingState.idle) {
-      return const SizedBox.shrink();
-    }
-
-    final screenWidth = MediaQuery.of(context).size.width;
-
-    // Responsive sizing for format selector
-    final double textScale;
-    final double borderRadius;
-    final EdgeInsets tilePadding;
-
-    if (screenWidth > 1200) {
-      textScale = 1.1;
-      borderRadius = 16;
-      tilePadding = const EdgeInsets.symmetric(horizontal: 16, vertical: 8);
-    } else if (screenWidth > 800) {
-      textScale = 1.05;
-      borderRadius = 14;
-      tilePadding = const EdgeInsets.symmetric(horizontal: 12, vertical: 6);
-    } else if (screenWidth > 600) {
-      textScale = 1.0;
-      borderRadius = 12;
-      tilePadding = const EdgeInsets.symmetric(horizontal: 8, vertical: 4);
-    } else {
-      textScale = 0.95;
-      borderRadius = 10;
-      tilePadding = const EdgeInsets.symmetric(horizontal: 4, vertical: 2);
-    }
-
-    return ConstrainedBox(
-      constraints: BoxConstraints(
-        maxWidth: screenWidth > 800 ? 400 : double.infinity,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Audio Format',
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-              fontSize:
-                  (theme.textTheme.titleMedium?.fontSize ?? 16) * textScale,
-            ),
-          ),
-          SizedBox(height: 12 * textScale),
-          Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(borderRadius),
-              border: Border.all(
-                color: theme.colorScheme.outline.withValues(alpha: 0.2),
-              ),
-            ),
-            child: Column(
-              children: AudioFormat.values
-                  .where((format) => format.isSupportedOnCurrentPlatform)
-                  .map((format) {
-                    return Padding(
-                      padding: tilePadding,
-                      child: RadioListTile<AudioFormat>(
-                        title: Text(
-                          format.displayName,
-                          style: TextStyle(
-                            fontSize:
-                                (theme.textTheme.bodyLarge?.fontSize ?? 14) *
-                                textScale,
-                          ),
-                        ),
-                        subtitle: Text(
-                          format.detailedDescription,
-                          style: TextStyle(
-                            fontSize:
-                                (theme.textTheme.bodyMedium?.fontSize ?? 12) *
-                                textScale,
-                          ),
-                        ),
-                        value: format,
-                        groupValue: _selectedFormat,
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedFormat = value!;
-                          });
-                        },
-                      ),
-                    );
-                  })
-                  .toList(),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Build audio quality selector with responsive design
-  Widget _buildAudioQualitySelector(ThemeData theme) {
-    if (_recordingState != RecordingState.stopped &&
-        _recordingState != RecordingState.idle) {
-      return const SizedBox.shrink();
-    }
-
-    final screenWidth = MediaQuery.of(context).size.width;
-
-    // Responsive sizing for quality selector
-    final double textScale;
-    final double borderRadius;
-    final EdgeInsets tilePadding;
-
-    if (screenWidth > 1200) {
-      textScale = 1.1;
-      borderRadius = 16;
-      tilePadding = const EdgeInsets.symmetric(horizontal: 16, vertical: 8);
-    } else if (screenWidth > 800) {
-      textScale = 1.05;
-      borderRadius = 14;
-      tilePadding = const EdgeInsets.symmetric(horizontal: 12, vertical: 6);
-    } else if (screenWidth > 600) {
-      textScale = 1.0;
-      borderRadius = 12;
-      tilePadding = const EdgeInsets.symmetric(horizontal: 8, vertical: 4);
-    } else {
-      textScale = 0.95;
-      borderRadius = 10;
-      tilePadding = const EdgeInsets.symmetric(horizontal: 4, vertical: 2);
-    }
-
-    return ConstrainedBox(
-      constraints: BoxConstraints(
-        maxWidth: screenWidth > 800 ? 400 : double.infinity,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Audio Quality',
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-              fontSize:
-                  (theme.textTheme.titleMedium?.fontSize ?? 16) * textScale,
-            ),
-          ),
-          SizedBox(height: 12 * textScale),
-          Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(borderRadius),
-              border: Border.all(
-                color: theme.colorScheme.outline.withValues(alpha: 0.2),
-              ),
-            ),
-            child: Column(
-              children: AudioQuality.values.map((quality) {
-                return Padding(
-                  padding: tilePadding,
-                  child: RadioListTile<AudioQuality>(
-                    title: Text(
-                      _getQualityDisplayName(quality),
-                      style: TextStyle(
-                        fontSize:
-                            (theme.textTheme.bodyLarge?.fontSize ?? 14) *
-                            textScale,
-                      ),
-                    ),
-                    subtitle: Text(
-                      _getQualityDescription(quality),
-                      style: TextStyle(
-                        fontSize:
-                            (theme.textTheme.bodyMedium?.fontSize ?? 12) *
-                            textScale,
-                      ),
-                    ),
-                    value: quality,
-                    groupValue: _selectedQuality,
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedQuality = value!;
-                      });
-                    },
-                  ),
-                );
-              }).toList(),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   /// Get display name for audio quality
   String _getQualityDisplayName(AudioQuality quality) {
