@@ -59,4 +59,13 @@ enum FileCategory {
     cache,
     exports, // Old exports can be regenerated
   ];
+
+  /// Create FileCategory from directory name string
+  static FileCategory fromString(String directoryName) {
+    return FileCategory.values.firstWhere(
+      (category) => category.directoryName == directoryName,
+      orElse: () =>
+          throw ArgumentError('Unknown file category: $directoryName'),
+    );
+  }
 }

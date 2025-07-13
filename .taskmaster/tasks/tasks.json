@@ -504,7 +504,7 @@
               1
             ],
             "details": "Implement search functionality that can query file contents, metadata, filenames, and tags. Include advanced filtering options by file type, date ranges, size, and custom attributes. Add search result ranking and relevance scoring.",
-            "status": "in-progress",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -515,7 +515,7 @@
               1
             ],
             "details": "Build a flexible export system that can convert and package files into different formats. Support single file exports, bulk exports, and custom format configurations. Include format-specific options and quality settings.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -703,7 +703,7 @@
     ],
     "metadata": {
       "created": "2025-07-06T01:29:26.245Z",
-      "updated": "2025-07-13T16:09:44.446Z",
+      "updated": "2025-07-13T23:22:02.024Z",
       "description": "Tasks for master context"
     }
   }
