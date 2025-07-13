@@ -429,9 +429,7 @@ class _RecordingScreenState extends State<RecordingScreen>
                         : Icons.analytics_outlined,
                   ),
                   title: Text(
-                    _showWaveformStats
-                        ? 'Hide Statistics'
-                        : 'Show Statistics',
+                    _showWaveformStats ? 'Hide Statistics' : 'Show Statistics',
                   ),
                 ),
               ),
@@ -442,9 +440,7 @@ class _RecordingScreenState extends State<RecordingScreen>
                     _showWaveformSettings ? Icons.tune : Icons.tune_outlined,
                   ),
                   title: Text(
-                    _showWaveformSettings
-                        ? 'Hide Settings'
-                        : 'Show Settings',
+                    _showWaveformSettings ? 'Hide Settings' : 'Show Settings',
                   ),
                 ),
               ),
