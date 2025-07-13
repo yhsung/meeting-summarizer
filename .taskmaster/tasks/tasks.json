@@ -493,7 +493,7 @@
             "description": "Create a structured file storage system with categorization, metadata management, and folder hierarchy for organizing files locally",
             "dependencies": [],
             "details": "Design and implement a local storage system that can organize files by type, date, tags, and custom categories. Include metadata storage for file properties, creation dates, and user-defined attributes. Create folder hierarchy management with support for nested structures.",
-            "status": "in-progress",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -504,7 +504,7 @@
               1
             ],
             "details": "Implement search functionality that can query file contents, metadata, filenames, and tags. Include advanced filtering options by file type, date ranges, size, and custom attributes. Add search result ranking and relevance scoring.",
-            "status": "pending",
+            "status": "in-progress",
             "testStrategy": ""
           },
           {
@@ -703,7 +703,7 @@
     ],
     "metadata": {
       "created": "2025-07-06T01:29:26.245Z",
-      "updated": "2025-07-10T11:35:34.224Z",
+      "updated": "2025-07-13T16:09:44.446Z",
       "description": "Tasks for master context"
     }
   }

@@ -48,7 +48,10 @@ project/                   # absolute path /Volumes/Samsung970EVOPlus/dev-projec
 │   │   │   │   ├── database_helper.dart           # Main database operations with migration support
 │   │   │   │   ├── database_schema.dart           # Database schema definitions and versioning
 │   │   │   │   ├── database_migrations.dart       # Database migration system with backup/restore
+│   │   │   │   ├── file_metadata_dao.dart         # SQLite data access for file metadata with FTS5 search
 │   │   │   │   └── README.md                      # Database architecture documentation
+│   │   │   ├── interfaces/
+│   │   │   │   └── storage_organization_interface.dart # Storage organization service interface
 │   │   │   ├── enums/
 │   │   │   │   ├── audio_format.dart      # Audio format definitions with compression ratios
 │   │   │   │   ├── audio_quality.dart     # Quality levels with detailed properties
@@ -59,11 +62,15 @@ project/                   # absolute path /Volumes/Samsung970EVOPlus/dev-projec
 │   │   │   │   ├── recording_session.dart     # Recording session management
 │   │   │   │   ├── summarization_configuration.dart # AI summarization configuration with 200+ lines
 │   │   │   │   ├── summarization_result.dart         # Comprehensive summarization results with metadata
-│   │   │   │   └── database/
-│   │   │   │       ├── recording.dart         # Recording model with JSON serialization and encryption support
-│   │   │   │       ├── transcription.dart     # Transcription model with status management
-│   │   │   │       ├── summary.dart           # Summary model with sentiment analysis
-│   │   │   │       └── app_settings.dart      # Application settings model with categories
+│   │   │   │   ├── database/
+│   │   │   │   │   ├── recording.dart         # Recording model with JSON serialization and encryption support
+│   │   │   │   │   ├── transcription.dart     # Transcription model with status management
+│   │   │   │   │   ├── summary.dart           # Summary model with sentiment analysis
+│   │   │   │   │   └── app_settings.dart      # Application settings model with categories
+│   │   │   │   └── storage/
+│   │   │   │       ├── file_category.dart     # File categorization system with 8 categories
+│   │   │   │       ├── file_metadata.dart     # Comprehensive file metadata with JSON serialization
+│   │   │   │       └── storage_stats.dart     # Storage analytics and statistics
 │   │   │   └── services/
 │   │   │       ├── audio_service_interface.dart           # Service interface definition
 │   │   │       ├── audio_format_manager.dart              # Platform-aware format selection
@@ -82,22 +89,37 @@ project/                   # absolute path /Volumes/Samsung970EVOPlus/dev-projec
 │   │   │       ├── meeting_notes_processor.dart           # Professional meeting notes with timestamp processing
 │   │   │       ├── prompt_template_service.dart           # Advanced prompt engineering with template system
 │   │   │       ├── topic_extraction_service.dart          # AI-powered topic analysis and keyword identification
-│   │   │       └── quality_scoring_service.dart           # Quality assessment with feedback integration (1,146 lines)
+│   │   │       ├── quality_scoring_service.dart           # Quality assessment with feedback integration (1,146 lines)
+│   │   │       ├── storage_organization_service.dart      # Basic file organization with JSON metadata cache
+│   │   │       ├── enhanced_storage_organization_service.dart # Advanced storage organization with SQLite integration
+│   │   │       ├── file_categorization_service.dart       # Smart file categorization and auto-tagging
+│   │   │       └── advanced_search_service.dart           # Comprehensive search with ranking and suggestions
 │   │   ├── features/
-│   │   │   └── audio_recording/
-│   │   │       ├── data/
-│   │   │       │   ├── audio_recording_service.dart  # Main audio recording service
-│   │   │       │   └── platform/
-│   │   │       │       ├── audio_recording_platform.dart   # Platform abstraction
-│   │   │       │       └── record_platform_adapter.dart    # Record package adapter
-│   │   │       ├── domain/             # Domain layer (to be implemented)
-│   │   │       └── presentation/       # UI layer (to be implemented)
+│   │   │   ├── audio_recording/
+│   │   │   │   ├── data/
+│   │   │   │   │   ├── audio_recording_service.dart  # Main audio recording service
+│   │   │   │   │   └── platform/
+│   │   │   │   │       ├── audio_recording_platform.dart   # Platform abstraction
+│   │   │   │   │       └── record_platform_adapter.dart    # Record package adapter
+│   │   │   │   ├── domain/             # Domain layer (to be implemented)
+│   │   │   │   └── presentation/       # UI layer (to be implemented)
+│   │   │   └── search/
+│   │   │       └── presentation/
+│   │   │           ├── screens/
+│   │   │           │   └── search_screen.dart              # Main search interface with tabs
+│   │   │           └── widgets/
+│   │   │               ├── advanced_search_widget.dart     # Advanced search form with filters
+│   │   │               └── search_results_widget.dart      # Search results display with ranking
 │   │   └── main.dart                   # Flutter app entry point
 │   ├── test/
 │   │   ├── core/
 │   │   │   ├── database/
 │   │   │   │   ├── database_helper_migrations_test.dart  # Database helper migration tests
 │   │   │   │   └── database_migrations_test.dart         # Migration system tests
+│   │   │   ├── models/
+│   │   │   │   └── storage/
+│   │   │   │       ├── file_metadata_test.dart           # File metadata model tests
+│   │   │   │       └── storage_stats_test.dart           # Storage statistics tests
 │   │   │   └── services/
 │   │   │       ├── audio_format_manager_test.dart       # Format manager tests
 │   │   │       ├── codec_manager_test.dart               # Codec manager tests
@@ -105,7 +127,9 @@ project/                   # absolute path /Volumes/Samsung970EVOPlus/dev-projec
 │   │   │       ├── audio_enhancement_service_test.dart   # Audio enhancement comprehensive tests
 │   │   │       ├── encryption_service_test.dart          # Encryption service tests with key management
 │   │   │       ├── encrypted_database_service_test.dart  # Encrypted database service integration tests
-│   │   │       └── quality_scoring_service_test.dart     # Quality scoring comprehensive tests (15 test cases)
+│   │   │       ├── quality_scoring_service_test.dart     # Quality scoring comprehensive tests (15 test cases)
+│   │   │       ├── file_categorization_service_test.dart # File categorization and tagging tests
+│   │   │       └── advanced_search_service_test.dart     # Comprehensive search functionality tests (28 test cases)
 │   │   ├── features/
 │   │   │   └── audio_recording/
 │   │   │       ├── audio_recording_service_test.dart
