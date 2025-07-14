@@ -12,10 +12,14 @@ import '../widgets/circular_waveform_visualizer.dart';
 import '../widgets/realtime_waveform_controller.dart';
 import '../widgets/waveform_settings.dart';
 import '../widgets/waveform_stats.dart';
+import '../widgets/transcription_settings_dialog.dart';
 import '../../../../core/enums/recording_state.dart';
 import '../../../../core/enums/audio_quality.dart';
 import '../../../../core/enums/audio_format.dart';
 import '../../../../core/models/audio_configuration.dart';
+import '../../../../core/models/transcription_request.dart';
+import '../../../../core/services/transcription_service_factory.dart';
+import '../../../../core/services/transcription_settings_service.dart';
 import '../../utils/audio_file_analyzer.dart';
 
 /// Main recording screen with audio controls and visualization
@@ -45,6 +49,14 @@ class _RecordingScreenState extends State<RecordingScreen>
   Color _waveformColor = Colors.blue;
   double _averageAmplitude = 0.0;
   double _peakAmplitude = 0.0;
+
+  // Transcription settings
+  TranscriptionSettings _transcriptionSettings = TranscriptionSettings(
+    provider: TranscriptionProvider.openaiWhisper,
+    quality: TranscriptionQuality.balanced,
+    enableTimestamps: true,
+    enableSpeakerDiarization: false,
+  );
 
   // Animation controllers
   late AnimationController _pulseController;
@@ -89,6 +101,20 @@ class _RecordingScreenState extends State<RecordingScreen>
         .catchError((error) {
           _showErrorSnackBar('Failed to initialize audio service: $error');
         });
+
+    // Initialize transcription settings service
+    _initializeTranscriptionSettings();
+  }
+
+  /// Initialize transcription settings
+  void _initializeTranscriptionSettings() {
+    TranscriptionSettingsService.instance.initialize().then((_) {
+      TranscriptionSettingsService.instance.loadSettings().then((settings) {
+        setState(() {
+          _transcriptionSettings = settings;
+        });
+      });
+    });
   }
 
   /// Initialize animation controllers
@@ -457,6 +483,32 @@ class _RecordingScreenState extends State<RecordingScreen>
     }
   }
 
+  /// Show transcription settings dialog
+  Future<void> _showTranscriptionSettingsDialog() async {
+    await showDialog<void>(
+      context: context,
+      builder: (context) {
+        return TranscriptionSettingsDialog(
+          currentProvider: _transcriptionSettings.provider,
+          currentQuality: _transcriptionSettings.quality,
+          currentLanguage: _transcriptionSettings.language,
+          enableTimestamps: _transcriptionSettings.enableTimestamps,
+          enableSpeakerDiarization:
+              _transcriptionSettings.enableSpeakerDiarization,
+          customPrompt: _transcriptionSettings.customPrompt,
+          onSaved: (settings) {
+            setState(() {
+              _transcriptionSettings = settings;
+            });
+            // Save settings to persistent storage
+            TranscriptionSettingsService.instance.saveSettings(settings);
+            _showSuccessSnackBar('Transcription settings saved');
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -490,6 +542,8 @@ class _RecordingScreenState extends State<RecordingScreen>
                 await _showQualityDialog();
               } else if (value == 3) {
                 await _showFormatDialog();
+              } else if (value == 4) {
+                await _showTranscriptionSettingsDialog();
               }
             },
             itemBuilder: (context) => [
@@ -532,6 +586,17 @@ class _RecordingScreenState extends State<RecordingScreen>
                   leading: const Icon(Icons.music_note),
                   title: const Text('Audio Format'),
                   subtitle: Text(_selectedFormat.displayName),
+                ),
+              ),
+              const PopupMenuDivider(),
+              PopupMenuItem(
+                value: 4,
+                child: ListTile(
+                  leading: const Icon(Icons.transcribe),
+                  title: const Text('Transcription Settings'),
+                  subtitle: Text(
+                    '${TranscriptionServiceFactory.getProviderDisplayName(_transcriptionSettings.provider)} • ${_transcriptionSettings.quality.displayName}',
+                  ),
                 ),
               ),
             ],
@@ -1069,7 +1134,6 @@ class _RecordingScreenState extends State<RecordingScreen>
       ],
     );
   }
-
 
   /// Get display name for audio quality
   String _getQualityDisplayName(AudioQuality quality) {

@@ -404,7 +404,8 @@ class BatchProcessingService implements BatchProcessingInterface {
     final pattern = config.getOption<String>('pattern')!;
     final replacement = config.getOption<String>('replacement') ?? '';
     final addIndex = config.getOption<bool>('addIndex') ?? false;
-    final preserveExtension = config.getOption<bool>('preserveExtension') ?? true;
+    final preserveExtension =
+        config.getOption<bool>('preserveExtension') ?? true;
 
     // Generate new filename
     String newName = file.baseName;
@@ -558,7 +559,8 @@ class BatchProcessingService implements BatchProcessingInterface {
     Stopwatch stopwatch,
   ) async {
     final tagsToAdd = config.getOption<List<String>>('tagsToAdd') ?? <String>[];
-    final tagsToRemove = config.getOption<List<String>>('tagsToRemove') ?? <String>[];
+    final tagsToRemove =
+        config.getOption<List<String>>('tagsToRemove') ?? <String>[];
 
     final currentTags = file.tags.toSet();
     currentTags.addAll(tagsToAdd);
@@ -623,7 +625,8 @@ class BatchProcessingService implements BatchProcessingInterface {
     final pattern = config.getOption<String>('pattern')!;
     final replacement = config.getOption<String>('replacement') ?? '';
     final addIndex = config.getOption<bool>('addIndex') ?? false;
-    final preserveExtension = config.getOption<bool>('preserveExtension') ?? true;
+    final preserveExtension =
+        config.getOption<bool>('preserveExtension') ?? true;
 
     String newName = file.baseName;
 
@@ -690,7 +693,8 @@ class BatchProcessingService implements BatchProcessingInterface {
 
   FileOperationPreview _previewTag(FileMetadata file, BatchConfig config) {
     final tagsToAdd = config.getOption<List<String>>('tagsToAdd') ?? <String>[];
-    final tagsToRemove = config.getOption<List<String>>('tagsToRemove') ?? <String>[];
+    final tagsToRemove =
+        config.getOption<List<String>>('tagsToRemove') ?? <String>[];
 
     final currentTags = file.tags.toSet();
     currentTags.addAll(tagsToAdd);
