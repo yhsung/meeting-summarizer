@@ -54,6 +54,14 @@ dependencies:
   
   # Cryptography dependencies
   crypto: ^3.0.5
+  
+  # File preview and thumbnail generation dependencies
+  image: ^4.1.7
+  flutter_image_compress: ^2.2.0
+  video_thumbnail: ^0.5.3
+  syncfusion_flutter_pdfviewer: ^26.2.14
+  file_icon: ^1.0.0
+  photo_view: ^0.14.0
 
 dev_dependencies:
   flutter_test:
