@@ -122,11 +122,17 @@ jobs:
       working-directory: ./meeting_summarizer
       run: flutter pub get
 
-    - name: Import signing certs
-      uses: apple-actions/import-codesign-certs@v3
-      with:
-        p12-file-base64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
-        p12-password: ${{ secrets.P12_PASSWORD }}
+    # - name: Import signing certs
+    #   uses: apple-actions/import-codesign-certs@v3
+    #   with:
+    #     p12-file-base64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
+    #     p12-password: ${{ secrets.P12_PASSWORD }}
+
+    # - name: Install provisioning profile
+    #   run: |
+    #     PP_PATH="$HOME/Library/MobileDevice/Provisioning Profiles"
+    #     mkdir -p "$PP_PATH"
+    #     echo "${{ secrets.PROVISIONING_PROFILE_BASE64 }}" | base64 --decode > "$PP_PATH/ci_profile.provisionprofile"
 
     - name: Build macOS
       working-directory: ./meeting_summarizer
