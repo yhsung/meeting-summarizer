@@ -738,25 +738,51 @@ class _TranscriptionScreenState extends State<TranscriptionScreen>
 
   /// Build tab bar for different views
   Widget _buildTabBar(ThemeData theme) {
+    final tabs = [
+      'Transcript',
+      if (_currentResult!.segments.isNotEmpty) 'Timeline',
+      if (_currentResult!.speakers.isNotEmpty) 'Speakers',
+      'Details',
+    ];
+
     return Container(
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(12),
       ),
-      child: TabBar(
-        controller: null,
-        isScrollable: true,
-        tabs: [
-          Tab(text: 'Transcript'),
-          if (_currentResult!.segments.isNotEmpty) Tab(text: 'Timeline'),
-          if (_currentResult!.speakers.isNotEmpty) Tab(text: 'Speakers'),
-          Tab(text: 'Details'),
-        ],
-        onTap: (index) {
-          setState(() {
-            _selectedTabIndex = index;
-          });
-        },
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: tabs.asMap().entries.map((entry) {
+          final index = entry.key;
+          final tabName = entry.value;
+          final isSelected = index == _selectedTabIndex;
+
+          return GestureDetector(
+            onTap: () {
+              setState(() {
+                _selectedTabIndex = index;
+              });
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? theme.colorScheme.primary.withValues(alpha: 0.2)
+                    : Colors.transparent,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                tabName,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: isSelected
+                      ? theme.colorScheme.primary
+                      : theme.colorScheme.onSurface,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                ),
+              ),
+            ),
+          );
+        }).toList(),
       ),
     );
   }
