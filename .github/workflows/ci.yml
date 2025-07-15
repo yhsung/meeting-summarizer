@@ -17,7 +17,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: |
-          ${{ env.FLUTTER_HOME }}/.pub-cache
+          ~/.pub-cache
           **/.dart_tool/package_config.json
         key: ${{ runner.os }}-flutter-${{ hashFiles('**/pubspec.lock') }}
         restore-keys: |
@@ -60,7 +60,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: |
-          ${{ env.FLUTTER_HOME }}/.pub-cache
+          ~/.pub-cache
           **/.dart_tool/package_config.json
         key: ${{ runner.os }}-flutter-${{ hashFiles('**/pubspec.lock') }}
         restore-keys: |
@@ -106,7 +106,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: |
-          ${{ env.FLUTTER_HOME }}/.pub-cache
+          ~/.pub-cache
           **/.dart_tool/package_config.json
         key: ${{ runner.os }}-flutter-${{ hashFiles('**/pubspec.lock') }}
         restore-keys: |
@@ -140,7 +140,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: |
-          ${{ env.FLUTTER_HOME }}/.pub-cache
+          ~/.pub-cache
           **/.dart_tool/package_config.json
         key: ${{ runner.os }}-flutter-${{ hashFiles('**/pubspec.lock') }}
         restore-keys: |
@@ -174,7 +174,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: |
-          ${{ env.FLUTTER_HOME }}/.pub-cache
+          ~/.pub-cache
           **/.dart_tool/package_config.json
         key: ${{ runner.os }}-flutter-${{ hashFiles('**/pubspec.lock') }}
         restore-keys: |
@@ -208,7 +208,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: |
-          ${{ env.FLUTTER_HOME }}/.pub-cache
+          ~/.pub-cache
           **/.dart_tool/package_config.json
         key: ${{ runner.os }}-flutter-${{ hashFiles('**/pubspec.lock') }}
         restore-keys: |
