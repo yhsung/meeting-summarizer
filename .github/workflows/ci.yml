@@ -36,9 +36,9 @@ jobs:
       working-directory: ./meeting_summarizer
       run: flutter test
 
-  build-android:
+  build-macos:
     needs: test
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     
     steps:
     - uses: actions/checkout@v4
@@ -48,20 +48,26 @@ jobs:
       with:
         flutter-version: '3.32.4'
         channel: 'stable'
-    
-    - name: Setup Java
-      uses: actions/setup-java@v4
-      with:
-        distribution: 'zulu'
-        java-version: '17'
-    
+
     - name: Install dependencies
       working-directory: ./meeting_summarizer
       run: flutter pub get
-    
-    - name: Build APK
+
+    # - name: Import signing certs
+    #   uses: apple-actions/import-codesign-certs@v3
+    #   with:
+    #     p12-file-base64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
+    #     p12-password: ${{ secrets.P12_PASSWORD }}
+
+    # - name: Install provisioning profile
+    #   run: |
+    #     PP_PATH="$HOME/Library/MobileDevice/Provisioning Profiles"
+    #     mkdir -p "$PP_PATH"
+    #     echo "${{ secrets.PROVISIONING_PROFILE_BASE64 }}" | base64 --decode > "$PP_PATH/ci_profile.provisionprofile"
+
+    - name: Build macOS
       working-directory: ./meeting_summarizer
-      run: flutter build apk --debug
+      run: flutter build macos --debug
 
   build-ios:
     needs: test
@@ -105,39 +111,6 @@ jobs:
       working-directory: ./meeting_summarizer
       run: flutter build web --debug
 
-  build-macos:
-    needs: test
-    runs-on: macos-latest
-    
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Setup Flutter
-      uses: subosito/flutter-action@v2
-      with:
-        flutter-version: '3.32.4'
-        channel: 'stable'
-
-    - name: Install dependencies
-      working-directory: ./meeting_summarizer
-      run: flutter pub get
-
-    # - name: Import signing certs
-    #   uses: apple-actions/import-codesign-certs@v3
-    #   with:
-    #     p12-file-base64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
-    #     p12-password: ${{ secrets.P12_PASSWORD }}
-
-    # - name: Install provisioning profile
-    #   run: |
-    #     PP_PATH="$HOME/Library/MobileDevice/Provisioning Profiles"
-    #     mkdir -p "$PP_PATH"
-    #     echo "${{ secrets.PROVISIONING_PROFILE_BASE64 }}" | base64 --decode > "$PP_PATH/ci_profile.provisionprofile"
-
-    - name: Build macOS
-      working-directory: ./meeting_summarizer
-      run: flutter build macos --debug
-
   build-windows:
     needs: test
     runs-on: windows-latest
@@ -158,3 +131,30 @@ jobs:
     - name: Build Windows
       working-directory: ./meeting_summarizer
       run: flutter build windows --debug
+
+  build-android:
+    needs: test
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.32.4'
+        channel: 'stable'
+    
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'zulu'
+        java-version: '17'
+    
+    - name: Install dependencies
+      working-directory: ./meeting_summarizer
+      run: flutter pub get
+    
+    - name: Build APK
+      working-directory: ./meeting_summarizer
+      run: flutter build apk --debug
