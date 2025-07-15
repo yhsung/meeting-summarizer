@@ -355,7 +355,7 @@ class _AdvancedSearchWidgetState extends State<AdvancedSearchWidget> {
         Text(
           'Tag selection coming soon...',
           style: TextStyle(
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+            color: Theme.of(context).colorScheme.onSurface.withAlpha(153),
           ),
         ),
       ],
@@ -405,7 +405,7 @@ class _AdvancedSearchWidgetState extends State<AdvancedSearchWidget> {
         Text(
           'Size range selection coming soon...',
           style: TextStyle(
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+            color: Theme.of(context).colorScheme.onSurface.withAlpha(153),
           ),
         ),
       ],

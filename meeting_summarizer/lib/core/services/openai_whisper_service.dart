@@ -26,8 +26,9 @@ class OpenAIWhisperService implements TranscriptionServiceInterface {
   static const Duration _rateLimitWindow = Duration(minutes: 1);
 
   final ApiKeyService _apiKeyService;
-  final http.Client _httpClient;
+  http.Client _httpClient;
   final RetryExecutor _retryExecutor;
+  bool _isClientClosed = false;
 
   // Rate limiting tracking
   final List<DateTime> _requestTimestamps = [];
@@ -58,7 +59,9 @@ class OpenAIWhisperService implements TranscriptionServiceInterface {
                failureThreshold: 5,
                recoveryTimeout: const Duration(minutes: 2),
              ),
-       );
+       ) {
+    _isClientClosed = false;
+  }
 
   @override
   Future<void> initialize() async {
@@ -81,6 +84,11 @@ class OpenAIWhisperService implements TranscriptionServiceInterface {
       final apiKey = await _apiKeyService.getApiKey('openai');
       if (apiKey == null || apiKey.isEmpty) {
         return false;
+      }
+
+      if (_isClientClosed) {
+        _httpClient = http.Client();
+        _isClientClosed = false;
       }
 
       // Test API connectivity with a simple request
@@ -300,7 +308,10 @@ class OpenAIWhisperService implements TranscriptionServiceInterface {
   @override
   Future<void> dispose() async {
     debugPrint('OpenAIWhisperService: Disposing service');
-    _httpClient.close();
+    if (!_isClientClosed) {
+      _httpClient.close();
+      _isClientClosed = true;
+    }
   }
 
   /// Build HTTP headers for API requests

@@ -103,7 +103,7 @@ class _FilePreviewModalState extends State<FilePreviewModal> {
       child: Scaffold(
         backgroundColor: Colors.black,
         appBar: AppBar(
-          backgroundColor: Colors.black.withOpacity(0.7),
+          backgroundColor: Colors.black.withAlpha(179),
           foregroundColor: Colors.white,
           title: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -118,7 +118,7 @@ class _FilePreviewModalState extends State<FilePreviewModal> {
                   '${_currentIndex + 1} of ${_allFiles.length}',
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.white.withOpacity(0.7),
+                    color: Colors.white.withAlpha(179),
                   ),
                 ),
             ],
@@ -210,13 +210,13 @@ class _FilePreviewModalState extends State<FilePreviewModal> {
             Icon(
               Icons.image_outlined,
               size: 64,
-              color: Colors.white.withOpacity(0.7),
+              color: Colors.white.withAlpha(179),
             ),
             const SizedBox(height: 16),
             Text(
               'Image Preview',
               style: TextStyle(
-                color: Colors.white.withOpacity(0.7),
+                color: Colors.white.withAlpha(179),
                 fontSize: 16,
               ),
             ),
@@ -224,7 +224,7 @@ class _FilePreviewModalState extends State<FilePreviewModal> {
             Text(
               file.fileName,
               style: TextStyle(
-                color: Colors.white.withOpacity(0.5),
+                color: Colors.white.withAlpha(128),
                 fontSize: 14,
               ),
               textAlign: TextAlign.center,
@@ -243,23 +243,17 @@ class _FilePreviewModalState extends State<FilePreviewModal> {
           Icon(
             Icons.play_circle_outline,
             size: 64,
-            color: Colors.white.withOpacity(0.7),
+            color: Colors.white.withAlpha(179),
           ),
           const SizedBox(height: 16),
           Text(
             'Video Preview',
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.7),
-              fontSize: 16,
-            ),
+            style: TextStyle(color: Colors.white.withAlpha(179), fontSize: 16),
           ),
           const SizedBox(height: 8),
           Text(
             file.fileName,
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.5),
-              fontSize: 14,
-            ),
+            style: TextStyle(color: Colors.white.withAlpha(128), fontSize: 14),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
@@ -288,23 +282,17 @@ class _FilePreviewModalState extends State<FilePreviewModal> {
           Icon(
             Icons.picture_as_pdf_outlined,
             size: 64,
-            color: Colors.white.withOpacity(0.7),
+            color: Colors.white.withAlpha(179),
           ),
           const SizedBox(height: 16),
           Text(
             'PDF Document',
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.7),
-              fontSize: 16,
-            ),
+            style: TextStyle(color: Colors.white.withAlpha(179), fontSize: 16),
           ),
           const SizedBox(height: 8),
           Text(
             file.fileName,
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.5),
-              fontSize: 14,
-            ),
+            style: TextStyle(color: Colors.white.withAlpha(128), fontSize: 14),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
@@ -331,23 +319,17 @@ class _FilePreviewModalState extends State<FilePreviewModal> {
           Icon(
             Icons.description_outlined,
             size: 64,
-            color: Colors.white.withOpacity(0.7),
+            color: Colors.white.withAlpha(179),
           ),
           const SizedBox(height: 16),
           Text(
             'Text File',
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.7),
-              fontSize: 16,
-            ),
+            style: TextStyle(color: Colors.white.withAlpha(179), fontSize: 16),
           ),
           const SizedBox(height: 8),
           Text(
             file.fileName,
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.5),
-              fontSize: 14,
-            ),
+            style: TextStyle(color: Colors.white.withAlpha(128), fontSize: 14),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
@@ -376,23 +358,17 @@ class _FilePreviewModalState extends State<FilePreviewModal> {
           Icon(
             Icons.audiotrack_outlined,
             size: 64,
-            color: Colors.white.withOpacity(0.7),
+            color: Colors.white.withAlpha(179),
           ),
           const SizedBox(height: 16),
           Text(
             'Audio File',
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.7),
-              fontSize: 16,
-            ),
+            style: TextStyle(color: Colors.white.withAlpha(179), fontSize: 16),
           ),
           const SizedBox(height: 8),
           Text(
             file.fileName,
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.5),
-              fontSize: 14,
-            ),
+            style: TextStyle(color: Colors.white.withAlpha(128), fontSize: 14),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
@@ -421,32 +397,23 @@ class _FilePreviewModalState extends State<FilePreviewModal> {
           Icon(
             Icons.help_outline,
             size: 64,
-            color: Colors.white.withOpacity(0.7),
+            color: Colors.white.withAlpha(179),
           ),
           const SizedBox(height: 16),
           Text(
             'Unsupported Format',
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.7),
-              fontSize: 16,
-            ),
+            style: TextStyle(color: Colors.white.withAlpha(179), fontSize: 16),
           ),
           const SizedBox(height: 8),
           Text(
             file.fileName,
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.5),
-              fontSize: 14,
-            ),
+            style: TextStyle(color: Colors.white.withAlpha(128), fontSize: 14),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
           Text(
             'This file type cannot be previewed',
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.4),
-              fontSize: 12,
-            ),
+            style: TextStyle(color: Colors.white.withAlpha(102), fontSize: 12),
             textAlign: TextAlign.center,
           ),
         ],
@@ -456,7 +423,7 @@ class _FilePreviewModalState extends State<FilePreviewModal> {
 
   Widget _buildLoadingOverlay() {
     return Container(
-      color: Colors.black.withOpacity(0.5),
+      color: Colors.black.withAlpha(128),
       child: const Center(
         child: CircularProgressIndicator(color: Colors.white),
       ),
@@ -465,7 +432,7 @@ class _FilePreviewModalState extends State<FilePreviewModal> {
 
   Widget _buildNavigationBar() {
     return Container(
-      color: Colors.black.withOpacity(0.7),
+      color: Colors.black.withAlpha(179),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,

@@ -131,7 +131,6 @@ class ExportService implements ExportServiceInterface {
         totalSizeBytes: result.totalSizeBytes,
         processingTime: processingTime,
         metadata: metadata,
-        warnings: result.warnings,
       );
     } catch (e, stackTrace) {
       return ExportResult.failure(
@@ -434,7 +433,7 @@ class ExportService implements ExportServiceInterface {
     return filtered;
   }
 
-  Future<_ExportInternalResult> _performExport(
+  Future<ExportInternalResult> _performExport(
     FormatExporter exporter,
     List<FileMetadata> files,
     ExportOptions options,
@@ -492,24 +491,22 @@ class ExportService implements ExportServiceInterface {
 
 /// Abstract base class for format-specific exporters
 abstract class FormatExporter {
-  Future<_ExportInternalResult> exportData(
+  Future<ExportInternalResult> exportData(
     List<Map<String, dynamic>> data,
     ExportOptions options,
   );
 }
 
 /// Internal result structure for exporters
-class _ExportInternalResult {
+class ExportInternalResult {
   final List<String> outputPaths;
   final int totalSizeBytes;
   final Duration processingTime;
-  final List<String> warnings;
 
-  const _ExportInternalResult({
+  const ExportInternalResult({
     required this.outputPaths,
     required this.totalSizeBytes,
     required this.processingTime,
-    this.warnings = const [],
   });
 }
 
@@ -518,7 +515,7 @@ class _ExportInternalResult {
 
 class JsonExporter extends FormatExporter {
   @override
-  Future<_ExportInternalResult> exportData(
+  Future<ExportInternalResult> exportData(
     List<Map<String, dynamic>> data,
     ExportOptions options,
   ) async {
@@ -548,7 +545,7 @@ class JsonExporter extends FormatExporter {
     final file = File(outputPath);
     await file.writeAsString(jsonString);
 
-    return _ExportInternalResult(
+    return ExportInternalResult(
       outputPaths: [outputPath],
       totalSizeBytes: jsonString.length,
       processingTime: DateTime.now().difference(startTime),
@@ -558,14 +555,14 @@ class JsonExporter extends FormatExporter {
 
 class CsvExporter extends FormatExporter {
   @override
-  Future<_ExportInternalResult> exportData(
+  Future<ExportInternalResult> exportData(
     List<Map<String, dynamic>> data,
     ExportOptions options,
   ) async {
     final startTime = DateTime.now();
 
     if (data.isEmpty) {
-      return _ExportInternalResult(
+      return ExportInternalResult(
         outputPaths: [],
         totalSizeBytes: 0,
         processingTime: DateTime.now().difference(startTime),
@@ -626,7 +623,7 @@ class CsvExporter extends FormatExporter {
     final file = File(outputPath);
     await file.writeAsString(csvContent);
 
-    return _ExportInternalResult(
+    return ExportInternalResult(
       outputPaths: [outputPath],
       totalSizeBytes: csvContent.length,
       processingTime: DateTime.now().difference(startTime),
@@ -644,7 +641,7 @@ class CsvExporter extends FormatExporter {
 
 class XmlExporter extends FormatExporter {
   @override
-  Future<_ExportInternalResult> exportData(
+  Future<ExportInternalResult> exportData(
     List<Map<String, dynamic>> data,
     ExportOptions options,
   ) async {
@@ -714,7 +711,7 @@ class XmlExporter extends FormatExporter {
     final file = File(outputPath);
     await file.writeAsString(xmlContent);
 
-    return _ExportInternalResult(
+    return ExportInternalResult(
       outputPaths: [outputPath],
       totalSizeBytes: xmlContent.length,
       processingTime: DateTime.now().difference(startTime),
@@ -733,7 +730,7 @@ class XmlExporter extends FormatExporter {
 
 class PdfExporter extends FormatExporter {
   @override
-  Future<_ExportInternalResult> exportData(
+  Future<ExportInternalResult> exportData(
     List<Map<String, dynamic>> data,
     ExportOptions options,
   ) async {
@@ -744,7 +741,7 @@ class PdfExporter extends FormatExporter {
 
 class HtmlExporter extends FormatExporter {
   @override
-  Future<_ExportInternalResult> exportData(
+  Future<ExportInternalResult> exportData(
     List<Map<String, dynamic>> data,
     ExportOptions options,
   ) async {
@@ -889,7 +886,7 @@ class HtmlExporter extends FormatExporter {
     final file = File(outputPath);
     await file.writeAsString(htmlContent);
 
-    return _ExportInternalResult(
+    return ExportInternalResult(
       outputPaths: [outputPath],
       totalSizeBytes: htmlContent.length,
       processingTime: DateTime.now().difference(startTime),
@@ -919,7 +916,7 @@ class HtmlExporter extends FormatExporter {
 
 class ZipExporter extends FormatExporter {
   @override
-  Future<_ExportInternalResult> exportData(
+  Future<ExportInternalResult> exportData(
     List<Map<String, dynamic>> data,
     ExportOptions options,
   ) async {
@@ -930,7 +927,7 @@ class ZipExporter extends FormatExporter {
 
 class TarExporter extends FormatExporter {
   @override
-  Future<_ExportInternalResult> exportData(
+  Future<ExportInternalResult> exportData(
     List<Map<String, dynamic>> data,
     ExportOptions options,
   ) async {

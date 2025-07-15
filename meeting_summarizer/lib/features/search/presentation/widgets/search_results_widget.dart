@@ -246,7 +246,7 @@ class SearchResultsWidget extends StatelessWidget {
       width: 40,
       height: 40,
       decoration: BoxDecoration(
-        color: iconColor.withOpacity(0.1),
+        color: iconColor.withAlpha(26),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Icon(iconData, color: iconColor, size: 24),

@@ -21,7 +21,7 @@ void main() {
 
     // Verify recording button is present (should find 2: one in nav bar, one in recording screen)
     expect(find.byIcon(Icons.mic), findsNWidgets(2));
-    
+
     // Verify bottom navigation bar is present
     expect(find.text('Record'), findsOneWidget);
     expect(find.text('Transcription'), findsOneWidget);

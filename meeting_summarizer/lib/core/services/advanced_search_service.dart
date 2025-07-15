@@ -117,7 +117,7 @@ class AdvancedSearchService {
   Future<SearchFacets> getSearchFacets([String? query]) async {
     final List<FileMetadata> allFiles;
     if (_enhancedService != null) {
-      allFiles = await _enhancedService!.searchFiles(query: query);
+      allFiles = await _enhancedService.searchFiles(query: query);
     } else {
       // _basicService is guaranteed to be non-null if _enhancedService is null
       allFiles = await _basicService!.searchFiles(query: query);

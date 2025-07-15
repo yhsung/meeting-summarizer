@@ -134,9 +134,9 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         height: dimension,
         decoration: BoxDecoration(
           borderRadius: widget.borderRadius ?? BorderRadius.circular(8),
-          color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.1),
+          color: theme.colorScheme.surfaceContainerHighest.withAlpha(26),
           border: Border.all(
-            color: theme.colorScheme.outline.withOpacity(0.2),
+            color: theme.colorScheme.outline.withAlpha(51),
             width: 1,
           ),
         ),
@@ -175,7 +175,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     final theme = Theme.of(context);
 
     return Container(
-      color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.1),
+      color: theme.colorScheme.surfaceContainerHighest.withAlpha(26),
       child: Center(
         child: SizedBox(
           width: widget.size.size * 0.3,
@@ -193,7 +193,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     final theme = Theme.of(context);
 
     return Container(
-      color: theme.colorScheme.errorContainer.withOpacity(0.1),
+      color: theme.colorScheme.errorContainer.withAlpha(26),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -245,7 +245,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         .toLowerCase();
 
     return Container(
-      color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.1),
+      color: theme.colorScheme.surfaceContainerHighest.withAlpha(26),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -282,7 +282,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [Colors.transparent, Colors.black.withOpacity(0.7)],
+          colors: [Colors.transparent, Colors.black.withAlpha(179)],
           stops: const [0.6, 1.0],
         ),
       ),
