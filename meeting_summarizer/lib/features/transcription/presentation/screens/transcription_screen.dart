@@ -48,7 +48,6 @@ class _TranscriptionScreenState extends State<TranscriptionScreen>
   bool _isServiceAvailable = false;
   double _transcriptionProgress = 0.0;
   String _statusMessage = 'Ready to transcribe';
-  TranscriptionProvider _currentProvider = TranscriptionProvider.openaiWhisper;
 
   // Settings
   TranscriptionLanguage _selectedLanguage = TranscriptionLanguage.english;
@@ -96,10 +95,7 @@ class _TranscriptionScreenState extends State<TranscriptionScreen>
       final selectedProvider = await _providerService
           .getBestAvailableProvider();
 
-      // Update current provider
-      setState(() {
-        _currentProvider = selectedProvider;
-      });
+      // Provider selected and ready to use
 
       // Create service instance for selected provider
       _transcriptionService = TranscriptionServiceFactory.getService(

@@ -119,6 +119,7 @@ class AdvancedSearchService {
     if (_enhancedService != null) {
       allFiles = await _enhancedService!.searchFiles(query: query);
     } else {
+      // _basicService is guaranteed to be non-null if _enhancedService is null
       allFiles = await _basicService!.searchFiles(query: query);
     }
 
@@ -485,8 +486,9 @@ class SearchQuery {
   String toString() {
     final parts = <String>[];
     if (text != null) parts.add('text: $text');
-    if (categories != null)
+    if (categories != null) {
       parts.add('categories: ${categories!.map((c) => c.name).join(',')}');
+    }
     if (tags != null) parts.add('tags: ${tags!.join(',')}');
     if (dateRange != null) parts.add('dateRange: ${dateRange.toString()}');
     if (sizeRange != null) parts.add('sizeRange: ${sizeRange.toString()}');

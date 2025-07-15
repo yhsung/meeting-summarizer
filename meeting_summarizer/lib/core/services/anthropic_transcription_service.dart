@@ -108,7 +108,6 @@ class AnthropicTranscriptionService implements TranscriptionServiceInterface {
     }
   }
 
-  @override
   Future<TranscriptionResult> transcribeAudioStream(
     Stream<List<int>> audioStream,
     TranscriptionRequest request,

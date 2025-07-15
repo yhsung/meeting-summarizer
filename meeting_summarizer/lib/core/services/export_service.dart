@@ -737,8 +737,6 @@ class PdfExporter extends FormatExporter {
     List<Map<String, dynamic>> data,
     ExportOptions options,
   ) async {
-    final startTime = DateTime.now();
-
     // TODO: Implement PDF export
     throw UnimplementedError('PDF export not yet implemented');
   }
@@ -912,8 +910,9 @@ class HtmlExporter extends FormatExporter {
 
     if (size < 1024) return '$size B';
     if (size < 1024 * 1024) return '${(size / 1024).toStringAsFixed(1)} KB';
-    if (size < 1024 * 1024 * 1024)
+    if (size < 1024 * 1024 * 1024) {
       return '${(size / (1024 * 1024)).toStringAsFixed(1)} MB';
+    }
     return '${(size / (1024 * 1024 * 1024)).toStringAsFixed(1)} GB';
   }
 }
@@ -924,8 +923,6 @@ class ZipExporter extends FormatExporter {
     List<Map<String, dynamic>> data,
     ExportOptions options,
   ) async {
-    final startTime = DateTime.now();
-
     // TODO: Implement ZIP export
     throw UnimplementedError('ZIP export not yet implemented');
   }
@@ -937,8 +934,6 @@ class TarExporter extends FormatExporter {
     List<Map<String, dynamic>> data,
     ExportOptions options,
   ) async {
-    final startTime = DateTime.now();
-
     // TODO: Implement TAR export
     throw UnimplementedError('TAR export not yet implemented');
   }

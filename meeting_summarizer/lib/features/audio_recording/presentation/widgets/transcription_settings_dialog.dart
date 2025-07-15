@@ -154,6 +154,8 @@ class _TranscriptionSettingsDialogState
 
     _apiKeyController.text = currentKey ?? '';
 
+    if (!mounted) return;
+
     final result = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(

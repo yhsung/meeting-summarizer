@@ -96,7 +96,6 @@ class _FilePreviewModalState extends State<FilePreviewModal> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final currentFile = _allFiles[_currentIndex];
 
     return Dialog.fullscreen(

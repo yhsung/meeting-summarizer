@@ -156,8 +156,6 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
   }
 
   Widget _buildThumbnailContent(BuildContext context) {
-    final theme = Theme.of(context);
-
     if (_isLoading) {
       return _buildLoadingState(context);
     }

@@ -372,9 +372,11 @@ class _SearchScreenState extends State<SearchScreen>
       final result = await _searchService.search(query);
       _handleSearchResult(result);
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Search failed: $e')));
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Search failed: $e')));
+      }
     }
   }
 
