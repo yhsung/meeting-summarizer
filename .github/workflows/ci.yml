@@ -13,11 +13,24 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
+    - name: Cache Flutter dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ${{ env.FLUTTER_HOME }}/.pub-cache
+          **/.dart_tool/package_config.json
+        key: ${{ runner.os }}-flutter-${{ hashFiles('**/pubspec.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-flutter-
+    
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
         flutter-version: '3.32.4'
         channel: 'stable'
+        cache: true
+        cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
+        cache-path: '${{ runner.tool_cache }}/flutter/:channel:-:version:-:arch:'
     
     - name: Install dependencies
       working-directory: ./meeting_summarizer
@@ -43,11 +56,24 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
+    - name: Cache Flutter dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ${{ env.FLUTTER_HOME }}/.pub-cache
+          **/.dart_tool/package_config.json
+        key: ${{ runner.os }}-flutter-${{ hashFiles('**/pubspec.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-flutter-
+    
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
         flutter-version: '3.32.4'
         channel: 'stable'
+        cache: true
+        cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
+        cache-path: '${{ runner.tool_cache }}/flutter/:channel:-:version:-:arch:'
 
     - name: Install dependencies
       working-directory: ./meeting_summarizer
@@ -76,11 +102,24 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
+    - name: Cache Flutter dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ${{ env.FLUTTER_HOME }}/.pub-cache
+          **/.dart_tool/package_config.json
+        key: ${{ runner.os }}-flutter-${{ hashFiles('**/pubspec.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-flutter-
+    
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
         flutter-version: '3.32.4'
         channel: 'stable'
+        cache: true
+        cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
+        cache-path: '${{ runner.tool_cache }}/flutter/:channel:-:version:-:arch:'
     
     - name: Install dependencies
       working-directory: ./meeting_summarizer
@@ -97,11 +136,24 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
+    - name: Cache Flutter dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ${{ env.FLUTTER_HOME }}/.pub-cache
+          **/.dart_tool/package_config.json
+        key: ${{ runner.os }}-flutter-${{ hashFiles('**/pubspec.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-flutter-
+    
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
         flutter-version: '3.32.4'
         channel: 'stable'
+        cache: true
+        cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
+        cache-path: '${{ runner.tool_cache }}/flutter/:channel:-:version:-:arch:'
     
     - name: Install dependencies
       working-directory: ./meeting_summarizer
@@ -118,11 +170,24 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
+    - name: Cache Flutter dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ${{ env.FLUTTER_HOME }}/.pub-cache
+          **/.dart_tool/package_config.json
+        key: ${{ runner.os }}-flutter-${{ hashFiles('**/pubspec.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-flutter-
+    
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
         flutter-version: '3.32.4'
         channel: 'stable'
+        cache: true
+        cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
+        cache-path: '${{ runner.tool_cache }}/flutter/:channel:-:version:-:arch:'
     
     - name: Install dependencies
       working-directory: ./meeting_summarizer
@@ -139,17 +204,41 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
+    - name: Cache Flutter dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ${{ env.FLUTTER_HOME }}/.pub-cache
+          **/.dart_tool/package_config.json
+        key: ${{ runner.os }}-flutter-${{ hashFiles('**/pubspec.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-flutter-
+    
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
         flutter-version: '3.32.4'
         channel: 'stable'
+        cache: true
+        cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
+        cache-path: '${{ runner.tool_cache }}/flutter/:channel:-:version:-:arch:'
+    
+    - name: Cache Gradle dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
     
     - name: Setup Java
       uses: actions/setup-java@v4
       with:
         distribution: 'zulu'
         java-version: '17'
+        cache: 'gradle'
     
     - name: Install dependencies
       working-directory: ./meeting_summarizer
