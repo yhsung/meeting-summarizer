@@ -740,8 +740,8 @@ class _TranscriptionScreenState extends State<TranscriptionScreen>
   Widget _buildTabBar(ThemeData theme) {
     final tabs = [
       'Transcript',
-      if (_currentResult!.segments.isNotEmpty) 'Timeline',
-      if (_currentResult!.speakers.isNotEmpty) 'Speakers',
+      if (_currentResult?.segments.isNotEmpty ?? false) 'Timeline',
+      if (_currentResult?.speakers.isNotEmpty ?? false) 'Speakers',
       'Details',
     ];
 
