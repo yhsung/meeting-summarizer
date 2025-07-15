@@ -7,6 +7,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:file_picker/file_picker.dart';
 
 import '../../../../core/models/transcription_result.dart';
 import '../../../../core/models/transcription_request.dart';
@@ -270,9 +271,109 @@ class _TranscriptionScreenState extends State<TranscriptionScreen>
 
   /// Handle file selection
   Future<void> _selectAudioFile() async {
-    // TODO: Implement file picker
-    // For now, show placeholder
-    _showInfoSnackBar('File selection will be implemented in next iteration');
+    try {
+      setState(() {
+        _statusMessage = 'Opening file picker...';
+      });
+
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['mp3', 'wav', 'm4a', 'aac', 'flac', 'ogg', 'wma'],
+        allowMultiple: false,
+        dialogTitle: 'Select Audio File for Transcription',
+      );
+
+      if (result == null || result.files.isEmpty) {
+        setState(() {
+          _statusMessage = 'No file selected';
+        });
+        _showInfoSnackBar('No file was selected');
+        return;
+      }
+
+      final platformFile = result.files.first;
+
+      // Validate file exists and has a path
+      if (platformFile.path == null) {
+        _showErrorSnackBar('Unable to access the selected file');
+        setState(() {
+          _statusMessage = 'File access failed';
+        });
+        return;
+      }
+
+      final selectedFile = File(platformFile.path!);
+
+      // Validate file exists and is readable
+      if (!await selectedFile.exists()) {
+        _showErrorSnackBar('Selected file does not exist');
+        setState(() {
+          _statusMessage = 'File not found';
+        });
+        return;
+      }
+
+      // Validate file size (max 200MB for audio files)
+      final fileSize = await selectedFile.length();
+      const maxSizeBytes = 200 * 1024 * 1024; // 200MB
+
+      if (fileSize > maxSizeBytes) {
+        _showErrorSnackBar(
+          'File is too large. Maximum size is 200MB (${(fileSize / (1024 * 1024)).toStringAsFixed(1)}MB selected)',
+        );
+        setState(() {
+          _statusMessage = 'File too large';
+        });
+        return;
+      }
+
+      // Validate audio format
+      if (!_isValidAudioFormat(platformFile.name)) {
+        _showErrorSnackBar(
+          'Unsupported audio format. Supported formats: MP3, WAV, M4A, AAC, FLAC, OGG, WMA',
+        );
+        setState(() {
+          _statusMessage = 'Unsupported format';
+        });
+        return;
+      }
+
+      // File is valid, set it and update UI
+      setState(() {
+        _currentAudioFile = selectedFile;
+        _statusMessage =
+            'Audio file selected: ${platformFile.name} (${(fileSize / (1024 * 1024)).toStringAsFixed(1)}MB)';
+        _currentResult = null; // Clear any previous result
+      });
+
+      _showSuccessSnackBar('Audio file selected: ${platformFile.name}');
+    } catch (e) {
+      _showErrorSnackBar('Failed to select file: $e');
+      setState(() {
+        _statusMessage = 'File selection failed';
+      });
+    }
+  }
+
+  /// Validate if the file has a supported audio format
+  bool _isValidAudioFormat(String fileName) {
+    final extension = fileName.split('.').last.toLowerCase();
+    const supportedFormats = {'mp3', 'wav', 'm4a', 'aac', 'flac', 'ogg', 'wma'};
+    return supportedFormats.contains(extension);
+  }
+
+  /// Get human-readable file size string
+  String _getFileSizeString(File file) {
+    final bytes = file.lengthSync();
+    if (bytes < 1024) {
+      return '$bytes B';
+    } else if (bytes < 1024 * 1024) {
+      return '${(bytes / 1024).toStringAsFixed(1)} KB';
+    } else if (bytes < 1024 * 1024 * 1024) {
+      return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+    } else {
+      return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(1)} GB';
+    }
   }
 
   /// Copy transcription to clipboard
@@ -372,11 +473,14 @@ class _TranscriptionScreenState extends State<TranscriptionScreen>
         ],
       ),
       body: SafeArea(child: _buildResponsiveLayout(theme, screenSize)),
-      floatingActionButton: _currentResult == null && !_isTranscribing
+      floatingActionButton:
+          _currentResult == null &&
+              !_isTranscribing &&
+              _currentAudioFile != null
           ? FloatingActionButton(
-              onPressed: _isServiceAvailable ? _selectAudioFile : null,
-              tooltip: 'Select Audio File',
-              child: const Icon(Icons.audio_file),
+              onPressed: _isServiceAvailable ? _startTranscription : null,
+              tooltip: 'Start Transcription',
+              child: const Icon(Icons.play_arrow),
             )
           : null,
     );
@@ -489,6 +593,11 @@ class _TranscriptionScreenState extends State<TranscriptionScreen>
                   isTranscribing: _isTranscribing,
                   isServiceAvailable: _isServiceAvailable,
                   hasResult: _currentResult != null,
+                  hasAudioFile: _currentAudioFile != null,
+                  audioFileName: _currentAudioFile?.path.split('/').last,
+                  audioFileSize: _currentAudioFile != null
+                      ? _getFileSizeString(_currentAudioFile!)
+                      : null,
                   onSelectFile: _selectAudioFile,
                   onStartTranscription: _startTranscription,
                   onCopyToClipboard: _copyToClipboard,
@@ -584,6 +693,11 @@ class _TranscriptionScreenState extends State<TranscriptionScreen>
               isTranscribing: _isTranscribing,
               isServiceAvailable: _isServiceAvailable,
               hasResult: _currentResult != null,
+              hasAudioFile: _currentAudioFile != null,
+              audioFileName: _currentAudioFile?.path.split('/').last,
+              audioFileSize: _currentAudioFile != null
+                  ? _getFileSizeString(_currentAudioFile!)
+                  : null,
               onSelectFile: _selectAudioFile,
               onStartTranscription: _startTranscription,
               onCopyToClipboard: _copyToClipboard,
