@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 
 import 'core/services/theme_service.dart';
 import 'features/audio_recording/presentation/screens/recording_screen.dart';
+import 'features/transcription/presentation/screens/transcription_screen.dart';
+import 'features/summary/presentation/screens/summary_screen.dart';
+import 'features/search/presentation/screens/search_screen.dart';
+import 'features/settings/presentation/screens/api_configuration_screen.dart';
 
 void main() {
   runApp(const MeetingSummarizerApp());
@@ -22,10 +26,61 @@ class MeetingSummarizerApp extends StatelessWidget {
           theme: themeService.lightTheme,
           darkTheme: themeService.darkTheme,
           themeMode: themeService.themeMode,
-          home: const RecordingScreen(),
+          home: const MainNavigation(),
           debugShowCheckedModeBanner: false,
         );
       },
+    );
+  }
+}
+
+class MainNavigation extends StatefulWidget {
+  const MainNavigation({super.key});
+
+  @override
+  State<MainNavigation> createState() => _MainNavigationState();
+}
+
+class _MainNavigationState extends State<MainNavigation> {
+  int _currentIndex = 0;
+
+  final List<Widget> _screens = [
+    const RecordingScreen(),
+    const TranscriptionScreen(),
+    const SummaryScreen(transcriptionId: 'default'), // Default for navigation
+    const SearchScreen(),
+    const ApiConfigurationScreen(),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: _screens[_currentIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        currentIndex: _currentIndex,
+        onTap: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.mic), label: 'Record'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.transcribe),
+            label: 'Transcription',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.summarize),
+            label: 'Summary',
+          ),
+          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            label: 'Settings',
+          ),
+        ],
+      ),
     );
   }
 }

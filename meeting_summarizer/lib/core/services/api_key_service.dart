@@ -3,14 +3,17 @@ library;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Service for securely storing and retrieving API keys
 class ApiKeyService {
   static const String _keyPrefix = 'api_key_';
+  static const String _fallbackPrefix = 'fallback_api_key_';
 
   final FlutterSecureStorage _secureStorage;
+  bool _useSecureStorage = true;
 
-  const ApiKeyService({FlutterSecureStorage? secureStorage})
+  ApiKeyService({FlutterSecureStorage? secureStorage})
     : _secureStorage = secureStorage ?? const FlutterSecureStorage();
 
   /// Store an API key securely
@@ -29,12 +32,45 @@ class ApiKeyService {
     final key = _buildStorageKey(provider);
 
     try {
-      await _secureStorage.write(key: key, value: apiKey);
-      debugPrint('ApiKeyService: API key stored for provider: $provider');
+      if (_useSecureStorage) {
+        await _secureStorage.write(key: key, value: apiKey);
+        debugPrint(
+          'ApiKeyService: API key stored securely for provider: $provider',
+        );
+      } else {
+        await _storeFallback(provider, apiKey);
+        debugPrint(
+          'ApiKeyService: API key stored in fallback storage for provider: $provider',
+        );
+      }
     } catch (e) {
-      debugPrint('ApiKeyService: Failed to store API key for $provider: $e');
-      rethrow;
+      debugPrint('ApiKeyService: Secure storage failed for $provider: $e');
+
+      // Fall back to SharedPreferences if secure storage fails
+      if (_useSecureStorage) {
+        debugPrint(
+          'ApiKeyService: Falling back to SharedPreferences for $provider',
+        );
+        _useSecureStorage = false;
+        await _storeFallback(provider, apiKey);
+        debugPrint(
+          'ApiKeyService: API key stored in fallback storage for provider: $provider',
+        );
+      } else {
+        rethrow;
+      }
     }
+  }
+
+  /// Store API key in fallback storage (SharedPreferences)
+  Future<void> _storeFallback(String provider, String apiKey) async {
+    final prefs = await SharedPreferences.getInstance();
+    final key = '$_fallbackPrefix${provider.toLowerCase()}';
+
+    // Basic obfuscation (not secure, but better than plain text)
+    final obfuscatedKey = _obfuscateKey(apiKey);
+
+    await prefs.setString(key, obfuscatedKey);
   }
 
   /// Retrieve an API key
@@ -50,15 +86,60 @@ class ApiKeyService {
     final key = _buildStorageKey(provider);
 
     try {
-      final apiKey = await _secureStorage.read(key: key);
-      if (apiKey != null) {
-        debugPrint('ApiKeyService: Retrieved API key for provider: $provider');
-      } else {
-        debugPrint('ApiKeyService: No API key found for provider: $provider');
+      if (_useSecureStorage) {
+        final apiKey = await _secureStorage.read(key: key);
+        if (apiKey != null) {
+          debugPrint(
+            'ApiKeyService: Retrieved API key from secure storage for provider: $provider',
+          );
+          return apiKey;
+        }
       }
-      return apiKey;
+
+      // Try fallback storage
+      final fallbackKey = await _getFallback(provider);
+      if (fallbackKey != null) {
+        debugPrint(
+          'ApiKeyService: Retrieved API key from fallback storage for provider: $provider',
+        );
+        return fallbackKey;
+      }
+
+      debugPrint('ApiKeyService: No API key found for provider: $provider');
+      return null;
     } catch (e) {
+      debugPrint('ApiKeyService: Secure storage failed for $provider: $e');
+
+      // Fall back to SharedPreferences if secure storage fails
+      if (_useSecureStorage) {
+        debugPrint(
+          'ApiKeyService: Falling back to SharedPreferences for $provider',
+        );
+        _useSecureStorage = false;
+        return await _getFallback(provider);
+      }
+
       debugPrint('ApiKeyService: Failed to retrieve API key for $provider: $e');
+      return null;
+    }
+  }
+
+  /// Get API key from fallback storage (SharedPreferences)
+  Future<String?> _getFallback(String provider) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final key = '$_fallbackPrefix${provider.toLowerCase()}';
+
+      final obfuscatedKey = prefs.getString(key);
+      if (obfuscatedKey != null) {
+        return _deobfuscateKey(obfuscatedKey);
+      }
+
+      return null;
+    } catch (e) {
+      debugPrint(
+        'ApiKeyService: Failed to retrieve from fallback storage for $provider: $e',
+      );
       return null;
     }
   }
@@ -84,7 +165,14 @@ class ApiKeyService {
     final key = _buildStorageKey(provider);
 
     try {
-      await _secureStorage.delete(key: key);
+      // Remove from secure storage
+      if (_useSecureStorage) {
+        await _secureStorage.delete(key: key);
+      }
+
+      // Also remove from fallback storage
+      await _removeFallback(provider);
+
       debugPrint('ApiKeyService: API key removed for provider: $provider');
     } catch (e) {
       debugPrint('ApiKeyService: Failed to remove API key for $provider: $e');
@@ -92,19 +180,51 @@ class ApiKeyService {
     }
   }
 
+  /// Remove API key from fallback storage
+  Future<void> _removeFallback(String provider) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final key = '$_fallbackPrefix${provider.toLowerCase()}';
+      await prefs.remove(key);
+    } catch (e) {
+      debugPrint(
+        'ApiKeyService: Failed to remove from fallback storage for $provider: $e',
+      );
+    }
+  }
+
   /// Get all configured providers
   ///
   /// Returns a list of provider names that have stored API keys
   Future<List<String>> getConfiguredProviders() async {
-    try {
-      final allKeys = await _secureStorage.readAll();
-      final providers = <String>[];
+    final providers = <String>[];
 
-      for (final key in allKeys.keys) {
-        if (key.startsWith(_keyPrefix)) {
-          final provider = key.substring(_keyPrefix.length);
-          if (provider.isNotEmpty && allKeys[key]?.isNotEmpty == true) {
-            providers.add(provider);
+    try {
+      if (_useSecureStorage) {
+        final allKeys = await _secureStorage.readAll();
+
+        for (final key in allKeys.keys) {
+          if (key.startsWith(_keyPrefix)) {
+            final provider = key.substring(_keyPrefix.length);
+            if (provider.isNotEmpty && allKeys[key]?.isNotEmpty == true) {
+              providers.add(provider);
+            }
+          }
+        }
+      }
+
+      // Also check fallback storage
+      final prefs = await SharedPreferences.getInstance();
+      final fallbackKeys = prefs.getKeys();
+
+      for (final key in fallbackKeys) {
+        if (key.startsWith(_fallbackPrefix)) {
+          final provider = key.substring(_fallbackPrefix.length);
+          if (provider.isNotEmpty && !providers.contains(provider)) {
+            final value = prefs.getString(key);
+            if (value?.isNotEmpty == true) {
+              providers.add(provider);
+            }
           }
         }
       }
@@ -253,6 +373,20 @@ class ApiKeyService {
     final middle = '*' * (apiKey.length - 8);
 
     return '$start$middle$end';
+  }
+
+  /// Basic obfuscation for fallback storage (not cryptographically secure)
+  String _obfuscateKey(String apiKey) {
+    final bytes = apiKey.codeUnits;
+    final obfuscated = bytes.map((byte) => byte ^ 0x42).toList();
+    return String.fromCharCodes(obfuscated);
+  }
+
+  /// Deobfuscate API key from fallback storage
+  String _deobfuscateKey(String obfuscatedKey) {
+    final bytes = obfuscatedKey.codeUnits;
+    final deobfuscated = bytes.map((byte) => byte ^ 0x42).toList();
+    return String.fromCharCodes(deobfuscated);
   }
 }
 

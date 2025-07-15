@@ -12,6 +12,7 @@ import '../../../../core/models/transcription_result.dart';
 import '../../../../core/models/transcription_request.dart';
 import '../../../../core/services/transcription_service_interface.dart';
 import '../../../../core/services/transcription_service_factory.dart';
+import '../../../../core/services/transcription_provider_service.dart';
 import '../../../../core/enums/transcription_language.dart';
 import '../widgets/transcription_viewer.dart';
 import '../widgets/transcription_controls.dart';
@@ -37,6 +38,8 @@ class _TranscriptionScreenState extends State<TranscriptionScreen>
     with TickerProviderStateMixin {
   // Services
   late final TranscriptionServiceInterface _transcriptionService;
+  final TranscriptionProviderService _providerService =
+      TranscriptionProviderService();
 
   // State management
   TranscriptionResult? _currentResult;
@@ -45,6 +48,7 @@ class _TranscriptionScreenState extends State<TranscriptionScreen>
   bool _isServiceAvailable = false;
   double _transcriptionProgress = 0.0;
   String _statusMessage = 'Ready to transcribe';
+  TranscriptionProvider _currentProvider = TranscriptionProvider.openaiWhisper;
 
   // Settings
   TranscriptionLanguage _selectedLanguage = TranscriptionLanguage.english;
@@ -82,17 +86,34 @@ class _TranscriptionScreenState extends State<TranscriptionScreen>
 
   /// Initialize transcription service
   void _initializeServices() {
-    _transcriptionService = TranscriptionServiceFactory.create();
-    _transcriptionService
-        .initialize()
-        .then((_) {
-          _checkServiceAvailability();
-        })
-        .catchError((error) {
-          _showErrorSnackBar(
-            'Failed to initialize transcription service: $error',
-          );
-        });
+    _initializeServicesAsync();
+  }
+
+  /// Initialize transcription service asynchronously
+  Future<void> _initializeServicesAsync() async {
+    try {
+      // Get the selected provider
+      final selectedProvider = await _providerService
+          .getBestAvailableProvider();
+
+      // Update current provider
+      setState(() {
+        _currentProvider = selectedProvider;
+      });
+
+      // Create service instance for selected provider
+      _transcriptionService = TranscriptionServiceFactory.getService(
+        selectedProvider,
+      );
+
+      // Initialize the service
+      await _transcriptionService.initialize();
+
+      // Check availability
+      await _checkServiceAvailability();
+    } catch (error) {
+      _showErrorSnackBar('Failed to initialize transcription service: $error');
+    }
   }
 
   /// Initialize animation controllers
