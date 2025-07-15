@@ -117,11 +117,17 @@ jobs:
       with:
         flutter-version: '3.32.4'
         channel: 'stable'
-    
+
     - name: Install dependencies
       working-directory: ./meeting_summarizer
       run: flutter pub get
-    
+
+    - name: Import signing certs
+      uses: apple-actions/import-codesign-certs@v3
+      with:
+        p12-file-base64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
+        p12-password: ${{ secrets.P12_PASSWORD }}
+
     - name: Build macOS
       working-directory: ./meeting_summarizer
       run: flutter build macos --debug
