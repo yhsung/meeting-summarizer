@@ -41,6 +41,12 @@ For detailed project structure, architecture overview, and file organization, se
 - **Features**: `meeting_summarizer/lib/features/` - Feature-specific implementations
 - **Tests**: `meeting_summarizer/test/` - Comprehensive test suite
 
+## Recent Changes
+
+For detailed information about recent updates, improvements, and changes to the project, see: [`CHANGELOG.md`](CHANGELOG.md)
+
+Key recent improvements include file picker integration, CI/CD performance optimizations (60-75% faster builds), custom tab bar implementation, and comprehensive documentation updates. For CI/CD optimization details, see: [`docs/ci-cd-optimizations.md`](docs/ci-cd-optimizations.md)
+
 ## Audio Enhancement
 
 The meeting summarizer includes comprehensive audio enhancement capabilities powered by FFT-based signal processing. For detailed information about audio enhancement features, configuration, and usage, see: [`docs/audio-enhancement.md`](docs/audio-enhancement.md)

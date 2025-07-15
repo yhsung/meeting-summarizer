@@ -110,13 +110,33 @@ project/                   # absolute path /Volumes/Samsung970EVOPlus/dev-projec
 │   │   │   │   │       └── record_platform_adapter.dart    # Record package adapter
 │   │   │   │   ├── domain/             # Domain layer (to be implemented)
 │   │   │   │   └── presentation/       # UI layer (to be implemented)
-│   │   │   └── search/
+│   │   │   ├── search/
+│   │   │   │   └── presentation/
+│   │   │   │       ├── screens/
+│   │   │   │       │   └── search_screen.dart              # Main search interface with tabs
+│   │   │   │       └── widgets/
+│   │   │   │           ├── advanced_search_widget.dart     # Advanced search form with filters
+│   │   │   │           └── search_results_widget.dart      # Search results display with ranking
+│   │   │   ├── transcription/
+│   │   │   │   └── presentation/
+│   │   │   │       ├── screens/
+│   │   │   │       │   └── transcription_screen.dart       # Transcription interface with file picker and custom tab bar
+│   │   │   │       └── widgets/
+│   │   │   │           ├── transcription_controls.dart     # Audio transcription controls
+│   │   │   │           ├── transcription_viewer.dart       # Transcription display component
+│   │   │   │           ├── transcription_progress.dart     # Progress tracking widget
+│   │   │   │           ├── speaker_timeline.dart           # Speaker diarization timeline
+│   │   │   │           └── transcription_settings.dart     # Transcription configuration
+│   │   │   └── summary/
 │   │   │       └── presentation/
 │   │   │           ├── screens/
-│   │   │           │   └── search_screen.dart              # Main search interface with tabs
+│   │   │           │   └── summary_screen.dart              # AI summary interface
 │   │   │           └── widgets/
-│   │   │               ├── advanced_search_widget.dart     # Advanced search form with filters
-│   │   │               └── search_results_widget.dart      # Search results display with ranking
+│   │   │               ├── summary_generator.dart           # Summary generation controls
+│   │   │               ├── summary_viewer.dart              # Summary display component
+│   │   │               ├── summary_controls.dart            # Summary interaction controls
+│   │   │               ├── summary_type_selector.dart       # Summary type selection
+│   │   │               └── action_items_list.dart           # Action items display
 │   │   └── main.dart                   # Flutter app entry point
 │   ├── test/
 │   │   ├── core/
@@ -149,7 +169,7 @@ project/                   # absolute path /Volumes/Samsung970EVOPlus/dev-projec
 │   ├── macos/                         # macOS platform configuration
 │   ├── web/                           # Web platform configuration
 │   ├── windows/                       # Windows platform configuration
-│   ├── pubspec.yaml                   # Flutter dependencies
+│   ├── pubspec.yaml                   # Flutter dependencies (optimized, removed unused syncfusion_flutter_pdfviewer)
 │   └── analysis_options.yaml         # Dart analysis configuration
 └── CLAUDE.md                         # Main Claude Code context file
 ```
@@ -284,6 +304,21 @@ The project supports multiple platforms through Flutter's cross-platform archite
 
 ## Dependencies Management
 
-- **Core Dependencies**: Essential packages for app functionality
-- **Dev Dependencies**: Tools for development, testing, and code quality
-- **Platform Dependencies**: Platform-specific integrations and plugins
+### Core Dependencies
+- **file_picker**: Cross-platform file selection for audio files
+- **flutter**: Framework for cross-platform development
+- **Essential packages**: Audio processing, database, encryption, UI components
+
+### Dev Dependencies
+- **flutter_test**: Testing framework
+- **flutter_lints**: Code quality and style enforcement
+- **build_runner**: Code generation for serialization
+
+### Platform Dependencies
+- **Android**: Gradle-based build system with NDK support
+- **iOS/macOS**: CocoaPods dependency management
+- **Web**: Dart2JS compilation for browser compatibility
+- **Windows**: CMake-based native compilation
+
+### Removed Dependencies
+- **syncfusion_flutter_pdfviewer**: Removed due to Flutter v1 embedding conflicts and lack of usage
