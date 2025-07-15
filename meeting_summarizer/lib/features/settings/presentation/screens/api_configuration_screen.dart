@@ -31,6 +31,7 @@ class _ApiConfigurationScreenState extends State<ApiConfigurationScreen> {
   bool _isLoadingInitial = true;
   TranscriptionProvider _selectedProvider = TranscriptionProvider.openaiWhisper;
   Map<TranscriptionProvider, bool> _providerAvailability = {};
+  bool _forceLocalWhisperOverride = false;
 
   // Supported providers
   final List<String> _supportedProviders = [
@@ -73,11 +74,14 @@ class _ApiConfigurationScreenState extends State<ApiConfigurationScreen> {
       final selectedProvider = await _providerService.getSelectedProvider();
       final providerAvailability = await _providerService
           .getAvailableProviders();
+      final forceLocalWhisperOverride = await _providerService
+          .getForceLocalWhisperOverride();
 
       setState(() {
         _apiKeyInfos = infos;
         _selectedProvider = selectedProvider;
         _providerAvailability = providerAvailability;
+        _forceLocalWhisperOverride = forceLocalWhisperOverride;
         _isLoadingInitial = false;
       });
     } catch (e) {
@@ -318,6 +322,8 @@ class _ApiConfigurationScreenState extends State<ApiConfigurationScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
+                _buildForceLocalWhisperCard(),
+                const SizedBox(height: 16),
                 _buildProviderSelectionCard(),
                 const SizedBox(height: 16),
                 ..._supportedProviders.map(
@@ -326,6 +332,112 @@ class _ApiConfigurationScreenState extends State<ApiConfigurationScreen> {
               ],
             ),
     );
+  }
+
+  Widget _buildForceLocalWhisperCard() {
+    final theme = Theme.of(context);
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.offline_bolt, color: theme.colorScheme.primary),
+                const SizedBox(width: 8),
+                Text(
+                  'Force Local Processing',
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'When enabled, all transcriptions will use Local Whisper processing regardless of your selected provider. '
+              'This ensures complete offline operation and privacy.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 16),
+            SwitchListTile(
+              title: const Text('Force Local Whisper'),
+              subtitle: Text(
+                _forceLocalWhisperOverride
+                    ? 'All transcriptions will use Local Whisper (offline)'
+                    : 'Normal provider selection will be used',
+              ),
+              value: _forceLocalWhisperOverride,
+              onChanged: _toggleForceLocalWhisper,
+              secondary: Icon(
+                _forceLocalWhisperOverride ? Icons.security : Icons.cloud_off,
+                color: _forceLocalWhisperOverride ? Colors.green : Colors.grey,
+              ),
+            ),
+            if (_forceLocalWhisperOverride) ...[
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.green.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: Colors.green.withValues(alpha: 0.3),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.info, color: Colors.green, size: 16),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Override active: Local Whisper will be used for all transcriptions',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: Colors.green,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _toggleForceLocalWhisper(bool value) async {
+    try {
+      await _providerService.setForceLocalWhisperOverride(value);
+      setState(() {
+        _forceLocalWhisperOverride = value;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              value
+                  ? 'Force Local Whisper enabled - all transcriptions will use offline processing'
+                  : 'Force Local Whisper disabled - normal provider selection restored',
+            ),
+            backgroundColor: value ? Colors.green : Colors.blue,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to update setting: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   Widget _buildProviderSelectionCard() {

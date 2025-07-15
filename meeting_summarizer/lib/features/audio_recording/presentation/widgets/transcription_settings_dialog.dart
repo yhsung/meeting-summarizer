@@ -238,6 +238,10 @@ class _TranscriptionSettingsDialogState
         return 'openai';
       case TranscriptionProvider.localWhisper:
         return 'local'; // Local doesn't need API key
+      case TranscriptionProvider.googleSpeechToText:
+        return 'google';
+      case TranscriptionProvider.anthropicTranscription:
+        return 'anthropic';
     }
   }
 
@@ -258,6 +262,10 @@ class _TranscriptionSettingsDialogState
         return true;
       case TranscriptionProvider.localWhisper:
         return false;
+      case TranscriptionProvider.googleSpeechToText:
+        return true;
+      case TranscriptionProvider.anthropicTranscription:
+        return true;
     }
   }
 

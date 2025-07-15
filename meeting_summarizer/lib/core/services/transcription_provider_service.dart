@@ -9,6 +9,7 @@ import 'transcription_service_factory.dart';
 /// Service for managing the selected transcription provider
 class TranscriptionProviderService {
   static const String _providerKey = 'selected_transcription_provider';
+  static const String _forceLocalWhisperKey = 'force_local_whisper_override';
   static const TranscriptionProvider _defaultProvider =
       TranscriptionProvider.openaiWhisper;
 
@@ -82,6 +83,17 @@ class TranscriptionProviderService {
 
   /// Get the best available provider based on user selection and availability
   Future<TranscriptionProvider> getBestAvailableProvider() async {
+    // Check if Local Whisper is forced via settings
+    final forceLocalWhisper = await getForceLocalWhisperOverride();
+
+    if (forceLocalWhisper) {
+      debugPrint(
+        'TranscriptionProviderService: Forcing Local Whisper provider (user setting)',
+      );
+      return TranscriptionProvider.localWhisper;
+    }
+
+    // Original implementation (used when forceLocalWhisper is false)
     final selectedProvider = await getSelectedProvider();
 
     // Check if selected provider is available
@@ -121,6 +133,53 @@ class TranscriptionProviderService {
     }
   }
 
+  /// Get the force local whisper override setting
+  Future<bool> getForceLocalWhisperOverride() async {
+    try {
+      final value = await _secureStorage.read(key: _forceLocalWhisperKey);
+      // If no value is set, default to false for normal provider selection
+      return value == 'true';
+    } catch (e) {
+      debugPrint(
+        'TranscriptionProviderService: Error getting force local whisper setting: $e',
+      );
+      return false; // Default to false (normal provider selection)
+    }
+  }
+
+  /// Set the force local whisper override setting
+  Future<void> setForceLocalWhisperOverride(bool enabled) async {
+    try {
+      await _secureStorage.write(
+        key: _forceLocalWhisperKey,
+        value: enabled.toString(),
+      );
+      debugPrint(
+        'TranscriptionProviderService: Force local whisper override set to: $enabled',
+      );
+    } catch (e) {
+      debugPrint(
+        'TranscriptionProviderService: Error setting force local whisper override: $e',
+      );
+      rethrow;
+    }
+  }
+
+  /// Clear the force local whisper override setting
+  Future<void> clearForceLocalWhisperOverride() async {
+    try {
+      await _secureStorage.delete(key: _forceLocalWhisperKey);
+      debugPrint(
+        'TranscriptionProviderService: Force local whisper override cleared',
+      );
+    } catch (e) {
+      debugPrint(
+        'TranscriptionProviderService: Error clearing force local whisper override: $e',
+      );
+      rethrow;
+    }
+  }
+
   /// Get provider requirements (what's needed to use this provider)
   static Map<String, dynamic> getProviderRequirements(
     TranscriptionProvider provider,
@@ -145,6 +204,26 @@ class TranscriptionProviderService {
           'cost_per_minute': 0.0,
           'setup_complexity': 'Medium',
           'setup_instructions': 'Download and configure local Whisper model',
+        };
+      case TranscriptionProvider.googleSpeechToText:
+        return {
+          'api_key_required': true,
+          'api_key_provider': 'google',
+          'internet_required': true,
+          'local_processing': false,
+          'cost_per_minute': 0.016,
+          'setup_complexity': 'Easy',
+          'setup_instructions': 'Get API key from Google Cloud Console',
+        };
+      case TranscriptionProvider.anthropicTranscription:
+        return {
+          'api_key_required': true,
+          'api_key_provider': 'anthropic',
+          'internet_required': true,
+          'local_processing': false,
+          'cost_per_minute': 0.003,
+          'setup_complexity': 'Easy',
+          'setup_instructions': 'Get API key from Anthropic Console',
         };
     }
   }
@@ -191,6 +270,24 @@ class TranscriptionProviderService {
           'No API rate limits',
           'One-time setup',
         ];
+      case TranscriptionProvider.googleSpeechToText:
+        return [
+          'Enterprise-grade accuracy',
+          'Speaker diarization support',
+          'Large file support (1GB+)',
+          'Fastest processing (1.2x real-time)',
+          '125+ languages supported',
+          'Advanced customization options',
+        ];
+      case TranscriptionProvider.anthropicTranscription:
+        return [
+          'Contextual understanding',
+          'Intelligent processing',
+          'Competitive pricing',
+          'Multi-language support',
+          'AI-powered accuracy',
+          'Future-proof technology',
+        ];
     }
   }
 
@@ -213,6 +310,24 @@ class TranscriptionProviderService {
           'Limited word-level timestamps',
           'Manual model updates',
           'No cloud backup',
+        ];
+      case TranscriptionProvider.googleSpeechToText:
+        return [
+          'Requires API key',
+          'Higher usage costs (\$0.016/min)',
+          'Internet connection required',
+          'Google Cloud setup required',
+          'Data sent to Google',
+          'Complex pricing model',
+        ];
+      case TranscriptionProvider.anthropicTranscription:
+        return [
+          'Requires API key',
+          'Usage costs (\$0.003/min)',
+          'Internet connection required',
+          'Conceptual implementation',
+          'Limited speaker diarization',
+          'Data sent to Anthropic',
         ];
     }
   }

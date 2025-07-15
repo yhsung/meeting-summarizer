@@ -6,14 +6,17 @@ import 'package:flutter/foundation.dart';
 import 'transcription_service_interface.dart';
 import 'openai_whisper_service.dart';
 import 'local_whisper_service.dart';
+import 'google_speech_service.dart';
+import 'anthropic_transcription_service.dart';
 import 'api_key_service.dart';
 
 /// Available transcription service providers
 enum TranscriptionProvider {
   openaiWhisper,
   localWhisper,
+  googleSpeechToText,
+  anthropicTranscription,
   // Future providers can be added here:
-  // googleSpeechToText,
   // azureSpeech,
   // awsTranscribe,
 }
@@ -165,6 +168,35 @@ class TranscriptionServiceFactory {
           averageProcessingSpeed: 2.0, // Varies by model and hardware
           costPerMinute: 0.0, // Free local processing
         );
+      case TranscriptionProvider.googleSpeechToText:
+        return ServiceCapabilities(
+          supportsTimestamps: true,
+          supportsWordLevelTimestamps: true,
+          supportsSpeakerDiarization:
+              true, // Google supports speaker diarization
+          supportsCustomVocabulary: true,
+          supportsLanguageDetection: true,
+          maxFileSizeMB: 1000, // Large file support
+          supportedFormats: ['wav', 'flac', 'mp3', 'ogg', 'webm'],
+          supportedLanguages: 125, // Google supports 125+ languages
+          qualityLevels: ['standard', 'enhanced', 'premium'],
+          averageProcessingSpeed: 1.2, // Very fast processing
+          costPerMinute: 0.016, // $0.016 per minute for standard model
+        );
+      case TranscriptionProvider.anthropicTranscription:
+        return ServiceCapabilities(
+          supportsTimestamps: true,
+          supportsWordLevelTimestamps: false, // Conceptual implementation
+          supportsSpeakerDiarization: false,
+          supportsCustomVocabulary: true,
+          supportsLanguageDetection: true,
+          maxFileSizeMB: 100,
+          supportedFormats: ['wav', 'mp3', 'm4a', 'flac'],
+          supportedLanguages: 50, // Claude supports many languages
+          qualityLevels: ['standard', 'enhanced'],
+          averageProcessingSpeed: 1.8, // Good processing speed
+          costPerMinute: 0.003, // Estimated competitive pricing
+        );
     }
   }
 
@@ -194,6 +226,10 @@ class TranscriptionServiceFactory {
         return OpenAIWhisperService(apiKeyService: _apiKeyService);
       case TranscriptionProvider.localWhisper:
         return LocalWhisperService();
+      case TranscriptionProvider.googleSpeechToText:
+        return GoogleSpeechService(apiKeyService: _apiKeyService);
+      case TranscriptionProvider.anthropicTranscription:
+        return AnthropicTranscriptionService(apiKeyService: _apiKeyService);
     }
   }
 
@@ -204,6 +240,10 @@ class TranscriptionServiceFactory {
         return 'OpenAI Whisper';
       case TranscriptionProvider.localWhisper:
         return 'Local Whisper';
+      case TranscriptionProvider.googleSpeechToText:
+        return 'Google Speech-to-Text';
+      case TranscriptionProvider.anthropicTranscription:
+        return 'Anthropic Claude';
     }
   }
 
@@ -216,6 +256,12 @@ class TranscriptionServiceFactory {
       case TranscriptionProvider.localWhisper:
         return 'Offline speech recognition using local Whisper models. '
             'No internet required, free processing with configurable quality levels.';
+      case TranscriptionProvider.googleSpeechToText:
+        return 'Enterprise-grade speech recognition from Google Cloud. '
+            'Supports 125+ languages with advanced features like speaker diarization.';
+      case TranscriptionProvider.anthropicTranscription:
+        return 'AI-powered transcription using Anthropic\'s Claude models. '
+            'Focuses on contextual understanding and intelligent processing.';
     }
   }
 
