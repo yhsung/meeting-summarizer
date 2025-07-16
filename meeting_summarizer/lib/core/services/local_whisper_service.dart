@@ -283,7 +283,45 @@ class LocalWhisperService implements TranscriptionServiceInterface {
     );
 
     // Copy the file to temporary directory to ensure the native library can access it
-    await audioFile.copy(tempFile.path);
+    try {
+      await audioFile.copy(tempFile.path);
+
+      // Verify the copy was successful
+      if (!await tempFile.exists()) {
+        throw TranscriptionError(
+          type: TranscriptionErrorType.audioFormatError,
+          message: 'Failed to copy audio file to temporary location',
+          isRetryable: true,
+        );
+      }
+
+      final copiedFileSize = await tempFile.length();
+      final originalFileSize = await audioFile.length();
+
+      debugPrint(
+        'LocalWhisperService: Original file: ${audioFile.path} ($originalFileSize bytes)',
+      );
+      debugPrint(
+        'LocalWhisperService: Copied to: ${tempFile.path} ($copiedFileSize bytes)',
+      );
+
+      if (copiedFileSize != originalFileSize) {
+        throw TranscriptionError(
+          type: TranscriptionErrorType.audioFormatError,
+          message:
+              'File copy incomplete: original $originalFileSize bytes, copied $copiedFileSize bytes',
+          isRetryable: true,
+        );
+      }
+    } catch (e) {
+      debugPrint('LocalWhisperService: Failed to copy audio file: $e');
+      throw TranscriptionError(
+        type: TranscriptionErrorType.audioFormatError,
+        message: 'Failed to prepare audio file for Whisper: $e',
+        originalError: e,
+        isRetryable: true,
+      );
+    }
 
     return tempFile;
   }
@@ -404,6 +442,9 @@ class LocalWhisperService implements TranscriptionServiceInterface {
     );
 
     if (!_isInitialized) {
+      debugPrint(
+        'LocalWhisperService: Transcription attempted on uninitialized service for file: ${audioFile.path}',
+      );
       throw TranscriptionError(
         type: TranscriptionErrorType.configurationError,
         message: 'Local Whisper service not initialized',
@@ -485,6 +526,9 @@ class LocalWhisperService implements TranscriptionServiceInterface {
     );
 
     if (!_isInitialized) {
+      debugPrint(
+        'LocalWhisperService: Transcription attempted on uninitialized service for audio bytes',
+      );
       throw TranscriptionError(
         type: TranscriptionErrorType.configurationError,
         message: 'Local Whisper service not initialized',
@@ -1067,11 +1111,47 @@ class LocalWhisperService implements TranscriptionServiceInterface {
 
       // Perform transcription
       debugPrint('LocalWhisperService: Starting Whisper transcription...');
+      debugPrint('LocalWhisperService: Using model: $_currentModel');
+      debugPrint(
+        'LocalWhisperService: Audio path for Whisper: ${wavFile.path}',
+      );
+      debugPrint('LocalWhisperService: File size: $fileSize bytes');
+
       final startTime = DateTime.now();
 
-      final transcriptionResponse = await _whisperInstance!.transcribe(
-        transcribeRequest: transcribeRequest,
-      );
+      final dynamic transcriptionResponse;
+      try {
+        transcriptionResponse = await _whisperInstance!.transcribe(
+          transcribeRequest: transcribeRequest,
+        );
+
+        debugPrint('LocalWhisperService: Whisper transcription successful');
+      } catch (whisperError) {
+        debugPrint(
+          'LocalWhisperService: Whisper transcription failed with error: $whisperError',
+        );
+        debugPrint(
+          'LocalWhisperService: Error type: ${whisperError.runtimeType}',
+        );
+
+        // Provide more specific error message based on common Whisper errors
+        String errorMessage = 'Whisper transcription failed: $whisperError';
+        if (whisperError.toString().contains('failed to open')) {
+          errorMessage =
+              'Failed to open audio file for Whisper processing. The file may be corrupted or in an unsupported format.';
+        } else if (whisperError.toString().contains('model')) {
+          errorMessage =
+              'Whisper model error. Please ensure the model is properly downloaded and accessible.';
+        }
+
+        throw TranscriptionError(
+          type: TranscriptionErrorType.processingError,
+          message: errorMessage,
+          originalError: whisperError,
+          isRetryable: true,
+        );
+      }
+
       final String transcriptionText = transcriptionResponse.text;
       final processingTime = DateTime.now().difference(startTime);
 
