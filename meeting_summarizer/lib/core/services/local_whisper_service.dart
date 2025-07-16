@@ -22,6 +22,7 @@ import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import 'package:http/http.dart' as http;
+import 'package:whisper_flutter_new/whisper_flutter_new.dart';
 
 import 'transcription_service_interface.dart';
 import '../models/transcription_request.dart';
@@ -77,6 +78,7 @@ class LocalWhisperService implements TranscriptionServiceInterface {
   String _currentModel = _defaultModel;
   bool _isInitialized = false;
   Directory? _modelStorageDirectory;
+  Whisper? _whisperInstance;
 
   // Usage monitoring
   final TranscriptionUsageMonitor _usageMonitor =
@@ -112,6 +114,13 @@ class LocalWhisperService implements TranscriptionServiceInterface {
 
       // Mark as initialized so downloadModel can be called
       _isInitialized = true;
+
+      // Initialize Whisper instance
+      _whisperInstance = Whisper(
+        model: _getWhisperModel(_currentModel),
+        downloadHost:
+            'https://huggingface.co/ggerganov/whisper.cpp/resolve/main',
+      );
 
       // Check if default model is available, download if not
       final hasDefaultModel = await _isModelAvailable(_defaultModel);
@@ -231,6 +240,158 @@ class LocalWhisperService implements TranscriptionServiceInterface {
         path.join(appSupportDir.path, _modelDirectory),
       );
     }
+  }
+
+  /// Map our model names to WhisperModel enum
+  WhisperModel _getWhisperModel(String modelName) {
+    switch (modelName) {
+      case 'whisper-tiny':
+        return WhisperModel.tiny;
+      case 'whisper-base':
+        return WhisperModel.base;
+      case 'whisper-small':
+        return WhisperModel.small;
+      default:
+        return WhisperModel.base;
+    }
+  }
+
+  /// Convert audio file to WAV format (required by Whisper)
+  Future<File> _prepareAudioForWhisper(File audioFile) async {
+    final extension = audioFile.path.split('.').last.toLowerCase();
+
+    // Check if the whisper_flutter_new library supports the format directly
+    const supportedFormats = ['wav', 'mp3', 'flac', 'm4a', 'ogg'];
+
+    if (!supportedFormats.contains(extension)) {
+      throw TranscriptionError(
+        type: TranscriptionErrorType.audioFormatError,
+        message:
+            'Unsupported audio format: $extension. Supported formats: ${supportedFormats.join(', ')}',
+        isRetryable: false,
+      );
+    }
+
+    // For sandboxed environments, we might need to copy the file to a temporary location
+    // that the native library can access
+    final tempDir = await getTemporaryDirectory();
+    final tempFile = File(
+      path.join(
+        tempDir.path,
+        'whisper_audio_${DateTime.now().millisecondsSinceEpoch}.$extension',
+      ),
+    );
+
+    // Copy the file to temporary directory to ensure the native library can access it
+    await audioFile.copy(tempFile.path);
+
+    return tempFile;
+  }
+
+  /// Parse transcription segments from Whisper output
+  List<TranscriptionSegment> _parseTranscriptionSegments(
+    String transcriptionText,
+  ) {
+    // Whisper output format with timestamps typically looks like:
+    // [00:00.000 --> 00:05.000] Hello world
+    // This is a simplified parser - in practice, you'd need more robust parsing
+
+    final segments = <TranscriptionSegment>[];
+    final lines = transcriptionText.split('\n');
+
+    for (var i = 0; i < lines.length; i++) {
+      final line = lines[i].trim();
+      if (line.isEmpty) continue;
+
+      // Simple regex to match timestamp format
+      final timestampRegex = RegExp(
+        r'\[(\d{2}):(\d{2})\.(\d{3})\s*-->\s*(\d{2}):(\d{2})\.(\d{3})\](.*)',
+      );
+      final match = timestampRegex.firstMatch(line);
+
+      if (match != null) {
+        final startMin = int.parse(match.group(1)!);
+        final startSec = int.parse(match.group(2)!);
+        final startMs = int.parse(match.group(3)!);
+        final endMin = int.parse(match.group(4)!);
+        final endSec = int.parse(match.group(5)!);
+        final endMs = int.parse(match.group(6)!);
+        final text = match.group(7)!.trim();
+
+        final startTime = (startMin * 60 + startSec) + (startMs / 1000.0);
+        final endTime = (endMin * 60 + endSec) + (endMs / 1000.0);
+
+        segments.add(
+          TranscriptionSegment(
+            text: text,
+            start: startTime,
+            end: endTime,
+            confidence: 0.95,
+          ),
+        );
+      } else {
+        // If no timestamp, treat as single segment
+        segments.add(
+          TranscriptionSegment(
+            text: line,
+            start: 0.0,
+            end: 5.0,
+            confidence: 0.95,
+          ),
+        );
+      }
+    }
+
+    return segments.isNotEmpty
+        ? segments
+        : [
+            TranscriptionSegment(
+              text: transcriptionText,
+              start: 0.0,
+              end: 5.0,
+              confidence: 0.95,
+            ),
+          ];
+  }
+
+  /// Detect language from transcription
+  TranscriptionLanguage _detectLanguageFromTranscription(
+    String transcriptionText,
+    TranscriptionLanguage? requestedLanguage,
+  ) {
+    // If specific language was requested, return it
+    if (requestedLanguage != null &&
+        requestedLanguage != TranscriptionLanguage.auto) {
+      return requestedLanguage;
+    }
+
+    // Simple language detection based on common patterns
+    // In practice, you'd use a proper language detection library
+    final text = transcriptionText.toLowerCase();
+
+    // Common English patterns
+    if (text.contains(
+      RegExp(r'\b(the|and|or|but|in|on|at|to|for|of|with|by)\b'),
+    )) {
+      return TranscriptionLanguage.english;
+    }
+
+    // Common Spanish patterns
+    if (text.contains(
+      RegExp(r'\b(el|la|los|las|y|o|pero|en|con|para|de|por)\b'),
+    )) {
+      return TranscriptionLanguage.spanish;
+    }
+
+    // Common French patterns
+    if (text.contains(
+      RegExp(r'\b(le|la|les|et|ou|mais|dans|sur|pour|de|avec)\b'),
+    )) {
+      return TranscriptionLanguage.french;
+    }
+
+    // Default to English if can't detect
+    return TranscriptionLanguage.english;
   }
 
   @override
@@ -868,45 +1029,128 @@ class LocalWhisperService implements TranscriptionServiceInterface {
       'LocalWhisperService: Running inference with local Whisper model',
     );
 
-    // For now, return a mock result as actual Whisper.cpp integration
-    // would require platform-specific native code implementation
-    final mockTranscription =
-        '''
-This is a mock transcription result from the local Whisper service.
-In a real implementation, this would invoke the actual Whisper.cpp library
-or a Flutter plugin that interfaces with the native Whisper implementation.
+    if (_whisperInstance == null) {
+      throw TranscriptionError(
+        type: TranscriptionErrorType.configurationError,
+        message: 'Whisper instance not initialized',
+        isRetryable: false,
+      );
+    }
 
-The audio file being processed is: ${audioFile.path}
-Using model: $_currentModel
-Language: ${request.language?.displayName ?? 'auto-detect'}
-''';
+    // Prepare audio file for Whisper (convert to WAV if needed)
+    final wavFile = await _prepareAudioForWhisper(audioFile);
 
-    return TranscriptionResult(
-      text: mockTranscription,
-      confidence: 0.95,
-      language: request.language == TranscriptionLanguage.auto
-          ? TranscriptionLanguage.english
-          : request.language,
-      processingTimeMs: 1000,
-      audioDurationMs: 5000,
-      segments: [
-        TranscriptionSegment(
-          text: mockTranscription,
-          start: 0.0,
-          end: 5.0,
-          confidence: 0.95,
-        ),
-      ],
-      provider: 'local_whisper',
-      model: _currentModel,
-      createdAt: DateTime.now(),
-      metadata: {
-        'service': 'local_whisper',
-        'model': _currentModel,
-        'audio_file': audioFile.path,
-        'implementation': 'mock',
-      },
-    );
+    try {
+      // Debug: Check if the audio file exists and is readable
+      if (!await wavFile.exists()) {
+        throw TranscriptionError(
+          type: TranscriptionErrorType.audioFormatError,
+          message: 'Audio file does not exist at path: ${wavFile.path}',
+          isRetryable: false,
+        );
+      }
+
+      final fileSize = await wavFile.length();
+      debugPrint('LocalWhisperService: Audio file path: ${wavFile.path}');
+      debugPrint('LocalWhisperService: Audio file size: $fileSize bytes');
+      debugPrint(
+        'LocalWhisperService: Audio file exists: ${await wavFile.exists()}',
+      );
+
+      // Create transcription request
+      final transcribeRequest = TranscribeRequest(
+        audio: wavFile.path,
+        isTranslate: request.language == TranscriptionLanguage.auto,
+        isNoTimestamps: false,
+        splitOnWord: true,
+      );
+
+      // Perform transcription
+      debugPrint('LocalWhisperService: Starting Whisper transcription...');
+      final startTime = DateTime.now();
+
+      final transcriptionResponse = await _whisperInstance!.transcribe(
+        transcribeRequest: transcribeRequest,
+      );
+      final String transcriptionText = transcriptionResponse.text;
+      final processingTime = DateTime.now().difference(startTime);
+
+      debugPrint(
+        'LocalWhisperService: Transcription completed in ${processingTime.inMilliseconds}ms',
+      );
+      debugPrint(
+        'LocalWhisperService: Transcription text length: ${transcriptionText.length}',
+      );
+
+      if (transcriptionText.isEmpty) {
+        throw TranscriptionError(
+          type: TranscriptionErrorType.processingError,
+          message: 'Whisper transcription returned empty text',
+          isRetryable: true,
+        );
+      }
+
+      // Clean up temporary file (always created now)
+      try {
+        if (await wavFile.exists()) {
+          await wavFile.delete();
+        }
+      } catch (e) {
+        debugPrint(
+          'LocalWhisperService: Failed to clean up temporary file: $e',
+        );
+      }
+
+      // Parse the transcription result
+      final segments = _parseTranscriptionSegments(transcriptionText);
+      final detectedLanguage = _detectLanguageFromTranscription(
+        transcriptionText,
+        request.language,
+      );
+
+      return TranscriptionResult(
+        text: transcriptionText,
+        confidence: 0.95, // Whisper doesn't provide confidence scores directly
+        language: detectedLanguage,
+        processingTimeMs: processingTime.inMilliseconds,
+        audioDurationMs: await _estimateAudioDuration(audioFile),
+        segments: segments,
+        provider: 'local_whisper',
+        model: _currentModel,
+        createdAt: startTime,
+        metadata: {
+          'service': 'local_whisper',
+          'model': _currentModel,
+          'audio_file': audioFile.path,
+          'implementation': 'whisper_flutter_new',
+          'processing_time_ms': processingTime.inMilliseconds,
+        },
+      );
+    } catch (e) {
+      debugPrint('LocalWhisperService: Transcription failed: $e');
+
+      // Clean up temporary file in case of error
+      try {
+        if (await wavFile.exists()) {
+          await wavFile.delete();
+        }
+      } catch (cleanupError) {
+        debugPrint(
+          'LocalWhisperService: Failed to clean up temporary file after error: $cleanupError',
+        );
+      }
+
+      if (e is TranscriptionError) {
+        rethrow;
+      }
+
+      throw TranscriptionError(
+        type: TranscriptionErrorType.processingError,
+        message: 'Whisper transcription failed: $e',
+        originalError: e,
+        isRetryable: true,
+      );
+    }
   }
 }
 

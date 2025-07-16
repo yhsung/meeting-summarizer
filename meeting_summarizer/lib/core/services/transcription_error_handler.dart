@@ -38,6 +38,9 @@ enum TranscriptionErrorType {
 
   /// Client-side configuration errors
   configurationError,
+
+  /// Audio processing or transcription errors
+  processingError,
 }
 
 /// Detailed transcription error with retry information

@@ -49,6 +49,7 @@ dependencies:
   
   # Audio processing dependencies
   fftea: ^1.5.0+1
+  whisper_flutter_new: ^1.0.1
   
   # JSON serialization dependencies
   json_annotation: ^4.9.0
