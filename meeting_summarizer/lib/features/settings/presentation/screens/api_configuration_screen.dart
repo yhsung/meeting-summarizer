@@ -7,6 +7,8 @@ import 'package:flutter/services.dart';
 import '../../../../core/services/api_key_service.dart';
 import '../../../../core/services/transcription_provider_service.dart';
 import '../../../../core/services/transcription_service_factory.dart';
+import '../../../../core/services/local_whisper_service.dart';
+import '../../../transcription/presentation/widgets/model_download_progress.dart';
 
 /// Screen for configuring API keys for transcription services
 class ApiConfigurationScreen extends StatefulWidget {
@@ -20,6 +22,8 @@ class _ApiConfigurationScreenState extends State<ApiConfigurationScreen> {
   final ApiKeyService _apiKeyService = ApiKeyService();
   final TranscriptionProviderService _providerService =
       TranscriptionProviderService();
+  final LocalWhisperService _localWhisperService =
+      LocalWhisperService.getInstance();
 
   // Controllers for text inputs
   final Map<String, TextEditingController> _controllers = {};
@@ -32,6 +36,13 @@ class _ApiConfigurationScreenState extends State<ApiConfigurationScreen> {
   TranscriptionProvider _selectedProvider = TranscriptionProvider.openaiWhisper;
   Map<TranscriptionProvider, bool> _providerAvailability = {};
   bool _forceLocalWhisperOverride = false;
+
+  // Local Whisper initialization state
+  bool _isWhisperInitializing = false;
+  bool _isWhisperInitialized = false;
+  double _whisperInitProgress = 0.0;
+  String _whisperInitStatus = 'Not initialized';
+  String? _whisperInitError;
 
   // Supported providers
   final List<String> _supportedProviders = [
@@ -46,6 +57,7 @@ class _ApiConfigurationScreenState extends State<ApiConfigurationScreen> {
     super.initState();
     _initializeControllers();
     _loadApiKeyInfo();
+    _initializeLocalWhisper();
   }
 
   @override
@@ -92,6 +104,90 @@ class _ApiConfigurationScreenState extends State<ApiConfigurationScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Failed to load API key information: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _updateProviderAvailability() async {
+    try {
+      final providerAvailability = await _providerService
+          .getAvailableProviders();
+      debugPrint('Updated provider availability: $providerAvailability');
+      setState(() {
+        _providerAvailability = providerAvailability;
+      });
+    } catch (e) {
+      debugPrint('Failed to update provider availability: $e');
+    }
+  }
+
+  Future<void> _initializeLocalWhisper() async {
+    debugPrint('Settings: Checking if LocalWhisperService is available...');
+
+    // Check if already initialized
+    if (await _localWhisperService.isServiceAvailable()) {
+      debugPrint('Settings: LocalWhisperService is already available');
+      setState(() {
+        _isWhisperInitialized = true;
+        _whisperInitStatus = 'Service ready';
+        _whisperInitProgress = 1.0;
+      });
+      await _updateProviderAvailability();
+      return;
+    }
+
+    debugPrint('Settings: LocalWhisperService not available, initializing...');
+
+    setState(() {
+      _isWhisperInitializing = true;
+      _whisperInitError = null;
+      _whisperInitProgress = 0.0;
+      _whisperInitStatus = 'Initializing...';
+    });
+
+    try {
+      await _localWhisperService.initialize(
+        onProgress: (progress, status) {
+          setState(() {
+            _whisperInitProgress = progress;
+            _whisperInitStatus = status;
+          });
+        },
+      );
+
+      setState(() {
+        _isWhisperInitializing = false;
+        _isWhisperInitialized = true;
+        _whisperInitStatus = 'Service ready';
+        _whisperInitProgress = 1.0;
+      });
+
+      // Update provider availability after successful initialization
+      await _updateProviderAvailability();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Local Whisper service initialized successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() {
+        _isWhisperInitializing = false;
+        _isWhisperInitialized = false;
+        _whisperInitError = e.toString();
+        _whisperInitStatus = 'Initialization failed';
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to initialize Local Whisper: $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -324,6 +420,8 @@ class _ApiConfigurationScreenState extends State<ApiConfigurationScreen> {
                 const SizedBox(height: 16),
                 _buildForceLocalWhisperCard(),
                 const SizedBox(height: 16),
+                _buildLocalWhisperInitializationCard(),
+                const SizedBox(height: 16),
                 _buildProviderSelectionCard(),
                 const SizedBox(height: 16),
                 ..._supportedProviders.map(
@@ -438,6 +536,180 @@ class _ApiConfigurationScreenState extends State<ApiConfigurationScreen> {
         );
       }
     }
+  }
+
+  Widget _buildLocalWhisperInitializationCard() {
+    final theme = Theme.of(context);
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  _isWhisperInitialized
+                      ? Icons.check_circle
+                      : _isWhisperInitializing
+                      ? Icons.hourglass_empty
+                      : Icons.download,
+                  color: _isWhisperInitialized
+                      ? Colors.green
+                      : _isWhisperInitializing
+                      ? Colors.orange
+                      : theme.colorScheme.primary,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Local Whisper Service',
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Local Whisper provides offline speech-to-text processing. '
+              'This service downloads and initializes the necessary models for local transcription.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 16),
+
+            // Status and progress display
+            if (_isWhisperInitializing) ...[
+              ModelDownloadProgress(
+                progress: _whisperInitProgress,
+                status: _whisperInitStatus,
+                modelName: 'Whisper Base',
+                isDownloading: _isWhisperInitializing,
+              ),
+            ] else if (_isWhisperInitialized) ...[
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.green.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: Colors.green.withValues(alpha: 0.3),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.check_circle, color: Colors.green, size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Service Ready',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: Colors.green,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          Text(
+                            'Local Whisper is initialized and ready for offline transcription',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: Colors.green,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ] else if (_whisperInitError != null) ...[
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.red.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.error, color: Colors.red, size: 20),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Initialization Failed',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: Colors.red,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      _whisperInitError!,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: Colors.red,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    ElevatedButton(
+                      onPressed: () async {
+                        await _initializeLocalWhisper();
+                      },
+                      child: const Text('Retry Initialization'),
+                    ),
+                  ],
+                ),
+              ),
+            ] else ...[
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.grey.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.grey.withValues(alpha: 0.3)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.info, color: Colors.grey, size: 20),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Not Initialized',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: Colors.grey,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Click below to initialize the Local Whisper service and download the required model.',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: Colors.grey,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    ElevatedButton(
+                      onPressed: () async {
+                        await _initializeLocalWhisper();
+                      },
+                      child: const Text('Initialize Service'),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildProviderSelectionCard() {

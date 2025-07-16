@@ -1,12 +1,27 @@
 /// Local Whisper service implementation for offline transcription
+///
+/// Usage with progress tracking:
+/// ```dart
+/// final service = LocalWhisperService.getInstance();
+/// await service.initialize(
+///   onProgress: (progress, status) {
+///     print('Progress: ${(progress * 100).toStringAsFixed(1)}% - $status');
+///   },
+/// );
+/// ```
+///
+/// Available models:
+/// - whisper-tiny (39 MB) - Fast, lower quality
+/// - whisper-base (142 MB) - Balanced speed/quality (default)
+/// - whisper-small (466 MB) - High quality, slower
 library;
 
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
+import 'package:http/http.dart' as http;
 
 import 'transcription_service_interface.dart';
 import '../models/transcription_request.dart';
@@ -20,6 +35,16 @@ import 'transcription_usage_monitor.dart';
 class LocalWhisperService implements TranscriptionServiceInterface {
   static const String _modelDirectory = 'whisper_models';
   static const String _defaultModel = 'whisper-base';
+
+  // Singleton pattern
+  static LocalWhisperService? _instance;
+  static LocalWhisperService getInstance() {
+    _instance ??= LocalWhisperService._internal();
+    return _instance!;
+  }
+
+  // Private constructor
+  LocalWhisperService._internal();
 
   // Available local models with their capabilities
   static const Map<String, LocalWhisperModel> _availableModels = {
@@ -58,15 +83,22 @@ class LocalWhisperService implements TranscriptionServiceInterface {
       TranscriptionUsageMonitor.getInstance();
 
   @override
-  Future<void> initialize() async {
+  Future<void> initialize({
+    Function(double progress, String status)? onProgress,
+  }) async {
     debugPrint('LocalWhisperService: Initializing local Whisper service');
+    onProgress?.call(0.0, 'Initializing service...');
+
+    // Check if already initialized
+    if (_isInitialized) {
+      debugPrint('LocalWhisperService: Service already initialized');
+      onProgress?.call(1.0, 'Service ready');
+      return;
+    }
 
     try {
       // Setup model storage directory
-      final appSupportDir = await getApplicationSupportDirectory();
-      _modelStorageDirectory = Directory(
-        path.join(appSupportDir.path, _modelDirectory),
-      );
+      await _setupModelStorageDirectory();
 
       if (!await _modelStorageDirectory!.exists()) {
         await _modelStorageDirectory!.create(recursive: true);
@@ -75,21 +107,61 @@ class LocalWhisperService implements TranscriptionServiceInterface {
         );
       }
 
-      // Check if default model is available
+      // Initialize usage monitor first
+      await _usageMonitor.initialize();
+
+      // Mark as initialized so downloadModel can be called
+      _isInitialized = true;
+
+      // Check if default model is available, download if not
       final hasDefaultModel = await _isModelAvailable(_defaultModel);
       if (!hasDefaultModel) {
         debugPrint(
-          'LocalWhisperService: Default model not found, service will be limited until model is downloaded',
+          'LocalWhisperService: Default model not found, downloading automatically...',
         );
+
+        onProgress?.call(0.1, 'Downloading default model...');
+
+        try {
+          await downloadModel(
+            _defaultModel,
+            onProgress:
+                (
+                  progress, {
+                  String? status,
+                  int? downloadedBytes,
+                  int? totalBytes,
+                }) {
+                  // Convert download progress to overall initialization progress
+                  // Download takes 80% of initialization (0.1 to 0.9)
+                  final overallProgress = 0.1 + (progress * 0.8);
+                  onProgress?.call(
+                    overallProgress,
+                    status ??
+                        'Downloading model: ${(progress * 100).toStringAsFixed(1)}%',
+                  );
+                },
+          );
+          debugPrint(
+            'LocalWhisperService: Default model downloaded successfully',
+          );
+          onProgress?.call(0.9, 'Model download completed');
+        } catch (e) {
+          debugPrint(
+            'LocalWhisperService: Failed to download default model: $e. Service will be limited until model is manually downloaded.',
+          );
+          onProgress?.call(0.9, 'Model download failed, continuing...');
+          // Continue initialization - service can still be used for other operations
+        }
+      } else {
+        onProgress?.call(0.9, 'Model already available');
       }
 
-      // Initialize usage monitor
-      await _usageMonitor.initialize();
-
-      _isInitialized = true;
+      onProgress?.call(1.0, 'Service ready');
       debugPrint('LocalWhisperService: Initialization complete');
     } catch (e) {
       debugPrint('LocalWhisperService: Initialization failed: $e');
+      _isInitialized = false; // Reset initialization flag on error
       throw TranscriptionError(
         type: TranscriptionErrorType.configurationError,
         message: 'Failed to initialize local Whisper service: $e',
@@ -101,18 +173,64 @@ class LocalWhisperService implements TranscriptionServiceInterface {
 
   @override
   Future<bool> isServiceAvailable() async {
+    debugPrint('LocalWhisperService: Checking service availability');
+    debugPrint('LocalWhisperService: _isInitialized = $_isInitialized');
+
     if (!_isInitialized) {
+      debugPrint(
+        'LocalWhisperService: Service not initialized, checking if models exist...',
+      );
+
+      // Even if not initialized, check if models exist (they might have been downloaded before)
+      await _setupModelStorageDirectory();
+
+      for (final modelName in _availableModels.keys) {
+        final isAvailable = await _isModelAvailable(modelName);
+        debugPrint(
+          'LocalWhisperService: Model $modelName available: $isAvailable',
+        );
+        if (isAvailable) {
+          debugPrint(
+            'LocalWhisperService: Model found but service not initialized',
+          );
+          return false; // Models exist but service needs initialization
+        }
+      }
+
+      debugPrint(
+        'LocalWhisperService: Service not initialized and no models available',
+      );
       return false;
     }
 
     // Check if at least one model is available
     for (final modelName in _availableModels.keys) {
-      if (await _isModelAvailable(modelName)) {
+      final isAvailable = await _isModelAvailable(modelName);
+      debugPrint(
+        'LocalWhisperService: Model $modelName available: $isAvailable',
+      );
+      if (isAvailable) {
+        debugPrint(
+          'LocalWhisperService: Service is available (model $modelName found)',
+        );
         return true;
       }
     }
 
+    debugPrint(
+      'LocalWhisperService: Service initialized but no models available',
+    );
     return false;
+  }
+
+  /// Setup model storage directory (helper method)
+  Future<void> _setupModelStorageDirectory() async {
+    if (_modelStorageDirectory == null) {
+      final appSupportDir = await getApplicationSupportDirectory();
+      _modelStorageDirectory = Directory(
+        path.join(appSupportDir.path, _modelDirectory),
+      );
+    }
   }
 
   @override
@@ -338,18 +456,39 @@ class LocalWhisperService implements TranscriptionServiceInterface {
 
   /// Check if a specific model is available locally
   Future<bool> _isModelAvailable(String modelName) async {
-    if (_modelStorageDirectory == null) return false;
+    if (_modelStorageDirectory == null) {
+      debugPrint('LocalWhisperService: Model storage directory is null');
+      return false;
+    }
 
     final modelFile = File(
       path.join(_modelStorageDirectory!.path, '$modelName.bin'),
     );
-    return await modelFile.exists();
+    final exists = await modelFile.exists();
+    debugPrint(
+      'LocalWhisperService: Checking model file ${modelFile.path}: exists = $exists',
+    );
+
+    if (exists) {
+      final fileSize = await modelFile.length();
+      debugPrint(
+        'LocalWhisperService: Model file size: ${(fileSize / (1024 * 1024)).toStringAsFixed(1)} MB',
+      );
+    }
+
+    return exists;
   }
 
   /// Download a Whisper model for local use
   Future<void> downloadModel(
     String modelName, {
-    Function(double)? onProgress,
+    Function(
+      double progress, {
+      String? status,
+      int? downloadedBytes,
+      int? totalBytes,
+    })?
+    onProgress,
   }) async {
     if (!_isInitialized) {
       throw TranscriptionError(
@@ -370,41 +509,100 @@ class LocalWhisperService implements TranscriptionServiceInterface {
 
     debugPrint('LocalWhisperService: Starting download for model: $modelName');
 
-    // This is a placeholder implementation
-    // In a real implementation, this would download the actual model files
-    // For now, we'll create a placeholder file to simulate model availability
     final modelFile = File(
       path.join(_modelStorageDirectory!.path, '$modelName.bin'),
     );
 
+    // Check if model already exists
+    if (await modelFile.exists()) {
+      debugPrint('LocalWhisperService: Model $modelName already exists');
+      return;
+    }
+
     try {
-      // Simulate download progress
-      for (int i = 0; i <= 100; i += 10) {
-        onProgress?.call(i / 100.0);
-        await Future.delayed(const Duration(milliseconds: 100));
+      onProgress?.call(0.0, status: 'Starting download...');
+
+      // Use streaming download for progress tracking
+      final request = http.Request('GET', Uri.parse(model.downloadUrl));
+      request.headers['User-Agent'] = 'MeetingSummarizer/1.0';
+
+      final response = await request.send();
+
+      if (response.statusCode != 200) {
+        throw TranscriptionError(
+          type: TranscriptionErrorType.networkError,
+          message: 'Failed to download model: HTTP ${response.statusCode}',
+          isRetryable: true,
+        );
       }
 
-      // Create placeholder model file
-      await modelFile.writeAsString(
-        jsonEncode({
-          'model_name': modelName,
-          'model_type': 'whisper',
-          'downloaded_at': DateTime.now().toIso8601String(),
-          'size_mb': model.size,
-          'quality': model.qualityLevel.name,
-          'languages': model.languages,
-          'note':
-              'This is a placeholder file. In production, this would be the actual Whisper model binary.',
-        }),
+      final totalBytes = response.contentLength ?? model.size * 1024 * 1024;
+      final downloadedBytes = <int>[];
+      var receivedBytes = 0;
+
+      onProgress?.call(
+        0.0,
+        status:
+            'Downloading ${model.name} (${(totalBytes / (1024 * 1024)).toStringAsFixed(1)} MB)...',
+        downloadedBytes: 0,
+        totalBytes: totalBytes,
       );
 
+      // Stream download with progress updates
+      await for (final chunk in response.stream) {
+        downloadedBytes.addAll(chunk);
+        receivedBytes += chunk.length;
+
+        final progress = receivedBytes / totalBytes;
+        final downloadedMB = receivedBytes / (1024 * 1024);
+        final totalMB = totalBytes / (1024 * 1024);
+
+        onProgress?.call(
+          progress,
+          status:
+              'Downloading ${(downloadedMB).toStringAsFixed(1)}/${totalMB.toStringAsFixed(1)} MB',
+          downloadedBytes: receivedBytes,
+          totalBytes: totalBytes,
+        );
+      }
+
+      onProgress?.call(0.9, status: 'Writing model file...');
+
+      // Write the complete file
+      await modelFile.writeAsBytes(downloadedBytes);
+
+      onProgress?.call(0.95, status: 'Verifying download...');
+
+      // Verify downloaded file
+      final downloadedSize = await modelFile.length();
+      if (downloadedSize != receivedBytes) {
+        await modelFile.delete();
+        throw TranscriptionError(
+          type: TranscriptionErrorType.configurationError,
+          message: 'Model download verification failed',
+          isRetryable: true,
+        );
+      }
+
+      onProgress?.call(1.0, status: 'Download completed');
+
       debugPrint(
-        'LocalWhisperService: Model $modelName downloaded successfully',
+        'LocalWhisperService: Model $modelName downloaded successfully (${(downloadedSize / (1024 * 1024)).toStringAsFixed(1)} MB)',
       );
     } catch (e) {
       debugPrint(
         'LocalWhisperService: Failed to download model $modelName: $e',
       );
+
+      // Clean up partial download
+      if (await modelFile.exists()) {
+        await modelFile.delete();
+      }
+
+      if (e is TranscriptionError) {
+        rethrow;
+      }
+
       throw TranscriptionError(
         type: TranscriptionErrorType.networkError,
         message: 'Failed to download model $modelName: $e',
@@ -518,72 +716,61 @@ class LocalWhisperService implements TranscriptionServiceInterface {
       );
     }
 
-    // In a real implementation, this would use a local Whisper engine
-    // For now, we'll simulate local processing with a placeholder result
-    await Future.delayed(
-      const Duration(seconds: 2),
-    ); // Simulate processing time
+    final startTime = DateTime.now();
 
-    // Create a simulated transcription result
-    final now = DateTime.now();
-
-    // Simulate different confidence levels based on model quality
-    final model = _availableModels[_currentModel]!;
-    final baseConfidence = switch (model.qualityLevel) {
-      WhisperQuality.low => 0.75,
-      WhisperQuality.medium => 0.85,
-      WhisperQuality.high => 0.92,
-    };
-
-    return TranscriptionResult(
-      text:
-          'This is a simulated transcription result from the local Whisper model $_currentModel. '
-          'In a production implementation, this would contain the actual transcribed text from the audio file.',
-      confidence: baseConfidence,
-      language: request.language != TranscriptionLanguage.auto
-          ? request.language
-          : TranscriptionLanguage.english,
-      processingTimeMs: 2000, // Simulated processing time
-      audioDurationMs: _estimateAudioDurationFromBytes(
+    try {
+      // Create temporary audio file for processing
+      final tempFile = await _createTemporaryAudioFile(
         audioBytes,
         request.audioFormat,
-      ),
-      segments: [
-        TranscriptionSegment(
-          text:
-              'This is a simulated transcription result from the local Whisper model $_currentModel.',
-          start: 0.0,
-          end: 3.5,
-          confidence: baseConfidence,
-        ),
-        TranscriptionSegment(
-          text:
-              'In a production implementation, this would contain the actual transcribed text from the audio file.',
-          start: 3.5,
-          end: 7.0,
-          confidence: baseConfidence - 0.05,
-        ),
-      ],
-      provider: 'local_whisper',
-      model: _currentModel,
-      metadata: {
-        'local_processing': true,
-        'model_path': path.join(
-          _modelStorageDirectory!.path,
-          '$_currentModel.bin',
-        ),
-        'processing_mode': 'offline',
-      },
-      createdAt: now,
-      qualityMetrics: TranscriptionQualityMetrics(
-        averageConfidence: baseConfidence,
-        confidenceVariance: 0.02,
-        lowConfidenceSegments: 0,
-        totalSegments: 2,
-        speechRate: 120.0, // words per minute
-        silencePeriods: 1,
-      ),
-    );
+      );
+
+      try {
+        // Process audio with local Whisper implementation
+        final transcriptionResult = await _runLocalWhisperInference(
+          tempFile,
+          request,
+        );
+
+        final processingTime = DateTime.now().difference(startTime);
+
+        // Return the result with updated processing time
+        return TranscriptionResult(
+          text: transcriptionResult.text,
+          confidence: transcriptionResult.confidence,
+          language: transcriptionResult.language,
+          processingTimeMs: processingTime.inMilliseconds,
+          audioDurationMs: transcriptionResult.audioDurationMs,
+          segments: transcriptionResult.segments,
+          words: transcriptionResult.words,
+          speakers: transcriptionResult.speakers,
+          alternatives: transcriptionResult.alternatives,
+          provider: transcriptionResult.provider,
+          model: transcriptionResult.model,
+          metadata: transcriptionResult.metadata,
+          createdAt: startTime,
+          qualityMetrics: transcriptionResult.qualityMetrics,
+        );
+      } finally {
+        // Clean up temporary file
+        if (await tempFile.exists()) {
+          await tempFile.delete();
+        }
+      }
+    } catch (e) {
+      debugPrint('LocalWhisperService: Transcription processing failed: $e');
+
+      if (e is TranscriptionError) {
+        rethrow;
+      }
+
+      throw TranscriptionError(
+        type: TranscriptionErrorType.unknownError,
+        message: 'Local Whisper processing failed: $e',
+        originalError: e,
+        isRetryable: false,
+      );
+    }
   }
 
   /// Estimate audio duration from file (rough estimate)
@@ -652,6 +839,74 @@ class LocalWhisperService implements TranscriptionServiceInterface {
     // Calculate duration: (file size in bits) / (bitrate) * 1000 for milliseconds
     final durationMs = (fileSize * 8 / estimatedBitrate * 1000).round();
     return durationMs;
+  }
+
+  /// Create temporary audio file for processing
+  Future<File> _createTemporaryAudioFile(
+    List<int> audioBytes,
+    String? audioFormat,
+  ) async {
+    final tempDir = await getTemporaryDirectory();
+    final extension = audioFormat?.toLowerCase() ?? 'wav';
+    final tempFile = File(
+      path.join(
+        tempDir.path,
+        'temp_audio_${DateTime.now().millisecondsSinceEpoch}.$extension',
+      ),
+    );
+
+    await tempFile.writeAsBytes(audioBytes);
+    return tempFile;
+  }
+
+  /// Run local Whisper inference on audio file
+  Future<TranscriptionResult> _runLocalWhisperInference(
+    File audioFile,
+    TranscriptionRequest request,
+  ) async {
+    debugPrint(
+      'LocalWhisperService: Running inference with local Whisper model',
+    );
+
+    // For now, return a mock result as actual Whisper.cpp integration
+    // would require platform-specific native code implementation
+    final mockTranscription =
+        '''
+This is a mock transcription result from the local Whisper service.
+In a real implementation, this would invoke the actual Whisper.cpp library
+or a Flutter plugin that interfaces with the native Whisper implementation.
+
+The audio file being processed is: ${audioFile.path}
+Using model: $_currentModel
+Language: ${request.language?.displayName ?? 'auto-detect'}
+''';
+
+    return TranscriptionResult(
+      text: mockTranscription,
+      confidence: 0.95,
+      language: request.language == TranscriptionLanguage.auto
+          ? TranscriptionLanguage.english
+          : request.language,
+      processingTimeMs: 1000,
+      audioDurationMs: 5000,
+      segments: [
+        TranscriptionSegment(
+          text: mockTranscription,
+          start: 0.0,
+          end: 5.0,
+          confidence: 0.95,
+        ),
+      ],
+      provider: 'local_whisper',
+      model: _currentModel,
+      createdAt: DateTime.now(),
+      metadata: {
+        'service': 'local_whisper',
+        'model': _currentModel,
+        'audio_file': audioFile.path,
+        'implementation': 'mock',
+      },
+    );
   }
 }
 
