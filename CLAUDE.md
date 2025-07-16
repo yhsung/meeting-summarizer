@@ -290,6 +290,97 @@ task-master models --set-fallback gpt-4o-mini
 - **Workflow Updates**: Update workflow sections when introducing new patterns
 - **Integration Points**: Document how new components integrate with existing architecture
 - **Update Timing**: Always update documentation BEFORE git tracking to ensure commits include current structure
+- **CHANGELOG Updates**: Follow the CHANGELOG workflow for tracking major changes
+
+### CHANGELOG Management Workflow
+
+**When to Update CHANGELOG.md:**
+- New features or major functionality additions
+- Breaking changes or API modifications
+- Performance improvements with measurable impact
+- Security enhancements or vulnerability fixes
+- Dependency changes (additions, removals, major version updates)
+- Build system or development workflow improvements
+
+**CHANGELOG Update Process:**
+1. **Before Implementation**: Review current CHANGELOG structure
+2. **During Development**: Note changes that should be documented
+3. **Before Commit**: Update CHANGELOG.md [Unreleased] section with new changes
+4. **Categorize Changes**: Use appropriate sections (Added, Changed, Fixed, Removed, Security, Performance)
+5. **Include Technical Details**: Add specific implementation details, metrics, and impact
+6. **Cross-Reference**: Link to related documentation where applicable
+
+**CHANGELOG Entry Format:**
+```markdown
+### Added
+- **Feature Name**: Brief description
+  - Technical detail 1
+  - Technical detail 2
+  - Impact or benefit statement
+
+### Changed  
+- **Component/System Modified**: Description of change
+  - Migration notes if applicable
+  - Performance impact if measurable
+
+### Fixed
+- **Issue Description**: Brief explanation of problem and solution
+  - Root cause identification
+  - Prevention measures implemented
+
+### Performance
+- **Optimization Area**: Description with metrics
+  - **Before**: Previous performance measurement
+  - **After**: New performance measurement  
+  - **Improvement**: Percentage or time savings
+```
+
+**Agent Workflow for CHANGELOG Updates:**
+1. **Change Detection**: Use Task tool to identify files modified since last CHANGELOG update
+2. **Impact Assessment**: Analyze changes for user-facing impact, performance implications, or architectural significance
+3. **Category Classification**: Determine appropriate CHANGELOG section(s)
+4. **Documentation**: Write clear, technical entries with context and impact
+5. **Validation**: Ensure entries follow Keep a Changelog format
+6. **Integration**: Update CHANGELOG.md before committing related code changes
+
+**Automated CHANGELOG Maintenance:**
+
+Use this workflow when major changes are detected:
+
+```bash
+# 1. Detect changes since last CHANGELOG update
+git log --oneline --since="$(git log -1 --format=%cd CHANGELOG.md)" --grep-invert-match="docs:" --grep-invert-match="style:"
+
+# 2. Identify significant file changes
+git diff --name-only HEAD~10..HEAD | grep -E "(lib/|test/|pubspec.yaml|\.github/)" | head -10
+
+# 3. Categorize changes by impact:
+# - New files in lib/ -> Likely "Added" features
+# - Modified core services -> Likely "Changed" functionality  
+# - Fixed test files -> Likely "Fixed" bugs
+# - CI/build changes -> Likely "Performance" or workflow improvements
+# - Dependency changes in pubspec.yaml -> Version updates
+
+# 4. Use Task tool to analyze specific changes:
+# Task: "Analyze the recent commits and file changes to identify entries that should be added to CHANGELOG.md. Focus on user-facing changes, performance improvements, bug fixes, and architectural modifications. Categorize them according to Keep a Changelog format."
+```
+
+**CHANGELOG Maintenance Triggers:**
+- Before major releases or version tags
+- After completing significant feature implementations
+- When dependency versions are updated
+- After performance optimizations are implemented
+- Before creating pull requests for review
+- During periodic documentation reviews
+
+**Quality Checklist for CHANGELOG Entries:**
+- [ ] Entry follows Keep a Changelog format
+- [ ] Technical details include specific impact or metrics
+- [ ] Breaking changes are clearly marked
+- [ ] Cross-references to documentation are included
+- [ ] Entry is in the correct category (Added, Changed, Fixed, etc.)
+- [ ] Language is clear and accessible to developers and users
+- [ ] Migration notes are provided for breaking changes
 
 ### Iterative Implementation
 
