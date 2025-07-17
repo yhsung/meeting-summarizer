@@ -112,6 +112,9 @@ class LocalWhisperService implements TranscriptionServiceInterface {
       // Initialize usage monitor first
       await _usageMonitor.initialize();
 
+      // Clean up old temporary files
+      await _cleanupOldTempFiles();
+
       // Mark as initialized so downloadModel can be called
       _isInitialized = true;
 
@@ -272,12 +275,24 @@ class LocalWhisperService implements TranscriptionServiceInterface {
       );
     }
 
-    // For sandboxed environments, we might need to copy the file to a temporary location
-    // that the native library can access
-    final tempDir = await getTemporaryDirectory();
+    // For sandboxed environments, use Application Support directory instead of temp directory
+    // This ensures the native library can access the file
+    final appSupportDir = await getApplicationSupportDirectory();
+    final whisperTempDir = Directory(
+      path.join(appSupportDir.path, 'whisper_temp'),
+    );
+
+    // Create whisper temp directory if it doesn't exist
+    if (!await whisperTempDir.exists()) {
+      await whisperTempDir.create(recursive: true);
+      debugPrint(
+        'LocalWhisperService: Created whisper temp directory: ${whisperTempDir.path}',
+      );
+    }
+
     final tempFile = File(
       path.join(
-        tempDir.path,
+        whisperTempDir.path,
         'whisper_audio_${DateTime.now().millisecondsSinceEpoch}.$extension',
       ),
     );
@@ -325,6 +340,71 @@ class LocalWhisperService implements TranscriptionServiceInterface {
 
     return tempFile;
   }
+
+  /// Test if a file is accessible by attempting to read it
+  Future<bool> _testFileAccess(File file) async {
+    try {
+      // Try to read a small portion of the file to test access
+      final bytes = await file.openRead(0, 10).first;
+      return bytes.isNotEmpty;
+    } catch (e) {
+      debugPrint('LocalWhisperService: File access test failed: $e');
+      return false;
+    }
+  }
+
+  /// Clean up old temporary audio files
+  Future<void> _cleanupOldTempFiles() async {
+    try {
+      final appSupportDir = await getApplicationSupportDirectory();
+      final whisperTempDir = Directory(
+        path.join(appSupportDir.path, 'whisper_temp'),
+      );
+
+      if (!await whisperTempDir.exists()) {
+        return;
+      }
+
+      // Clean up files older than 1 hour
+      final cutoffTime = DateTime.now().subtract(const Duration(hours: 1));
+
+      await for (final entity in whisperTempDir.list()) {
+        if (entity is File) {
+          try {
+            final stat = await entity.stat();
+            if (stat.modified.isBefore(cutoffTime)) {
+              await entity.delete();
+              debugPrint(
+                'LocalWhisperService: Cleaned up old temp file: ${entity.path}',
+              );
+            }
+          } catch (e) {
+            debugPrint(
+              'LocalWhisperService: Could not clean up temp file ${entity.path}: $e',
+            );
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('LocalWhisperService: Cleanup failed: $e');
+    }
+  }
+
+  /// Check if the app is running in a sandboxed environment
+  bool _isSandboxed() {
+    // On macOS, check for the presence of the sandbox container
+    try {
+      final appSupportPath = Platform.environment['HOME'];
+      if (appSupportPath != null && appSupportPath.contains('Containers')) {
+        debugPrint('LocalWhisperService: Detected sandboxed environment');
+        return true;
+      }
+    } catch (e) {
+      debugPrint('LocalWhisperService: Could not determine sandbox status: $e');
+    }
+    return false;
+  }
+
 
   /// Parse transcription segments from Whisper output
   List<TranscriptionSegment> _parseTranscriptionSegments(
@@ -1051,16 +1131,32 @@ class LocalWhisperService implements TranscriptionServiceInterface {
     List<int> audioBytes,
     String? audioFormat,
   ) async {
-    final tempDir = await getTemporaryDirectory();
+    // Use Application Support directory for better sandbox compatibility
+    final appSupportDir = await getApplicationSupportDirectory();
+    final whisperTempDir = Directory(
+      path.join(appSupportDir.path, 'whisper_temp'),
+    );
+
+    // Create whisper temp directory if it doesn't exist
+    if (!await whisperTempDir.exists()) {
+      await whisperTempDir.create(recursive: true);
+      debugPrint(
+        'LocalWhisperService: Created whisper temp directory: ${whisperTempDir.path}',
+      );
+    }
+
     final extension = audioFormat?.toLowerCase() ?? 'wav';
     final tempFile = File(
       path.join(
-        tempDir.path,
+        whisperTempDir.path,
         'temp_audio_${DateTime.now().millisecondsSinceEpoch}.$extension',
       ),
     );
 
     await tempFile.writeAsBytes(audioBytes);
+    debugPrint(
+      'LocalWhisperService: Created temporary audio file: ${tempFile.path} (${audioBytes.length} bytes)',
+    );
     return tempFile;
   }
 
@@ -1100,6 +1196,23 @@ class LocalWhisperService implements TranscriptionServiceInterface {
       debugPrint(
         'LocalWhisperService: Audio file exists: ${await wavFile.exists()}',
       );
+      debugPrint(
+        'LocalWhisperService: Sandboxed environment: ${_isSandboxed()}',
+      );
+
+      // Additional debug info for sandboxed environments
+      try {
+        final fileStats = await wavFile.stat();
+        debugPrint(
+          'LocalWhisperService: File permissions mode: ${fileStats.mode}',
+        );
+        debugPrint('LocalWhisperService: File type: ${fileStats.type}');
+        debugPrint(
+          'LocalWhisperService: File is accessible: ${await _testFileAccess(wavFile)}',
+        );
+      } catch (e) {
+        debugPrint('LocalWhisperService: Could not read file stats: $e');
+      }
 
       // Create transcription request
       final transcribeRequest = TranscribeRequest(
@@ -1107,6 +1220,8 @@ class LocalWhisperService implements TranscriptionServiceInterface {
         isTranslate: request.language == TranscriptionLanguage.auto,
         isNoTimestamps: false,
         splitOnWord: true,
+        isSpecialTokens: false,
+        diarize: request.enableSpeakerDiarization,
       );
 
       // Perform transcription
