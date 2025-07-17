@@ -57,6 +57,10 @@ dependencies:
   # Cryptography dependencies
   crypto: ^3.0.5
   
+  # Google Cloud Speech-to-Text API
+  googleapis: ^13.2.0
+  googleapis_auth: ^1.6.0
+  
   # File preview and thumbnail generation dependencies
   image: ^4.1.7
   flutter_image_compress: ^2.2.0

@@ -227,7 +227,7 @@ class TranscriptionServiceFactory {
       case TranscriptionProvider.localWhisper:
         return LocalWhisperService.getInstance();
       case TranscriptionProvider.googleSpeechToText:
-        return GoogleSpeechService(apiKeyService: _apiKeyService);
+        return GoogleSpeechService.getInstance();
       case TranscriptionProvider.anthropicTranscription:
         return AnthropicTranscriptionService(apiKeyService: _apiKeyService);
     }
