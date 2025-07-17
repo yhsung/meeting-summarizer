@@ -1,6 +1,8 @@
 /// Demo test to show Google Speech service initialization status
 library;
 
+import 'dart:developer';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_summarizer/core/services/google_speech_service.dart';
 
@@ -14,47 +16,47 @@ void main() {
       // Get detailed initialization status
       final status = await service.getInitializationStatus();
 
-      // Print setup information (normally would use logging in production)
-      print('\n🎤 Google Speech-to-Text Service Setup Status:');
-      print('  • Initialized: ${status['isInitialized']}');
-      print('  • Setup Required: ${status['setupRequired']}');
-      print('  • Has API Key: ${status['hasApiKey']}');
-      print('  • Has Auth Client: ${status['hasAuthClient']}');
+      // Log setup information (normally would use logging in production)
+      log('\n🎤 Google Speech-to-Text Service Setup Status:');
+      log('  • Initialized: ${status['isInitialized']}');
+      log('  • Setup Required: ${status['setupRequired']}');
+      log('  • Has API Key: ${status['hasApiKey']}');
+      log('  • Has Auth Client: ${status['hasAuthClient']}');
 
       final credentials = status['credentialsFound'] as Map<String, dynamic>;
-      print('\n🔍 Credentials Check:');
-      print('  • API Key from Environment: ${credentials['apiKeyFromEnv']}');
-      print(
+      log('\n🔍 Credentials Check:');
+      log('  • API Key from Environment: ${credentials['apiKeyFromEnv']}');
+      log(
         '  • Service Account from Environment: ${credentials['serviceAccountFromEnv']}',
       );
-      print('  • Has Any Credentials: ${credentials['hasAnyCredentials']}');
+      log('  • Has Any Credentials: ${credentials['hasAnyCredentials']}');
 
-      print('\n📋 Environment Variables Checked:');
+      log('\n📋 Environment Variables Checked:');
       final envVars =
           credentials['environmentVariablesChecked'] as List<String>;
       for (final envVar in envVars) {
-        print('  • $envVar');
+        log('  • $envVar');
       }
 
-      print('\n🛠️ Setup Steps Required:');
+      log('\n🛠️ Setup Steps Required:');
       final setupSteps = status['setupSteps'] as List<String>;
       for (final step in setupSteps) {
-        print('  $step');
+        log('  $step');
       }
 
       // Test service availability
       final isAvailable = await service.isServiceAvailable();
-      print('\n✅ Service Availability: $isAvailable');
+      log('\n✅ Service Availability: $isAvailable');
 
       if (!isAvailable) {
-        print('\n❌ Service Setup Required!');
-        print(
+        log('\n❌ Service Setup Required!');
+        log(
           'The Google Speech-to-Text service requires proper authentication.',
         );
-        print('Please follow the setup steps above to configure credentials.');
+        log('Please follow the setup steps above to configure credentials.');
       } else {
-        print('\n✅ Service Ready!');
-        print(
+        log('\n✅ Service Ready!');
+        log(
           'The Google Speech-to-Text service is properly configured and ready to use.',
         );
       }

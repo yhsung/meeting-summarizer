@@ -331,9 +331,7 @@ class PreviewService implements PreviewServiceInterface {
       } catch (e) {
         // Continue with next file on error
         if (kDebugMode) {
-          log(
-            'Failed to generate thumbnail for ${fileMetadata.fileName}: $e',
-          );
+          log('Failed to generate thumbnail for ${fileMetadata.fileName}: $e');
         }
       }
 
