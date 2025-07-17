@@ -1,7 +1,8 @@
 /// Service for managing selected transcription provider
 library;
 
-import 'package:flutter/foundation.dart';
+import 'dart:developer';
+
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'transcription_service_factory.dart';
@@ -24,7 +25,7 @@ class TranscriptionProviderService {
       final providerString = await _secureStorage.read(key: _providerKey);
 
       if (providerString == null) {
-        debugPrint(
+        log(
           'TranscriptionProviderService: No provider selected, using default',
         );
         return _defaultProvider;
@@ -35,10 +36,10 @@ class TranscriptionProviderService {
         orElse: () => _defaultProvider,
       );
 
-      debugPrint('TranscriptionProviderService: Selected provider: $provider');
+      log('TranscriptionProviderService: Selected provider: $provider');
       return provider;
     } catch (e) {
-      debugPrint('TranscriptionProviderService: Error getting provider: $e');
+      log('TranscriptionProviderService: Error getting provider: $e');
       return _defaultProvider;
     }
   }
@@ -47,9 +48,9 @@ class TranscriptionProviderService {
   Future<void> setSelectedProvider(TranscriptionProvider provider) async {
     try {
       await _secureStorage.write(key: _providerKey, value: provider.name);
-      debugPrint('TranscriptionProviderService: Provider set to: $provider');
+      log('TranscriptionProviderService: Provider set to: $provider');
     } catch (e) {
-      debugPrint('TranscriptionProviderService: Error setting provider: $e');
+      log('TranscriptionProviderService: Error setting provider: $e');
       rethrow;
     }
   }
@@ -63,7 +64,7 @@ class TranscriptionProviderService {
       final service = TranscriptionServiceFactory.getService(provider);
       return await service.isServiceAvailable();
     } catch (e) {
-      debugPrint(
+      log(
         'TranscriptionProviderService: Error checking provider availability: $e',
       );
       return false;
@@ -87,7 +88,7 @@ class TranscriptionProviderService {
     final forceLocalWhisper = await getForceLocalWhisperOverride();
 
     if (forceLocalWhisper) {
-      debugPrint(
+      log(
         'TranscriptionProviderService: Forcing Local Whisper provider (user setting)',
       );
       return TranscriptionProvider.localWhisper;
@@ -98,7 +99,7 @@ class TranscriptionProviderService {
 
     // Check if selected provider is available
     if (await isProviderAvailable(selectedProvider)) {
-      debugPrint(
+      log(
         'TranscriptionProviderService: Using selected provider: $selectedProvider',
       );
       return selectedProvider;
@@ -114,7 +115,7 @@ class TranscriptionProviderService {
         .key;
 
     if (availableProvider != selectedProvider) {
-      debugPrint(
+      log(
         'TranscriptionProviderService: Selected provider unavailable, using fallback: $availableProvider',
       );
     }
@@ -126,9 +127,9 @@ class TranscriptionProviderService {
   Future<void> clearSelectedProvider() async {
     try {
       await _secureStorage.delete(key: _providerKey);
-      debugPrint('TranscriptionProviderService: Provider selection cleared');
+      log('TranscriptionProviderService: Provider selection cleared');
     } catch (e) {
-      debugPrint('TranscriptionProviderService: Error clearing provider: $e');
+      log('TranscriptionProviderService: Error clearing provider: $e');
       rethrow;
     }
   }
@@ -140,7 +141,7 @@ class TranscriptionProviderService {
       // If no value is set, default to false for normal provider selection
       return value == 'true';
     } catch (e) {
-      debugPrint(
+      log(
         'TranscriptionProviderService: Error getting force local whisper setting: $e',
       );
       return false; // Default to false (normal provider selection)
@@ -154,11 +155,11 @@ class TranscriptionProviderService {
         key: _forceLocalWhisperKey,
         value: enabled.toString(),
       );
-      debugPrint(
+      log(
         'TranscriptionProviderService: Force local whisper override set to: $enabled',
       );
     } catch (e) {
-      debugPrint(
+      log(
         'TranscriptionProviderService: Error setting force local whisper override: $e',
       );
       rethrow;
@@ -169,11 +170,11 @@ class TranscriptionProviderService {
   Future<void> clearForceLocalWhisperOverride() async {
     try {
       await _secureStorage.delete(key: _forceLocalWhisperKey);
-      debugPrint(
+      log(
         'TranscriptionProviderService: Force local whisper override cleared',
       );
     } catch (e) {
-      debugPrint(
+      log(
         'TranscriptionProviderService: Error clearing force local whisper override: $e',
       );
       rethrow;

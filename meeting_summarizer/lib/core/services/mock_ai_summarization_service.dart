@@ -3,7 +3,8 @@ library;
 
 import 'dart:async';
 import 'dart:math' as math;
-import 'package:flutter/foundation.dart';
+import 'dart:developer';
+
 import 'package:uuid/uuid.dart';
 
 import 'base_ai_summarization_service.dart';
@@ -31,7 +32,7 @@ class MockAISummarizationService extends BaseAISummarizationService {
     // Register specialized processors
     _registerSpecializedProcessors();
 
-    debugPrint(
+    log(
       'MockAISummarizationService: Initialized with specialized processors',
     );
   }
@@ -175,7 +176,7 @@ Proceed with implementation as planned with weekly progress reviews.
 
   @override
   Future<void> disposeProvider() async {
-    debugPrint('MockAISummarizationService: Disposed');
+    log('MockAISummarizationService: Disposed');
   }
 
   @override

@@ -2,7 +2,8 @@
 library;
 
 import 'dart:async';
-import 'package:flutter/foundation.dart';
+import 'dart:developer';
+
 import 'package:uuid/uuid.dart';
 
 import '../enums/summary_type.dart';
@@ -139,7 +140,7 @@ class BriefSummaryProcessor extends SummaryTypeProcessor {
       // Parse response and create action items
       return _parseActionItems(response);
     } catch (e) {
-      debugPrint('BriefSummaryProcessor: Action item extraction failed: $e');
+      log('BriefSummaryProcessor: Action item extraction failed: $e');
       return [];
     }
   }
@@ -154,7 +155,7 @@ class BriefSummaryProcessor extends SummaryTypeProcessor {
 
       return _parseKeyDecisions(response);
     } catch (e) {
-      debugPrint('BriefSummaryProcessor: Decision extraction failed: $e');
+      log('BriefSummaryProcessor: Decision extraction failed: $e');
       return [];
     }
   }
@@ -172,7 +173,7 @@ class BriefSummaryProcessor extends SummaryTypeProcessor {
 
       return _parseTopics(response);
     } catch (e) {
-      debugPrint('BriefSummaryProcessor: Topic extraction failed: $e');
+      log('BriefSummaryProcessor: Topic extraction failed: $e');
       return [];
     }
   }
@@ -407,7 +408,7 @@ Provide detailed action items with:
       );
       return _parseDetailedActionItems(response);
     } catch (e) {
-      debugPrint('DetailedSummaryProcessor: Action item extraction failed: $e');
+      log('DetailedSummaryProcessor: Action item extraction failed: $e');
       return [];
     }
   }
@@ -427,7 +428,7 @@ Include context, rationale, and implications for each decision.''';
       );
       return _parseDetailedDecisions(response);
     } catch (e) {
-      debugPrint('DetailedSummaryProcessor: Decision extraction failed: $e');
+      log('DetailedSummaryProcessor: Decision extraction failed: $e');
       return [];
     }
   }
@@ -448,7 +449,7 @@ Include context, rationale, and implications for each decision.''';
 
       return _parseDetailedTopics(response);
     } catch (e) {
-      debugPrint('DetailedSummaryProcessor: Topic extraction failed: $e');
+      log('DetailedSummaryProcessor: Topic extraction failed: $e');
       return [];
     }
   }

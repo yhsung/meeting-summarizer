@@ -2,7 +2,8 @@
 library;
 
 import 'dart:async';
-import 'package:flutter/foundation.dart';
+import 'dart:developer';
+
 import 'package:uuid/uuid.dart';
 
 import '../enums/summary_type.dart';
@@ -217,7 +218,7 @@ class MeetingNotesProcessor extends SummaryTypeProcessor {
         return Duration(hours: hours, minutes: minutes, seconds: seconds);
       }
     } catch (e) {
-      debugPrint('MeetingNotesProcessor: Failed to parse time "$timeStr": $e');
+      log('MeetingNotesProcessor: Failed to parse time "$timeStr": $e');
     }
     return null;
   }
@@ -437,7 +438,7 @@ Return action items with timeline context.''';
       final response = await aiCall(prompt, systemPrompt);
       return _parseTimestampedActionItems(response, timestampData);
     } catch (e) {
-      debugPrint('MeetingNotesProcessor: Action item extraction failed: $e');
+      log('MeetingNotesProcessor: Action item extraction failed: $e');
       return [];
     }
   }
@@ -475,7 +476,7 @@ Return decisions with timeline context.''';
       final response = await aiCall(prompt, systemPrompt);
       return _parseTimestampedDecisions(response, timestampData);
     } catch (e) {
-      debugPrint('MeetingNotesProcessor: Decision extraction failed: $e');
+      log('MeetingNotesProcessor: Decision extraction failed: $e');
       return [];
     }
   }
@@ -513,7 +514,7 @@ Return topics with timeline context.''';
       final response = await aiCall(prompt, systemPrompt);
       return _parseTimestampedTopics(response, timestampData);
     } catch (e) {
-      debugPrint('MeetingNotesProcessor: Topic extraction failed: $e');
+      log('MeetingNotesProcessor: Topic extraction failed: $e');
       return [];
     }
   }

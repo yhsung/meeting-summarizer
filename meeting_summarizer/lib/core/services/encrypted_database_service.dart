@@ -1,5 +1,6 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
+import 'dart:developer';
+
 import '../database/database_helper.dart';
 import '../models/database/recording.dart';
 import '../models/database/transcription.dart';
@@ -40,14 +41,14 @@ class EncryptedDatabaseService {
       if (_encryptionEnabled) {
         // Get or create default encryption key
         _defaultEncryptionKeyId = await _getOrCreateDefaultEncryptionKey();
-        debugPrint('EncryptedDatabaseService: Encryption enabled');
+        log('EncryptedDatabaseService: Encryption enabled');
       } else {
-        debugPrint('EncryptedDatabaseService: Encryption disabled');
+        log('EncryptedDatabaseService: Encryption disabled');
       }
 
-      debugPrint('EncryptedDatabaseService: Initialized successfully');
+      log('EncryptedDatabaseService: Initialized successfully');
     } catch (e) {
-      debugPrint('EncryptedDatabaseService: Initialization failed: $e');
+      log('EncryptedDatabaseService: Initialization failed: $e');
       rethrow;
     }
   }
@@ -77,7 +78,7 @@ class EncryptedDatabaseService {
       _defaultEncryptionKeyId = await _getOrCreateDefaultEncryptionKey();
     }
 
-    debugPrint(
+    log(
       'EncryptedDatabaseService: Encryption ${enabled ? 'enabled' : 'disabled'}',
     );
   }
@@ -100,12 +101,12 @@ class EncryptedDatabaseService {
       }
 
       final result = await _databaseHelper!.insertRecording(processedRecording);
-      debugPrint(
+      log(
         'EncryptedDatabaseService: Inserted recording ${recording.id} with encryption: $_encryptionEnabled',
       );
       return result;
     } catch (e) {
-      debugPrint('EncryptedDatabaseService: Failed to insert recording: $e');
+      log('EncryptedDatabaseService: Failed to insert recording: $e');
       rethrow;
     }
   }
@@ -122,7 +123,7 @@ class EncryptedDatabaseService {
 
       return recording;
     } catch (e) {
-      debugPrint('EncryptedDatabaseService: Failed to get recording: $e');
+      log('EncryptedDatabaseService: Failed to get recording: $e');
       return null;
     }
   }
@@ -137,12 +138,12 @@ class EncryptedDatabaseService {
       }
 
       final result = await _databaseHelper!.updateRecording(processedRecording);
-      debugPrint(
+      log(
         'EncryptedDatabaseService: Updated recording ${recording.id} with encryption: $_encryptionEnabled',
       );
       return result;
     } catch (e) {
-      debugPrint('EncryptedDatabaseService: Failed to update recording: $e');
+      log('EncryptedDatabaseService: Failed to update recording: $e');
       return false;
     }
   }
@@ -220,7 +221,7 @@ class EncryptedDatabaseService {
         metadata: encryptedMetadata ?? recording.metadata,
       );
     } catch (e) {
-      debugPrint(
+      log(
         'EncryptedDatabaseService: Encryption failed for recording: $e',
       );
       return recording; // Return unencrypted on failure
@@ -319,7 +320,7 @@ class EncryptedDatabaseService {
         metadata: decryptedMetadata,
       );
     } catch (e) {
-      debugPrint(
+      log(
         'EncryptedDatabaseService: Decryption failed for recording: $e',
       );
       return recording; // Return as-is on failure
@@ -342,12 +343,12 @@ class EncryptedDatabaseService {
       final result = await _databaseHelper!.insertTranscription(
         processedTranscription,
       );
-      debugPrint(
+      log(
         'EncryptedDatabaseService: Inserted transcription ${transcription.id} with encryption: $_encryptionEnabled',
       );
       return result;
     } catch (e) {
-      debugPrint(
+      log(
         'EncryptedDatabaseService: Failed to insert transcription: $e',
       );
       rethrow;
@@ -366,7 +367,7 @@ class EncryptedDatabaseService {
 
       return transcription;
     } catch (e) {
-      debugPrint('EncryptedDatabaseService: Failed to get transcription: $e');
+      log('EncryptedDatabaseService: Failed to get transcription: $e');
       return null;
     }
   }
@@ -391,7 +392,7 @@ class EncryptedDatabaseService {
 
       return transcription.copyWith(text: encryptedText ?? transcription.text);
     } catch (e) {
-      debugPrint(
+      log(
         'EncryptedDatabaseService: Encryption failed for transcription: $e',
       );
       return transcription;
@@ -425,7 +426,7 @@ class EncryptedDatabaseService {
 
       return transcription.copyWith(text: decryptedText);
     } catch (e) {
-      debugPrint(
+      log(
         'EncryptedDatabaseService: Decryption failed for transcription: $e',
       );
       return transcription;
@@ -509,7 +510,7 @@ class EncryptedDatabaseService {
 
       return await _databaseHelper!.updateTranscription(processedTranscription);
     } catch (e) {
-      debugPrint(
+      log(
         'EncryptedDatabaseService: Failed to update transcription: $e',
       );
       return false;
@@ -576,7 +577,7 @@ class EncryptedDatabaseService {
       throw Exception('Encryption not enabled');
     }
 
-    debugPrint('EncryptedDatabaseService: Starting encryption migration');
+    log('EncryptedDatabaseService: Starting encryption migration');
 
     try {
       // Get all recordings and re-encrypt them
@@ -599,9 +600,9 @@ class EncryptedDatabaseService {
         await _databaseHelper!.updateTranscription(encryptedTranscription);
       }
 
-      debugPrint('EncryptedDatabaseService: Encryption migration completed');
+      log('EncryptedDatabaseService: Encryption migration completed');
     } catch (e) {
-      debugPrint('EncryptedDatabaseService: Encryption migration failed: $e');
+      log('EncryptedDatabaseService: Encryption migration failed: $e');
       rethrow;
     }
   }

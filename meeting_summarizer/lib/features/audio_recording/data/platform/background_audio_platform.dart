@@ -1,6 +1,6 @@
 import 'dart:io';
+import 'dart:developer';
 
-import 'package:flutter/foundation.dart';
 
 import 'audio_recording_platform.dart';
 
@@ -63,11 +63,11 @@ class BackgroundIOSAudioPlatform extends IOSAudioRecordingPlatform
     try {
       // Configure AVAudioSession for background recording
       // This would require native iOS implementation
-      debugPrint('iOS: Enabling background audio session');
+      log('iOS: Enabling background audio session');
       _backgroundSessionEnabled = true;
       return true;
     } catch (e) {
-      debugPrint('iOS: Failed to enable background session: $e');
+      log('iOS: Failed to enable background session: $e');
       return false;
     }
   }
@@ -75,13 +75,13 @@ class BackgroundIOSAudioPlatform extends IOSAudioRecordingPlatform
   @override
   Future<void> disableBackgroundSession() async {
     try {
-      debugPrint('iOS: Disabling background audio session');
+      log('iOS: Disabling background audio session');
       _backgroundSessionEnabled = false;
       if (_backgroundTaskActive) {
         await stopBackgroundTask();
       }
     } catch (e) {
-      debugPrint('iOS: Failed to disable background session: $e');
+      log('iOS: Failed to disable background session: $e');
     }
   }
 
@@ -98,10 +98,10 @@ class BackgroundIOSAudioPlatform extends IOSAudioRecordingPlatform
   }) async {
     try {
       // Start iOS background task
-      debugPrint('iOS: Starting background task for session $sessionId');
+      log('iOS: Starting background task for session $sessionId');
       _backgroundTaskActive = true;
     } catch (e) {
-      debugPrint('iOS: Failed to start background task: $e');
+      log('iOS: Failed to start background task: $e');
       rethrow;
     }
   }
@@ -109,10 +109,10 @@ class BackgroundIOSAudioPlatform extends IOSAudioRecordingPlatform
   @override
   Future<void> stopBackgroundTask() async {
     try {
-      debugPrint('iOS: Stopping background task');
+      log('iOS: Stopping background task');
       _backgroundTaskActive = false;
     } catch (e) {
-      debugPrint('iOS: Failed to stop background task: $e');
+      log('iOS: Failed to stop background task: $e');
     }
   }
 
@@ -150,7 +150,7 @@ class BackgroundIOSAudioPlatform extends IOSAudioRecordingPlatform
   Future<void> initialize() async {
     await super.initialize();
     // Additional iOS background-specific initialization
-    debugPrint('iOS: Background audio platform initialized');
+    log('iOS: Background audio platform initialized');
   }
 }
 
@@ -163,11 +163,11 @@ class BackgroundAndroidAudioPlatform extends AndroidAudioRecordingPlatform
   @override
   Future<bool> enableBackgroundSession() async {
     try {
-      debugPrint('Android: Enabling background audio session');
+      log('Android: Enabling background audio session');
       _backgroundSessionEnabled = true;
       return true;
     } catch (e) {
-      debugPrint('Android: Failed to enable background session: $e');
+      log('Android: Failed to enable background session: $e');
       return false;
     }
   }
@@ -175,13 +175,13 @@ class BackgroundAndroidAudioPlatform extends AndroidAudioRecordingPlatform
   @override
   Future<void> disableBackgroundSession() async {
     try {
-      debugPrint('Android: Disabling background audio session');
+      log('Android: Disabling background audio session');
       _backgroundSessionEnabled = false;
       if (_foregroundServiceActive) {
         await stopBackgroundTask();
       }
     } catch (e) {
-      debugPrint('Android: Failed to disable background session: $e');
+      log('Android: Failed to disable background session: $e');
     }
   }
 
@@ -198,10 +198,10 @@ class BackgroundAndroidAudioPlatform extends AndroidAudioRecordingPlatform
   }) async {
     try {
       // Start Android foreground service
-      debugPrint('Android: Starting foreground service for session $sessionId');
+      log('Android: Starting foreground service for session $sessionId');
       _foregroundServiceActive = true;
     } catch (e) {
-      debugPrint('Android: Failed to start foreground service: $e');
+      log('Android: Failed to start foreground service: $e');
       rethrow;
     }
   }
@@ -209,10 +209,10 @@ class BackgroundAndroidAudioPlatform extends AndroidAudioRecordingPlatform
   @override
   Future<void> stopBackgroundTask() async {
     try {
-      debugPrint('Android: Stopping foreground service');
+      log('Android: Stopping foreground service');
       _foregroundServiceActive = false;
     } catch (e) {
-      debugPrint('Android: Failed to stop foreground service: $e');
+      log('Android: Failed to stop foreground service: $e');
     }
   }
 
@@ -246,7 +246,7 @@ class BackgroundAndroidAudioPlatform extends AndroidAudioRecordingPlatform
   @override
   Future<void> initialize() async {
     await super.initialize();
-    debugPrint('Android: Background audio platform initialized');
+    log('Android: Background audio platform initialized');
   }
 }
 
@@ -257,14 +257,14 @@ class BackgroundMacOSAudioPlatform extends MacOSAudioRecordingPlatform
 
   @override
   Future<bool> enableBackgroundSession() async {
-    debugPrint('macOS: Enabling background audio session');
+    log('macOS: Enabling background audio session');
     _backgroundSessionEnabled = true;
     return true;
   }
 
   @override
   Future<void> disableBackgroundSession() async {
-    debugPrint('macOS: Disabling background audio session');
+    log('macOS: Disabling background audio session');
     _backgroundSessionEnabled = false;
   }
 
@@ -279,12 +279,12 @@ class BackgroundMacOSAudioPlatform extends MacOSAudioRecordingPlatform
     String? title,
     String? message,
   }) async {
-    debugPrint('macOS: Background task started for session $sessionId');
+    log('macOS: Background task started for session $sessionId');
   }
 
   @override
   Future<void> stopBackgroundTask() async {
-    debugPrint('macOS: Background task stopped');
+    log('macOS: Background task stopped');
   }
 
   @override
@@ -316,14 +316,14 @@ class BackgroundWindowsAudioPlatform extends WindowsAudioRecordingPlatform
 
   @override
   Future<bool> enableBackgroundSession() async {
-    debugPrint('Windows: Enabling background audio session');
+    log('Windows: Enabling background audio session');
     _backgroundSessionEnabled = true;
     return true;
   }
 
   @override
   Future<void> disableBackgroundSession() async {
-    debugPrint('Windows: Disabling background audio session');
+    log('Windows: Disabling background audio session');
     _backgroundSessionEnabled = false;
   }
 
@@ -338,12 +338,12 @@ class BackgroundWindowsAudioPlatform extends WindowsAudioRecordingPlatform
     String? title,
     String? message,
   }) async {
-    debugPrint('Windows: Background task started for session $sessionId');
+    log('Windows: Background task started for session $sessionId');
   }
 
   @override
   Future<void> stopBackgroundTask() async {
-    debugPrint('Windows: Background task stopped');
+    log('Windows: Background task stopped');
   }
 
   @override
@@ -375,14 +375,14 @@ class BackgroundLinuxAudioPlatform extends LinuxAudioRecordingPlatform
 
   @override
   Future<bool> enableBackgroundSession() async {
-    debugPrint('Linux: Enabling background audio session');
+    log('Linux: Enabling background audio session');
     _backgroundSessionEnabled = true;
     return true;
   }
 
   @override
   Future<void> disableBackgroundSession() async {
-    debugPrint('Linux: Disabling background audio session');
+    log('Linux: Disabling background audio session');
     _backgroundSessionEnabled = false;
   }
 
@@ -397,12 +397,12 @@ class BackgroundLinuxAudioPlatform extends LinuxAudioRecordingPlatform
     String? title,
     String? message,
   }) async {
-    debugPrint('Linux: Background task started for session $sessionId');
+    log('Linux: Background task started for session $sessionId');
   }
 
   @override
   Future<void> stopBackgroundTask() async {
-    debugPrint('Linux: Background task stopped');
+    log('Linux: Background task stopped');
   }
 
   @override
@@ -436,19 +436,19 @@ class BackgroundWebAudioPlatform extends WebAudioRecordingPlatform
   @override
   Future<bool> enableBackgroundSession() async {
     try {
-      debugPrint('Web: Enabling background audio session');
+      log('Web: Enabling background audio session');
       // In a real implementation, this would set up Page Visibility API listeners
       _backgroundSessionEnabled = true;
       return true;
     } catch (e) {
-      debugPrint('Web: Failed to enable background session: $e');
+      log('Web: Failed to enable background session: $e');
       return false;
     }
   }
 
   @override
   Future<void> disableBackgroundSession() async {
-    debugPrint('Web: Disabling background audio session');
+    log('Web: Disabling background audio session');
     _backgroundSessionEnabled = false;
   }
 
@@ -463,13 +463,13 @@ class BackgroundWebAudioPlatform extends WebAudioRecordingPlatform
     String? title,
     String? message,
   }) async {
-    debugPrint('Web: Background task started for session $sessionId');
+    log('Web: Background task started for session $sessionId');
     // Could show browser notification here
   }
 
   @override
   Future<void> stopBackgroundTask() async {
-    debugPrint('Web: Background task stopped');
+    log('Web: Background task stopped');
   }
 
   @override

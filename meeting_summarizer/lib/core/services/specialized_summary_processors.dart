@@ -2,7 +2,8 @@
 library;
 
 import 'dart:async';
-import 'package:flutter/foundation.dart';
+import 'dart:developer';
+
 import 'package:uuid/uuid.dart';
 
 import '../enums/summary_type.dart';
@@ -259,7 +260,7 @@ Provide a comprehensive list of all actionable items:''';
         return now.add(Duration(days: daysUntilFriday));
       }
     } catch (e) {
-      debugPrint(
+      log(
         'ActionItemsProcessor: Date parsing failed for "$dateStr": $e',
       );
     }
@@ -452,7 +453,7 @@ Return only strategic actions requiring executive attention.''';
       final response = await aiCall(prompt, 'Extract strategic action items.');
       return _parseExecutiveActions(response);
     } catch (e) {
-      debugPrint('ExecutiveSummaryProcessor: Action extraction failed: $e');
+      log('ExecutiveSummaryProcessor: Action extraction failed: $e');
       return [];
     }
   }
@@ -477,7 +478,7 @@ Return decisions with business impact and strategic implications.''';
       final response = await aiCall(prompt, 'Extract strategic decisions.');
       return _parseStrategicDecisions(response);
     } catch (e) {
-      debugPrint('ExecutiveSummaryProcessor: Decision extraction failed: $e');
+      log('ExecutiveSummaryProcessor: Decision extraction failed: $e');
       return [];
     }
   }

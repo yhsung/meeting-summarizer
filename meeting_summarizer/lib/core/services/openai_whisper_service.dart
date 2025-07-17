@@ -3,8 +3,8 @@ library;
 
 import 'dart:convert';
 import 'dart:io';
+import 'dart:developer';
 
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 import 'transcription_service_interface.dart';
@@ -65,7 +65,7 @@ class OpenAIWhisperService implements TranscriptionServiceInterface {
 
   @override
   Future<void> initialize() async {
-    debugPrint('OpenAIWhisperService: Initializing Whisper API service');
+    log('OpenAIWhisperService: Initializing Whisper API service');
 
     // Verify API key is available
     final apiKey = await _apiKeyService.getApiKey('openai');
@@ -75,7 +75,7 @@ class OpenAIWhisperService implements TranscriptionServiceInterface {
       );
     }
 
-    debugPrint('OpenAIWhisperService: Initialization complete');
+    log('OpenAIWhisperService: Initialization complete');
   }
 
   @override
@@ -99,7 +99,7 @@ class OpenAIWhisperService implements TranscriptionServiceInterface {
 
       return response.statusCode == 200;
     } catch (e) {
-      debugPrint('OpenAIWhisperService: Service availability check failed: $e');
+      log('OpenAIWhisperService: Service availability check failed: $e');
       return false;
     }
   }
@@ -109,7 +109,7 @@ class OpenAIWhisperService implements TranscriptionServiceInterface {
     File audioFile,
     TranscriptionRequest request,
   ) async {
-    debugPrint(
+    log(
       'OpenAIWhisperService: Starting transcription for file: ${audioFile.path}',
     );
 
@@ -160,7 +160,7 @@ class OpenAIWhisperService implements TranscriptionServiceInterface {
         },
       );
 
-      debugPrint('OpenAIWhisperService: Transcription completed successfully');
+      log('OpenAIWhisperService: Transcription completed successfully');
       return result;
     } catch (e) {
       final processingTime = DateTime.now().difference(startTime);
@@ -182,7 +182,7 @@ class OpenAIWhisperService implements TranscriptionServiceInterface {
         },
       );
 
-      debugPrint('OpenAIWhisperService: Transcription failed: $e');
+      log('OpenAIWhisperService: Transcription failed: $e');
       rethrow;
     }
   }
@@ -192,7 +192,7 @@ class OpenAIWhisperService implements TranscriptionServiceInterface {
     List<int> audioBytes,
     TranscriptionRequest request,
   ) async {
-    debugPrint('OpenAIWhisperService: Starting transcription for audio bytes');
+    log('OpenAIWhisperService: Starting transcription for audio bytes');
 
     final startTime = DateTime.now();
 
@@ -241,7 +241,7 @@ class OpenAIWhisperService implements TranscriptionServiceInterface {
         },
       );
 
-      debugPrint('OpenAIWhisperService: Transcription completed successfully');
+      log('OpenAIWhisperService: Transcription completed successfully');
       return result;
     } catch (e) {
       final processingTime = DateTime.now().difference(startTime);
@@ -263,7 +263,7 @@ class OpenAIWhisperService implements TranscriptionServiceInterface {
         },
       );
 
-      debugPrint('OpenAIWhisperService: Transcription failed: $e');
+      log('OpenAIWhisperService: Transcription failed: $e');
       rethrow;
     }
   }
@@ -276,7 +276,7 @@ class OpenAIWhisperService implements TranscriptionServiceInterface {
 
   @override
   Future<TranscriptionLanguage?> detectLanguage(File audioFile) async {
-    debugPrint(
+    log(
       'OpenAIWhisperService: Detecting language for file: ${audioFile.path}',
     );
 
@@ -290,12 +290,12 @@ class OpenAIWhisperService implements TranscriptionServiceInterface {
       // Transcribe with language detection
       final result = await transcribeAudioFile(audioFile, request);
 
-      debugPrint(
+      log(
         'OpenAIWhisperService: Detected language: ${result.language?.displayName}',
       );
       return result.language;
     } catch (e) {
-      debugPrint('OpenAIWhisperService: Language detection failed: $e');
+      log('OpenAIWhisperService: Language detection failed: $e');
       return null;
     }
   }
@@ -307,7 +307,7 @@ class OpenAIWhisperService implements TranscriptionServiceInterface {
 
   @override
   Future<void> dispose() async {
-    debugPrint('OpenAIWhisperService: Disposing service');
+    log('OpenAIWhisperService: Disposing service');
     if (!_isClientClosed) {
       _httpClient.close();
       _isClientClosed = true;
@@ -343,7 +343,7 @@ class OpenAIWhisperService implements TranscriptionServiceInterface {
       final oldestRequest = _requestTimestamps.first;
       final waitTime = _rateLimitWindow - now.difference(oldestRequest);
 
-      debugPrint(
+      log(
         'OpenAIWhisperService: Rate limit reached, waiting ${waitTime.inSeconds}s',
       );
 
@@ -436,7 +436,7 @@ class OpenAIWhisperService implements TranscriptionServiceInterface {
       multipartRequest.fields[entry.key] = entry.value.toString();
     }
 
-    debugPrint(
+    log(
       'OpenAIWhisperService: Sending transcription request to ${uri.toString()}',
     );
 
@@ -444,13 +444,13 @@ class OpenAIWhisperService implements TranscriptionServiceInterface {
     final streamedResponse = await multipartRequest.send();
     final response = await http.Response.fromStream(streamedResponse);
 
-    debugPrint(
+    log(
       'OpenAIWhisperService: Received response with status: ${response.statusCode}',
     );
 
     if (response.statusCode != 200) {
       final errorBody = response.body;
-      debugPrint('OpenAIWhisperService: API error response: $errorBody');
+      log('OpenAIWhisperService: API error response: $errorBody');
 
       Map<String, dynamic>? errorData;
       try {
@@ -512,10 +512,10 @@ class OpenAIWhisperService implements TranscriptionServiceInterface {
 
     try {
       final responseData = jsonDecode(response.body) as Map<String, dynamic>;
-      debugPrint('OpenAIWhisperService: Successfully parsed API response');
+      log('OpenAIWhisperService: Successfully parsed API response');
       return responseData;
     } catch (e) {
-      debugPrint('OpenAIWhisperService: Failed to parse API response: $e');
+      log('OpenAIWhisperService: Failed to parse API response: $e');
       throw TranscriptionError(
         type: TranscriptionErrorType.invalidRequest,
         message: 'Invalid JSON response from OpenAI API',
@@ -581,7 +581,7 @@ class OpenAIWhisperService implements TranscriptionServiceInterface {
       final durationMs = (fileSize * 8 / estimatedBitrate * 1000).round();
       return durationMs;
     } catch (e) {
-      debugPrint('OpenAIWhisperService: Could not estimate audio duration: $e');
+      log('OpenAIWhisperService: Could not estimate audio duration: $e');
       return 0;
     }
   }

@@ -5,8 +5,9 @@
 library;
 
 import 'dart:async';
-import 'dart:math';
-import 'package:flutter/foundation.dart';
+import 'dart:math' hide log;
+import 'dart:developer';
+
 
 import '../database/database_helper.dart';
 
@@ -38,7 +39,7 @@ class DatabasePerformanceService {
   }) async {
     if (_isMonitoring) return;
 
-    debugPrint('DatabasePerformanceService: Starting performance monitoring');
+    log('DatabasePerformanceService: Starting performance monitoring');
     _isMonitoring = true;
 
     _performanceMonitorTimer = Timer.periodic(interval, (timer) async {
@@ -53,7 +54,7 @@ class DatabasePerformanceService {
   void stopMonitoring() {
     if (!_isMonitoring) return;
 
-    debugPrint('DatabasePerformanceService: Stopping performance monitoring');
+    log('DatabasePerformanceService: Stopping performance monitoring');
     _performanceMonitorTimer?.cancel();
     _performanceMonitorTimer = null;
     _isMonitoring = false;
@@ -105,7 +106,7 @@ class DatabasePerformanceService {
 
       return report;
     } catch (e) {
-      debugPrint(
+      log(
         'DatabasePerformanceService: Failed to generate performance report: $e',
       );
       return {
@@ -123,7 +124,7 @@ class DatabasePerformanceService {
     final startTime = DateTime.now();
 
     try {
-      debugPrint('DatabasePerformanceService: Starting automatic optimization');
+      log('DatabasePerformanceService: Starting automatic optimization');
 
       // Run database optimization
       final optimizationResults = await _dbHelper.optimizeDatabase();
@@ -154,12 +155,12 @@ class DatabasePerformanceService {
           .inMilliseconds;
       results['success'] = true;
 
-      debugPrint(
+      log(
         'DatabasePerformanceService: Optimization completed successfully',
       );
       return results;
     } catch (e) {
-      debugPrint('DatabasePerformanceService: Optimization failed: $e');
+      log('DatabasePerformanceService: Optimization failed: $e');
       results['success'] = false;
       results['error'] = e.toString();
       return results;
@@ -175,7 +176,7 @@ class DatabasePerformanceService {
     final startTime = DateTime.now();
 
     try {
-      debugPrint('DatabasePerformanceService: Starting performance benchmark');
+      log('DatabasePerformanceService: Starting performance benchmark');
 
       // Standard query benchmarks
       final queryBenchmarks = await _dbHelper.benchmarkQueries(
@@ -208,10 +209,10 @@ class DatabasePerformanceService {
       benchmarkResults['timestamp'] = endTime.toIso8601String();
       benchmarkResults['success'] = true;
 
-      debugPrint('DatabasePerformanceService: Benchmark completed');
+      log('DatabasePerformanceService: Benchmark completed');
       return benchmarkResults;
     } catch (e) {
-      debugPrint('DatabasePerformanceService: Benchmark failed: $e');
+      log('DatabasePerformanceService: Benchmark failed: $e');
       return {
         'success': false,
         'error': e.toString(),
@@ -236,7 +237,7 @@ class DatabasePerformanceService {
   void resetMetrics() {
     _queryTimes.clear();
     _queryCount.clear();
-    debugPrint('DatabasePerformanceService: Performance metrics reset');
+    log('DatabasePerformanceService: Performance metrics reset');
   }
 
   // Private helper methods
@@ -250,7 +251,7 @@ class DatabasePerformanceService {
       // Log performance alerts
       if (level == PerformanceLevel.poor ||
           level == PerformanceLevel.critical) {
-        debugPrint(
+        log(
           'DatabasePerformanceService: Performance alert - Level: ${level.name}',
         );
 
@@ -260,7 +261,7 @@ class DatabasePerformanceService {
         }
       }
     } catch (e) {
-      debugPrint('DatabasePerformanceService: Performance check failed: $e');
+      log('DatabasePerformanceService: Performance check failed: $e');
     }
   }
 
@@ -277,7 +278,7 @@ class DatabasePerformanceService {
       if (score >= 40) return PerformanceLevel.poor;
       return PerformanceLevel.critical;
     } catch (e) {
-      debugPrint(
+      log(
         'DatabasePerformanceService: Failed to assess performance level: $e',
       );
       return PerformanceLevel.fair;
@@ -318,7 +319,7 @@ class DatabasePerformanceService {
 
       return max(0, score);
     } catch (e) {
-      debugPrint(
+      log(
         'DatabasePerformanceService: Failed to calculate performance score: $e',
       );
       return 50.0; // Default middle score
@@ -461,7 +462,7 @@ class DatabasePerformanceService {
 
       return indicators;
     } catch (e) {
-      debugPrint(
+      log(
         'DatabasePerformanceService: Failed to get health indicators: $e',
       );
       return {'overall_health': 'unknown'};
@@ -547,7 +548,7 @@ class DatabasePerformanceService {
 
       return benchmarkCount > 0 ? totalScore / benchmarkCount : 0.0;
     } catch (e) {
-      debugPrint(
+      log(
         'DatabasePerformanceService: Failed to calculate benchmark score: $e',
       );
       return 0.0;

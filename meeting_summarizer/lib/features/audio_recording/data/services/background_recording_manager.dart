@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -45,7 +46,7 @@ class BackgroundRecordingManager {
   /// Safely add event to stream controller if not disposed
   void _addEvent(BackgroundRecordingEvent event) {
     if (_isDisposed || _eventController.isClosed) {
-      debugPrint(
+      log(
         'BackgroundRecordingManager: Cannot add event after disposal: $event',
       );
       return;
@@ -63,7 +64,7 @@ class BackgroundRecordingManager {
         WidgetsBinding.instance.addObserver(_AppLifecycleObserver(this));
       } catch (e) {
         // Binding not initialized (likely in test environment)
-        debugPrint(
+        log(
           'BackgroundRecordingManager: Could not register lifecycle observer: $e',
         );
       }
@@ -77,9 +78,9 @@ class BackgroundRecordingManager {
         await _initializeWebBackground();
       }
 
-      debugPrint('BackgroundRecordingManager: Initialized successfully');
+      log('BackgroundRecordingManager: Initialized successfully');
     } catch (e) {
-      debugPrint('BackgroundRecordingManager: Initialization failed: $e');
+      log('BackgroundRecordingManager: Initialization failed: $e');
       rethrow;
     }
   }
@@ -108,7 +109,7 @@ class BackgroundRecordingManager {
 
       return _isBackgroundRecordingEnabled;
     } catch (e) {
-      debugPrint('BackgroundRecordingManager: Failed to enable background: $e');
+      log('BackgroundRecordingManager: Failed to enable background: $e');
       return false;
     }
   }
@@ -127,7 +128,7 @@ class BackgroundRecordingManager {
       _isBackgroundRecordingEnabled = false;
       _addEvent(BackgroundRecordingEvent.disabled);
     } catch (e) {
-      debugPrint(
+      log(
         'BackgroundRecordingManager: Failed to disable background: $e',
       );
     }
@@ -168,7 +169,7 @@ class BackgroundRecordingManager {
 
   /// Handle app going to background
   void _onAppBackgrounded(AppLifecycleState? previousState) async {
-    debugPrint('BackgroundRecordingManager: App backgrounded');
+    log('BackgroundRecordingManager: App backgrounded');
     _isInBackground = true;
 
     // If recording is active and background is enabled, maintain recording
@@ -186,7 +187,7 @@ class BackgroundRecordingManager {
 
   /// Handle app returning to foreground
   void _onAppForegrounded(AppLifecycleState? previousState) async {
-    debugPrint('BackgroundRecordingManager: App foregrounded');
+    log('BackgroundRecordingManager: App foregrounded');
     _isInBackground = false;
 
     // If we had a background session, transition back to foreground
@@ -205,7 +206,7 @@ class BackgroundRecordingManager {
 
   /// Handle app being detached/terminated
   void _onAppDetached() async {
-    debugPrint('BackgroundRecordingManager: App detached');
+    log('BackgroundRecordingManager: App detached');
 
     // Save any ongoing recording before termination
     if (_audioService?.currentSession?.isActive == true) {
@@ -220,7 +221,7 @@ class BackgroundRecordingManager {
     try {
       await _androidChannel.invokeMethod('initialize');
     } catch (e) {
-      debugPrint('BackgroundRecordingManager: Android init failed: $e');
+      log('BackgroundRecordingManager: Android init failed: $e');
     }
   }
 
@@ -228,14 +229,14 @@ class BackgroundRecordingManager {
     try {
       await _iosChannel.invokeMethod('initialize');
     } catch (e) {
-      debugPrint('BackgroundRecordingManager: iOS init failed: $e');
+      log('BackgroundRecordingManager: iOS init failed: $e');
     }
   }
 
   Future<void> _initializeWebBackground() async {
     // Web initialization - register page visibility change listeners
     // This would be implemented with JS interop in a real implementation
-    debugPrint('BackgroundRecordingManager: Web background initialized');
+    log('BackgroundRecordingManager: Web background initialized');
   }
 
   // Background recording control methods
@@ -254,7 +255,7 @@ class BackgroundRecordingManager {
         });
       }
     } catch (e) {
-      debugPrint(
+      log(
         'BackgroundRecordingManager: Failed to start background recording: $e',
       );
     }
@@ -268,7 +269,7 @@ class BackgroundRecordingManager {
         await _iosChannel.invokeMethod('endBackgroundTask');
       }
     } catch (e) {
-      debugPrint(
+      log(
         'BackgroundRecordingManager: Failed to stop background recording: $e',
       );
     }

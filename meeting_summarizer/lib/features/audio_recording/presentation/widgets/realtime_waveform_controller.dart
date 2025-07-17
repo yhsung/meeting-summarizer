@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 
@@ -68,7 +69,7 @@ class _RealtimeWaveformControllerState
         }
       },
       onError: (error) {
-        debugPrint('RealtimeWaveformController: Session stream error: $error');
+        log('RealtimeWaveformController: Session stream error: $error');
       },
     );
 

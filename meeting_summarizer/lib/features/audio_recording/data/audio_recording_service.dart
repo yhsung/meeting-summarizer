@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:math' as math;
+import 'dart:math' as math hide log;
+import 'dart:developer';
+
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
@@ -87,7 +89,7 @@ class AudioRecordingService implements AudioServiceInterface {
           );
           yield result.enhancedAudioData;
         } catch (e) {
-          debugPrint('AudioRecordingService: Real-time enhancement failed: $e');
+          log('AudioRecordingService: Real-time enhancement failed: $e');
           yield audioChunk; // Fallback to original audio
         }
       } else {
@@ -116,14 +118,14 @@ class AudioRecordingService implements AudioServiceInterface {
         PermissionType.microphone,
       );
       if (permissionState != PermissionState.granted) {
-        debugPrint(
+        log(
           'AudioRecordingService: Microphone permission not granted: $permissionState',
         );
       }
 
-      debugPrint('AudioRecordingService: Initialized successfully');
+      log('AudioRecordingService: Initialized successfully');
     } catch (e) {
-      debugPrint('AudioRecordingService: Initialization failed: $e');
+      log('AudioRecordingService: Initialization failed: $e');
       // Don't rethrow in test environment to allow graceful handling
       if (const bool.fromEnvironment('dart.vm.product') == false) {
         // Development/test environment - handle gracefully
@@ -141,7 +143,7 @@ class AudioRecordingService implements AudioServiceInterface {
     await _enhancementService.dispose();
     await _permissionService.dispose();
     await _sessionController.close();
-    debugPrint('AudioRecordingService: Disposed');
+    log('AudioRecordingService: Disposed');
   }
 
   @override
@@ -171,7 +173,7 @@ class AudioRecordingService implements AudioServiceInterface {
             configuration.outputDirectory ??
             (await getApplicationDocumentsDirectory()).path;
       } catch (e) {
-        debugPrint(
+        log(
           'AudioRecordingService: Failed to get documents directory: $e',
         );
         // Fallback to current directory for tests
@@ -214,12 +216,12 @@ class AudioRecordingService implements AudioServiceInterface {
         _startRecordingTimer();
         _startAmplitudeMonitoring();
       } catch (e) {
-        debugPrint('AudioRecordingService: Failed to start monitoring: $e');
+        log('AudioRecordingService: Failed to start monitoring: $e');
         // Continue recording even if monitoring fails
       }
 
       _sessionController.add(_currentSession!);
-      debugPrint('AudioRecordingService: Recording started - $_recordingPath');
+      log('AudioRecordingService: Recording started - $_recordingPath');
     } catch (e) {
       _handleUnexpectedStartFailure(e);
     }
@@ -243,7 +245,7 @@ class AudioRecordingService implements AudioServiceInterface {
       );
     }
 
-    debugPrint(
+    log(
       'AudioRecordingService: Recording start failed due to permissions: $errorMessage',
     );
   }
@@ -253,7 +255,7 @@ class AudioRecordingService implements AudioServiceInterface {
     dynamic error,
     AudioConfiguration configuration,
   ) {
-    debugPrint(
+    log(
       'AudioRecordingService: Platform recording start failed: $error',
     );
 
@@ -288,7 +290,7 @@ class AudioRecordingService implements AudioServiceInterface {
 
   /// Handle unexpected failures during recording start
   void _handleUnexpectedStartFailure(dynamic error) {
-    debugPrint(
+    log(
       'AudioRecordingService: Unexpected start recording failure: $error',
     );
 
@@ -315,10 +317,10 @@ class AudioRecordingService implements AudioServiceInterface {
       await _stopTimers();
 
       _updateSession(RecordingState.paused);
-      debugPrint('AudioRecordingService: Recording paused');
+      log('AudioRecordingService: Recording paused');
     } catch (e) {
       _updateSession(RecordingState.error, null, e.toString());
-      debugPrint('AudioRecordingService: Pause recording failed: $e');
+      log('AudioRecordingService: Pause recording failed: $e');
       rethrow;
     }
   }
@@ -335,10 +337,10 @@ class AudioRecordingService implements AudioServiceInterface {
       _startAmplitudeMonitoring();
 
       _updateSession(RecordingState.recording);
-      debugPrint('AudioRecordingService: Recording resumed');
+      log('AudioRecordingService: Recording resumed');
     } catch (e) {
       _updateSession(RecordingState.error, null, e.toString());
-      debugPrint('AudioRecordingService: Resume recording failed: $e');
+      log('AudioRecordingService: Resume recording failed: $e');
       rethrow;
     }
   }
@@ -359,7 +361,7 @@ class AudioRecordingService implements AudioServiceInterface {
       if (path != null && await File(path).exists()) {
         // For debugging, let's skip enhancement and use original file
         String finalPath = path;
-        debugPrint(
+        log(
           'AudioRecordingService: Using original file for now - $finalPath',
         );
 
@@ -370,11 +372,11 @@ class AudioRecordingService implements AudioServiceInterface {
           try {
             _updateSession(RecordingState.processing);
             finalPath = await _applyPostProcessingEnhancement(path);
-            debugPrint(
+            log(
               'AudioRecordingService: Enhancement applied - $finalPath',
             );
           } catch (e) {
-            debugPrint('AudioRecordingService: Enhancement failed: $e');
+            log('AudioRecordingService: Enhancement failed: $e');
             // Continue with original file if enhancement fails
             finalPath = path;
           }
@@ -392,7 +394,7 @@ class AudioRecordingService implements AudioServiceInterface {
         );
 
         _sessionController.add(_currentSession!);
-        debugPrint(
+        log(
           'AudioRecordingService: Recording stopped - $finalPath (${finalFileSize}B)',
         );
 
@@ -402,7 +404,7 @@ class AudioRecordingService implements AudioServiceInterface {
       }
     } catch (e) {
       _updateSession(RecordingState.error, null, e.toString());
-      debugPrint('AudioRecordingService: Stop recording failed: $e');
+      log('AudioRecordingService: Stop recording failed: $e');
       rethrow;
     }
   }
@@ -424,7 +426,7 @@ class AudioRecordingService implements AudioServiceInterface {
         _sessionController.add(_currentSession!);
       }
     } catch (e) {
-      debugPrint('AudioRecordingService: Cancel recording failed: $e');
+      log('AudioRecordingService: Cancel recording failed: $e');
       rethrow;
     }
   }
@@ -434,7 +436,7 @@ class AudioRecordingService implements AudioServiceInterface {
     try {
       return await _platform.hasPermission() && !await _platform.isRecording();
     } catch (e) {
-      debugPrint('AudioRecordingService: Ready check failed: $e');
+      log('AudioRecordingService: Ready check failed: $e');
       return false;
     }
   }
@@ -452,7 +454,7 @@ class AudioRecordingService implements AudioServiceInterface {
       );
       return state == PermissionState.granted;
     } catch (e) {
-      debugPrint('AudioRecordingService: Permission check failed: $e');
+      log('AudioRecordingService: Permission check failed: $e');
       return false;
     }
   }
@@ -474,7 +476,7 @@ class AudioRecordingService implements AudioServiceInterface {
       );
       return result.isGranted;
     } catch (e) {
-      debugPrint('AudioRecordingService: Permission request failed: $e');
+      log('AudioRecordingService: Permission request failed: $e');
       return false;
     }
   }
@@ -551,7 +553,7 @@ class AudioRecordingService implements AudioServiceInterface {
           );
           _sessionController.add(_currentSession!);
         } catch (e) {
-          debugPrint('AudioRecordingService: Amplitude monitoring error: $e');
+          log('AudioRecordingService: Amplitude monitoring error: $e');
         }
       }
     });
@@ -604,7 +606,7 @@ class AudioRecordingService implements AudioServiceInterface {
         }
       },
       onError: (error) {
-        debugPrint(
+        log(
           'AudioRecordingService: Permission monitoring error: $error',
         );
       },
@@ -613,7 +615,7 @@ class AudioRecordingService implements AudioServiceInterface {
 
   /// Handle permission state changes with graceful degradation
   void _handlePermissionStateChange(PermissionState newState) {
-    debugPrint(
+    log(
       'AudioRecordingService: Microphone permission changed to: $newState',
     );
 
@@ -644,14 +646,14 @@ class AudioRecordingService implements AudioServiceInterface {
 
   /// Handle when permission is granted
   void _handlePermissionGranted() {
-    debugPrint('AudioRecordingService: Microphone permission granted');
+    log('AudioRecordingService: Microphone permission granted');
     // Permission is now available - no action needed
     // Recording can proceed normally
   }
 
   /// Handle when permission is denied but can be requested again
   void _handlePermissionDenied() {
-    debugPrint('AudioRecordingService: Microphone permission denied');
+    log('AudioRecordingService: Microphone permission denied');
 
     if (_currentSession?.state.isActive == true) {
       _gracefullyStopRecording(
@@ -663,7 +665,7 @@ class AudioRecordingService implements AudioServiceInterface {
 
   /// Handle when permission is permanently denied
   void _handlePermissionPermanentlyDenied() {
-    debugPrint(
+    log(
       'AudioRecordingService: Microphone permission permanently denied',
     );
 
@@ -679,7 +681,7 @@ class AudioRecordingService implements AudioServiceInterface {
 
   /// Handle when permission is restricted by device policy
   void _handlePermissionRestricted() {
-    debugPrint('AudioRecordingService: Microphone permission restricted');
+    log('AudioRecordingService: Microphone permission restricted');
 
     if (_currentSession?.state.isActive == true) {
       _gracefullyStopRecording(
@@ -693,7 +695,7 @@ class AudioRecordingService implements AudioServiceInterface {
 
   /// Handle when permission has limited access (iOS 14+)
   void _handlePermissionLimited() {
-    debugPrint('AudioRecordingService: Microphone permission limited');
+    log('AudioRecordingService: Microphone permission limited');
 
     if (_currentSession?.state.isActive == true) {
       // Limited permission may still allow recording, so warn but continue
@@ -707,7 +709,7 @@ class AudioRecordingService implements AudioServiceInterface {
 
   /// Handle when permission request is in progress
   void _handlePermissionRequesting() {
-    debugPrint('AudioRecordingService: Microphone permission being requested');
+    log('AudioRecordingService: Microphone permission being requested');
 
     if (_currentSession?.state.isActive == true) {
       _updateSession(
@@ -720,7 +722,7 @@ class AudioRecordingService implements AudioServiceInterface {
 
   /// Handle when permission state is unknown
   void _handlePermissionUnknown() {
-    debugPrint('AudioRecordingService: Microphone permission state unknown');
+    log('AudioRecordingService: Microphone permission state unknown');
 
     if (_currentSession?.state.isActive == true) {
       _gracefullyStopRecording(
@@ -742,7 +744,7 @@ class AudioRecordingService implements AudioServiceInterface {
         final currentDuration = _currentSession?.duration ?? Duration.zero;
         final currentPath = _currentSession?.filePath;
 
-        debugPrint(
+        log(
           'AudioRecordingService: Gracefully stopping recording - $message',
         );
 
@@ -761,13 +763,13 @@ class AudioRecordingService implements AudioServiceInterface {
         );
 
         // Log the graceful degradation event
-        debugPrint(
+        log(
           'AudioRecordingService: Graceful degradation - Duration: $currentDuration, '
           'Path: $currentPath, Recoverable: $isRecoverable',
         );
       }
     } catch (e) {
-      debugPrint(
+      log(
         'AudioRecordingService: Error during graceful recording stop: $e',
       );
       // Fallback to basic error state
@@ -858,7 +860,7 @@ class AudioRecordingService implements AudioServiceInterface {
 
       // Provide guided flow based on current state
       final guidance = _getPermissionGuidance(currentState);
-      debugPrint(
+      log(
         'AudioRecordingService: Permission guidance - ${guidance.message}',
       );
 
@@ -879,7 +881,7 @@ class AudioRecordingService implements AudioServiceInterface {
         config: config,
       );
     } catch (e) {
-      debugPrint('AudioRecordingService: Guided permission request failed: $e');
+      log('AudioRecordingService: Guided permission request failed: $e');
       return PermissionResult.error('Permission request failed: $e');
     }
   }
@@ -969,7 +971,7 @@ class AudioRecordingService implements AudioServiceInterface {
   /// Attempt to recover from permission issues
   Future<PermissionRecoveryResult> attemptPermissionRecovery() async {
     try {
-      debugPrint('AudioRecordingService: Attempting permission recovery');
+      log('AudioRecordingService: Attempting permission recovery');
 
       // Check current state
       final currentState = await _permissionService.checkPermission(
@@ -1011,7 +1013,7 @@ class AudioRecordingService implements AudioServiceInterface {
         );
       }
     } catch (e) {
-      debugPrint('AudioRecordingService: Permission recovery failed: $e');
+      log('AudioRecordingService: Permission recovery failed: $e');
       return PermissionRecoveryResult(
         success: false,
         message: 'Permission recovery failed due to an error.',
@@ -1061,7 +1063,7 @@ class AudioRecordingService implements AudioServiceInterface {
         guidance: 'All systems ready for recording.',
       );
     } catch (e) {
-      debugPrint('AudioRecordingService: Readiness check failed: $e');
+      log('AudioRecordingService: Readiness check failed: $e');
       return RecordingReadinessResult(
         isReady: false,
         reason: 'System check failed',

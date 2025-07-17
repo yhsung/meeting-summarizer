@@ -2,7 +2,8 @@
 library;
 
 import 'dart:io';
-import 'package:flutter/foundation.dart';
+import 'dart:developer';
+
 
 import '../models/transcription_result.dart';
 import '../models/transcription_request.dart';
@@ -28,12 +29,12 @@ class AnthropicTranscriptionService implements TranscriptionServiceInterface {
     }
 
     if (_isInitialized) {
-      debugPrint('AnthropicTranscriptionService: Already initialized');
+      log('AnthropicTranscriptionService: Already initialized');
       return;
     }
 
     try {
-      debugPrint('AnthropicTranscriptionService: Initializing service');
+      log('AnthropicTranscriptionService: Initializing service');
 
       // Check if API key is available
       final apiKey = await _apiKeyService.getApiKey('anthropic');
@@ -42,11 +43,11 @@ class AnthropicTranscriptionService implements TranscriptionServiceInterface {
       }
 
       _isInitialized = true;
-      debugPrint(
+      log(
         'AnthropicTranscriptionService: Service initialized successfully',
       );
     } catch (e) {
-      debugPrint('AnthropicTranscriptionService: Failed to initialize: $e');
+      log('AnthropicTranscriptionService: Failed to initialize: $e');
       rethrow;
     }
   }
@@ -57,7 +58,7 @@ class AnthropicTranscriptionService implements TranscriptionServiceInterface {
       final apiKey = await _apiKeyService.getApiKey('anthropic');
       return apiKey != null && apiKey.isNotEmpty;
     } catch (e) {
-      debugPrint(
+      log(
         'AnthropicTranscriptionService: Error checking availability: $e',
       );
       return false;
@@ -78,7 +79,7 @@ class AnthropicTranscriptionService implements TranscriptionServiceInterface {
     }
 
     try {
-      debugPrint(
+      log(
         'AnthropicTranscriptionService: Starting transcription of ${audioFile.path}',
       );
 
@@ -103,7 +104,7 @@ class AnthropicTranscriptionService implements TranscriptionServiceInterface {
         createdAt: DateTime.now(),
       );
     } catch (e) {
-      debugPrint('AnthropicTranscriptionService: Transcription failed: $e');
+      log('AnthropicTranscriptionService: Transcription failed: $e');
       rethrow;
     }
   }
@@ -177,7 +178,7 @@ class AnthropicTranscriptionService implements TranscriptionServiceInterface {
       return;
     }
 
-    debugPrint('AnthropicTranscriptionService: Disposing service');
+    log('AnthropicTranscriptionService: Disposing service');
     _isDisposed = true;
     _isInitialized = false;
   }

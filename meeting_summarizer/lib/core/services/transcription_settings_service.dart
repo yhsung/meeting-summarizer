@@ -1,7 +1,8 @@
 /// Service for persisting transcription settings
 library;
 
-import 'package:flutter/foundation.dart';
+import 'dart:developer';
+
 
 import '../models/transcription_request.dart';
 import '../services/transcription_service_factory.dart';
@@ -30,7 +31,7 @@ class TranscriptionSettingsService {
   /// Save transcription settings
   Future<void> saveSettings(TranscriptionSettings settings) async {
     _cachedSettings = settings;
-    debugPrint('TranscriptionSettingsService: Settings saved - $settings');
+    log('TranscriptionSettingsService: Settings saved - $settings');
   }
 
   /// Load transcription settings
@@ -53,7 +54,7 @@ class TranscriptionSettingsService {
   /// Reset settings to default
   Future<void> resetSettings() async {
     _cachedSettings = _getDefaultSettings();
-    debugPrint('TranscriptionSettingsService: Settings reset to defaults');
+    log('TranscriptionSettingsService: Settings reset to defaults');
   }
 
   /// Check if settings exist
@@ -80,7 +81,7 @@ class TranscriptionSettingsService {
     final isProviderAvailable = availability[settings.provider] ?? false;
 
     if (!isProviderAvailable) {
-      debugPrint(
+      log(
         'TranscriptionSettingsService: Provider ${settings.provider} not available, falling back to default',
       );
 
@@ -104,7 +105,7 @@ class TranscriptionSettingsService {
 
     // Disable features not supported by provider
     if (!capabilities.supportsTimestamps && settings.enableTimestamps) {
-      debugPrint(
+      log(
         'TranscriptionSettingsService: Timestamps not supported by ${settings.provider}, disabling',
       );
       validatedSettings = validatedSettings.copyWith(enableTimestamps: false);
@@ -112,7 +113,7 @@ class TranscriptionSettingsService {
 
     if (!capabilities.supportsSpeakerDiarization &&
         settings.enableSpeakerDiarization) {
-      debugPrint(
+      log(
         'TranscriptionSettingsService: Speaker diarization not supported by ${settings.provider}, disabling',
       );
       validatedSettings = validatedSettings.copyWith(
@@ -122,7 +123,7 @@ class TranscriptionSettingsService {
 
     if (!capabilities.supportsCustomVocabulary &&
         settings.customPrompt != null) {
-      debugPrint(
+      log(
         'TranscriptionSettingsService: Custom vocabulary not supported by ${settings.provider}, removing prompt',
       );
       validatedSettings = validatedSettings.copyWith(customPrompt: null);

@@ -2,6 +2,8 @@
 library;
 
 import 'dart:async';
+import 'dart:developer';
+
 import 'package:flutter/foundation.dart';
 
 import 'ai_summarization_service_interface.dart';
@@ -46,7 +48,7 @@ class AISummarizationService implements AISummarizationServiceInterface {
       }
 
       _isInitialized = true;
-      debugPrint('AISummarizationService: Initialized successfully');
+      log('AISummarizationService: Initialized successfully');
     } catch (e, stackTrace) {
       throw SummarizationExceptions.initializationFailed(
         'Service initialization failed: $e',
@@ -65,9 +67,9 @@ class AISummarizationService implements AISummarizationServiceInterface {
       _activeService = null;
       _currentConfig = null;
       _isInitialized = false;
-      debugPrint('AISummarizationService: Disposed successfully');
+      log('AISummarizationService: Disposed successfully');
     } catch (e) {
-      debugPrint('AISummarizationService: Error during disposal: $e');
+      log('AISummarizationService: Error during disposal: $e');
     }
   }
 
@@ -82,7 +84,7 @@ class AISummarizationService implements AISummarizationServiceInterface {
       await _activeService!.initialize();
 
       _currentConfig = config;
-      debugPrint(
+      log(
         'AISummarizationService: Configured with ${config.provider.id}',
       );
     } catch (e, stackTrace) {

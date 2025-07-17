@@ -3,8 +3,8 @@ library;
 
 import 'dart:convert';
 import 'dart:io';
+import 'dart:developer';
 
-import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 
@@ -42,7 +42,7 @@ class TranscriptionUsageMonitor {
       if (_isInitialized) return;
 
       try {
-        debugPrint('TranscriptionUsageMonitor: Initializing usage monitoring');
+        log('TranscriptionUsageMonitor: Initializing usage monitoring');
 
         // Setup storage directories and files
         final appDocsDir = await getApplicationDocumentsDirectory();
@@ -66,9 +66,9 @@ class TranscriptionUsageMonitor {
         await _loadExistingStats();
 
         _isInitialized = true;
-        debugPrint('TranscriptionUsageMonitor: Initialization complete');
+        log('TranscriptionUsageMonitor: Initialization complete');
       } catch (e) {
-        debugPrint('TranscriptionUsageMonitor: Initialization failed: $e');
+        log('TranscriptionUsageMonitor: Initialization failed: $e');
         throw TranscriptionError(
           type: TranscriptionErrorType.configurationError,
           message: 'Failed to initialize usage monitor: $e',
@@ -93,7 +93,7 @@ class TranscriptionUsageMonitor {
     }
 
     try {
-      debugPrint(
+      log(
         'TranscriptionUsageMonitor: Recording request - '
         'Provider: $provider, Success: $success, Duration: ${processingTime.inMilliseconds}ms',
       );
@@ -123,9 +123,9 @@ class TranscriptionUsageMonitor {
         });
       }
 
-      debugPrint('TranscriptionUsageMonitor: Request recorded successfully');
+      log('TranscriptionUsageMonitor: Request recorded successfully');
     } catch (e) {
-      debugPrint('TranscriptionUsageMonitor: Failed to record request: $e');
+      log('TranscriptionUsageMonitor: Failed to record request: $e');
       // Don't throw errors for monitoring failures to avoid disrupting transcription
     }
   }
@@ -324,7 +324,7 @@ class TranscriptionUsageMonitor {
     }
 
     try {
-      debugPrint('TranscriptionUsageMonitor: Clearing all usage statistics');
+      log('TranscriptionUsageMonitor: Clearing all usage statistics');
 
       _currentStats = TranscriptionUsageStats.empty();
       await _saveStats();
@@ -334,9 +334,9 @@ class TranscriptionUsageMonitor {
         await _metricsFile!.writeAsString('[]');
       }
 
-      debugPrint('TranscriptionUsageMonitor: Usage statistics cleared');
+      log('TranscriptionUsageMonitor: Usage statistics cleared');
     } catch (e) {
-      debugPrint('TranscriptionUsageMonitor: Failed to clear stats: $e');
+      log('TranscriptionUsageMonitor: Failed to clear stats: $e');
       throw TranscriptionError(
         type: TranscriptionErrorType.configurationError,
         message: 'Failed to clear usage statistics: $e',
@@ -351,11 +351,11 @@ class TranscriptionUsageMonitor {
     if (!_isInitialized) return;
 
     try {
-      debugPrint('TranscriptionUsageMonitor: Disposing and saving final state');
+      log('TranscriptionUsageMonitor: Disposing and saving final state');
       await _saveStats();
       _isInitialized = false;
     } catch (e) {
-      debugPrint('TranscriptionUsageMonitor: Error during disposal: $e');
+      log('TranscriptionUsageMonitor: Error during disposal: $e');
     }
   }
 
@@ -368,17 +368,17 @@ class TranscriptionUsageMonitor {
         final content = await _statsFile!.readAsString();
         final json = jsonDecode(content) as Map<String, dynamic>;
         _currentStats = TranscriptionUsageStats.fromJson(json);
-        debugPrint(
+        log(
           'TranscriptionUsageMonitor: Loaded existing usage statistics',
         );
       } else {
         _currentStats = TranscriptionUsageStats.empty();
-        debugPrint(
+        log(
           'TranscriptionUsageMonitor: No existing statistics found, starting fresh',
         );
       }
     } catch (e) {
-      debugPrint(
+      log(
         'TranscriptionUsageMonitor: Error loading existing stats, starting fresh: $e',
       );
       _currentStats = TranscriptionUsageStats.empty();
@@ -393,7 +393,7 @@ class TranscriptionUsageMonitor {
         await _statsFile!.writeAsString(json);
       }
     } catch (e) {
-      debugPrint('TranscriptionUsageMonitor: Error saving stats: $e');
+      log('TranscriptionUsageMonitor: Error saving stats: $e');
     }
   }
 
@@ -424,7 +424,7 @@ class TranscriptionUsageMonitor {
 
       await _metricsFile!.writeAsString(jsonEncode(existingMetrics));
     } catch (e) {
-      debugPrint(
+      log(
         'TranscriptionUsageMonitor: Error recording detailed metrics: $e',
       );
     }

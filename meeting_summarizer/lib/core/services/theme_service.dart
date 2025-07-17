@@ -1,6 +1,8 @@
 /// Theme service for managing application theme state and persistence
 library;
 
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -61,7 +63,7 @@ class ThemeService extends ChangeNotifier {
       _isInitialized = true;
       notifyListeners();
     } catch (error) {
-      debugPrint('Failed to initialize theme service: $error');
+      log('Failed to initialize theme service: $error');
       _isInitialized = true;
       notifyListeners();
     }
@@ -75,7 +77,7 @@ class ThemeService extends ChangeNotifier {
       _themeMode = ThemeMode.system;
       _isHighContrastMode = false;
     } catch (error) {
-      debugPrint('Failed to load theme settings: $error');
+      log('Failed to load theme settings: $error');
     }
   }
 

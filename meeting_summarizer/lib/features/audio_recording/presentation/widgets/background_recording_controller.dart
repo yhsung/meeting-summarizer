@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 
@@ -45,7 +46,7 @@ class _BackgroundRecordingControllerState
     _eventSubscription = widget.audioService.backgroundEventStream.listen(
       _handleBackgroundEvent,
       onError: (error) {
-        debugPrint('BackgroundRecordingController: Event error: $error');
+        log('BackgroundRecordingController: Event error: $error');
       },
     );
 

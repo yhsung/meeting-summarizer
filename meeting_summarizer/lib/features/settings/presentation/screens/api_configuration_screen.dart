@@ -1,6 +1,8 @@
 /// API Configuration screen for managing transcription service API keys
 library;
 
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -115,21 +117,21 @@ class _ApiConfigurationScreenState extends State<ApiConfigurationScreen> {
     try {
       final providerAvailability = await _providerService
           .getAvailableProviders();
-      debugPrint('Updated provider availability: $providerAvailability');
+      log('Updated provider availability: $providerAvailability');
       setState(() {
         _providerAvailability = providerAvailability;
       });
     } catch (e) {
-      debugPrint('Failed to update provider availability: $e');
+      log('Failed to update provider availability: $e');
     }
   }
 
   Future<void> _initializeLocalWhisper() async {
-    debugPrint('Settings: Checking if LocalWhisperService is available...');
+    log('Settings: Checking if LocalWhisperService is available...');
 
     // Check if already initialized
     if (await _localWhisperService.isServiceAvailable()) {
-      debugPrint('Settings: LocalWhisperService is already available');
+      log('Settings: LocalWhisperService is already available');
       setState(() {
         _isWhisperInitialized = true;
         _whisperInitStatus = 'Service ready';
@@ -139,7 +141,7 @@ class _ApiConfigurationScreenState extends State<ApiConfigurationScreen> {
       return;
     }
 
-    debugPrint('Settings: LocalWhisperService not available, initializing...');
+    log('Settings: LocalWhisperService not available, initializing...');
 
     setState(() {
       _isWhisperInitializing = true;

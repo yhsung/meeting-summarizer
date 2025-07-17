@@ -3,7 +3,8 @@ library;
 
 import 'dart:async';
 import 'dart:math' as math;
-import 'package:flutter/foundation.dart';
+import 'dart:developer';
+
 import 'package:uuid/uuid.dart';
 
 import '../models/summarization_result.dart';
@@ -111,7 +112,7 @@ class QualityScoringService {
         configurationUsed: configuration,
       );
     } catch (e) {
-      debugPrint('QualityScoringService: Quality assessment failed: $e');
+      log('QualityScoringService: Quality assessment failed: $e');
 
       // Return a basic assessment in case of error
       return QualityAssessment(
@@ -366,7 +367,7 @@ FEEDBACK: Brief explanation of strengths and weaknesses''';
       final response = await aiCall(prompt, systemPrompt);
       return _parseAIAssessment(response);
     } catch (e) {
-      debugPrint('QualityScoringService: AI assessment failed: $e');
+      log('QualityScoringService: AI assessment failed: $e');
       return QualityDimensions(
         accuracy: 0.7,
         completeness: 0.7,

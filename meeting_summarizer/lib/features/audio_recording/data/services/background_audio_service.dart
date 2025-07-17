@@ -1,6 +1,6 @@
 import 'dart:async';
+import 'dart:developer';
 
-import 'package:flutter/foundation.dart';
 
 import '../../../../core/models/audio_configuration.dart';
 import '../../../../core/models/recording_session.dart';
@@ -43,7 +43,7 @@ class BackgroundAudioService implements AudioServiceInterface {
   /// Safely add session update to stream controller if not disposed
   void _addSessionUpdate(RecordingSession session) {
     if (_isDisposed || _sessionController.isClosed) {
-      debugPrint(
+      log(
         'BackgroundAudioService: Cannot add session update after disposal',
       );
       return;
@@ -54,7 +54,7 @@ class BackgroundAudioService implements AudioServiceInterface {
   /// Safely add background event to stream controller if not disposed
   void _addBackgroundEvent(BackgroundRecordingEvent event) {
     if (_isDisposed || _backgroundEventController.isClosed) {
-      debugPrint(
+      log(
         'BackgroundAudioService: Cannot add background event after disposal: $event',
       );
       return;
@@ -90,7 +90,7 @@ class BackgroundAudioService implements AudioServiceInterface {
       _baseServiceSubscription = _baseService.sessionStream.listen(
         _handleBaseServiceSessionUpdate,
         onError: (error) {
-          debugPrint('BackgroundAudioService: Base service error: $error');
+          log('BackgroundAudioService: Base service error: $error');
           _sessionController.addError(error);
         },
       );
@@ -99,14 +99,14 @@ class BackgroundAudioService implements AudioServiceInterface {
       _backgroundEventSubscription = _backgroundManager.eventStream.listen(
         _handleBackgroundEvent,
         onError: (error) {
-          debugPrint('BackgroundAudioService: Background event error: $error');
+          log('BackgroundAudioService: Background event error: $error');
           _backgroundEventController.addError(error);
         },
       );
 
-      debugPrint('BackgroundAudioService: Initialized successfully');
+      log('BackgroundAudioService: Initialized successfully');
     } catch (e) {
-      debugPrint('BackgroundAudioService: Initialization failed: $e');
+      log('BackgroundAudioService: Initialization failed: $e');
       rethrow;
     }
   }
@@ -130,7 +130,7 @@ class BackgroundAudioService implements AudioServiceInterface {
     // Dispose dependencies
     await _backgroundManager.dispose();
     await _baseService.dispose();
-    debugPrint('BackgroundAudioService: Disposed');
+    log('BackgroundAudioService: Disposed');
   }
 
   /// Enable background recording mode
@@ -140,14 +140,14 @@ class BackgroundAudioService implements AudioServiceInterface {
       _isBackgroundModeEnabled = success;
 
       if (success) {
-        debugPrint('BackgroundAudioService: Background mode enabled');
+        log('BackgroundAudioService: Background mode enabled');
       } else {
-        debugPrint('BackgroundAudioService: Failed to enable background mode');
+        log('BackgroundAudioService: Failed to enable background mode');
       }
 
       return success;
     } catch (e) {
-      debugPrint('BackgroundAudioService: Error enabling background mode: $e');
+      log('BackgroundAudioService: Error enabling background mode: $e');
       return false;
     }
   }
@@ -157,9 +157,9 @@ class BackgroundAudioService implements AudioServiceInterface {
     try {
       await _backgroundManager.disableBackgroundRecording();
       _isBackgroundModeEnabled = false;
-      debugPrint('BackgroundAudioService: Background mode disabled');
+      log('BackgroundAudioService: Background mode disabled');
     } catch (e) {
-      debugPrint('BackgroundAudioService: Error disabling background mode: $e');
+      log('BackgroundAudioService: Error disabling background mode: $e');
     }
   }
 
@@ -175,9 +175,9 @@ class BackgroundAudioService implements AudioServiceInterface {
         fileName: fileName,
       );
 
-      debugPrint('BackgroundAudioService: Recording started');
+      log('BackgroundAudioService: Recording started');
     } catch (e) {
-      debugPrint('BackgroundAudioService: Failed to start recording: $e');
+      log('BackgroundAudioService: Failed to start recording: $e');
       rethrow;
     }
   }
@@ -186,9 +186,9 @@ class BackgroundAudioService implements AudioServiceInterface {
   Future<void> pauseRecording() async {
     try {
       await _baseService.pauseRecording();
-      debugPrint('BackgroundAudioService: Recording paused');
+      log('BackgroundAudioService: Recording paused');
     } catch (e) {
-      debugPrint('BackgroundAudioService: Failed to pause recording: $e');
+      log('BackgroundAudioService: Failed to pause recording: $e');
       rethrow;
     }
   }
@@ -197,9 +197,9 @@ class BackgroundAudioService implements AudioServiceInterface {
   Future<void> resumeRecording() async {
     try {
       await _baseService.resumeRecording();
-      debugPrint('BackgroundAudioService: Recording resumed');
+      log('BackgroundAudioService: Recording resumed');
     } catch (e) {
-      debugPrint('BackgroundAudioService: Failed to resume recording: $e');
+      log('BackgroundAudioService: Failed to resume recording: $e');
       rethrow;
     }
   }
@@ -208,10 +208,10 @@ class BackgroundAudioService implements AudioServiceInterface {
   Future<String?> stopRecording() async {
     try {
       final result = await _baseService.stopRecording();
-      debugPrint('BackgroundAudioService: Recording stopped');
+      log('BackgroundAudioService: Recording stopped');
       return result;
     } catch (e) {
-      debugPrint('BackgroundAudioService: Failed to stop recording: $e');
+      log('BackgroundAudioService: Failed to stop recording: $e');
       rethrow;
     }
   }
@@ -220,9 +220,9 @@ class BackgroundAudioService implements AudioServiceInterface {
   Future<void> cancelRecording() async {
     try {
       await _baseService.cancelRecording();
-      debugPrint('BackgroundAudioService: Recording cancelled');
+      log('BackgroundAudioService: Recording cancelled');
     } catch (e) {
-      debugPrint('BackgroundAudioService: Failed to cancel recording: $e');
+      log('BackgroundAudioService: Failed to cancel recording: $e');
       rethrow;
     }
   }
@@ -296,10 +296,10 @@ class BackgroundAudioService implements AudioServiceInterface {
 
       // Platform-specific permission requests would go here
       // For now, return true as this would be implemented with native code
-      debugPrint('BackgroundAudioService: Background permissions requested');
+      log('BackgroundAudioService: Background permissions requested');
       return true;
     } catch (e) {
-      debugPrint('BackgroundAudioService: Failed to request permissions: $e');
+      log('BackgroundAudioService: Failed to request permissions: $e');
       return false;
     }
   }

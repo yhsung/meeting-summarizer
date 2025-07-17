@@ -2,7 +2,8 @@
 library;
 
 import 'dart:async';
-import 'package:flutter/foundation.dart';
+import 'dart:developer';
+
 
 import '../models/summarization_result.dart';
 
@@ -42,7 +43,7 @@ class TopicExtractionService {
 
       return mergedTopics.take(maxTopics).toList();
     } catch (e) {
-      debugPrint('TopicExtractionService: Topic extraction failed: $e');
+      log('TopicExtractionService: Topic extraction failed: $e');
       return _extractTopicsStatistically(transcriptionText, maxTopics);
     }
   }
@@ -285,7 +286,7 @@ DURATION: [minutes]
           topics.add(topic);
         }
       } catch (e) {
-        debugPrint('TopicExtractionService: Failed to parse topic section: $e');
+        log('TopicExtractionService: Failed to parse topic section: $e');
       }
     }
 

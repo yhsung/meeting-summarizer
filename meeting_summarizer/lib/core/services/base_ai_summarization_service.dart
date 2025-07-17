@@ -2,6 +2,8 @@
 library;
 
 import 'dart:async';
+import 'dart:developer';
+
 import 'package:flutter/foundation.dart';
 
 import 'ai_summarization_service_interface.dart';
@@ -63,7 +65,7 @@ abstract class BaseAISummarizationService
     try {
       await initializeProvider();
       _isInitialized = true;
-      debugPrint(
+      log(
         'BaseAISummarizationService: Initialized ${config.provider.id}',
       );
     } catch (e, stackTrace) {
@@ -83,9 +85,9 @@ abstract class BaseAISummarizationService
       await disposeProvider();
       _isDisposed = true;
       _isInitialized = false;
-      debugPrint('BaseAISummarizationService: Disposed ${config.provider.id}');
+      log('BaseAISummarizationService: Disposed ${config.provider.id}');
     } catch (e) {
-      debugPrint('BaseAISummarizationService: Error during disposal: $e');
+      log('BaseAISummarizationService: Error during disposal: $e');
     }
   }
 
@@ -118,7 +120,7 @@ abstract class BaseAISummarizationService
       );
 
       final processingTime = DateTime.now().difference(startTime);
-      debugPrint(
+      log(
         'BaseAISummarizationService: Generated summary in ${processingTime.inMilliseconds}ms',
       );
 
@@ -279,7 +281,7 @@ abstract class BaseAISummarizationService
         );
         results[key] = result;
       } catch (e) {
-        debugPrint(
+        log(
           'BaseAISummarizationService: Failed to generate summary for config $i: $e',
         );
         // Continue with other configurations
@@ -358,7 +360,7 @@ abstract class BaseAISummarizationService
       final healthStatus = await getHealthStatus();
       return healthStatus.isHealthy;
     } catch (e) {
-      debugPrint('BaseAISummarizationService: Health check failed: $e');
+      log('BaseAISummarizationService: Health check failed: $e');
       return false;
     }
   }

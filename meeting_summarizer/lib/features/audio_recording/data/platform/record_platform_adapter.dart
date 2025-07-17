@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:developer';
 
-import 'package:flutter/foundation.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:record/record.dart';
 
@@ -37,11 +37,11 @@ class RecordPlatformAdapter extends AudioRecordingPlatform {
       }
 
       _isInitialized = true;
-      debugPrint(
+      log(
         'RecordPlatformAdapter: Initialized for ${Platform.operatingSystem}',
       );
     } catch (e) {
-      debugPrint('RecordPlatformAdapter: Initialization failed: $e');
+      log('RecordPlatformAdapter: Initialization failed: $e');
       rethrow;
     }
   }
@@ -54,9 +54,9 @@ class RecordPlatformAdapter extends AudioRecordingPlatform {
       }
       await _recorder.dispose();
       _isInitialized = false;
-      debugPrint('RecordPlatformAdapter: Disposed');
+      log('RecordPlatformAdapter: Disposed');
     } catch (e) {
-      debugPrint('RecordPlatformAdapter: Dispose failed: $e');
+      log('RecordPlatformAdapter: Dispose failed: $e');
     }
   }
 
@@ -94,9 +94,9 @@ class RecordPlatformAdapter extends AudioRecordingPlatform {
       _isRecording = true;
       _isPaused = false;
 
-      debugPrint('RecordPlatformAdapter: Recording started - $filePath');
+      log('RecordPlatformAdapter: Recording started - $filePath');
     } catch (e) {
-      debugPrint('RecordPlatformAdapter: Start recording failed: $e');
+      log('RecordPlatformAdapter: Start recording failed: $e');
       rethrow;
     }
   }
@@ -111,9 +111,9 @@ class RecordPlatformAdapter extends AudioRecordingPlatform {
       await _recorder.pause();
       _isPaused = true;
 
-      debugPrint('RecordPlatformAdapter: Recording paused');
+      log('RecordPlatformAdapter: Recording paused');
     } catch (e) {
-      debugPrint('RecordPlatformAdapter: Pause recording failed: $e');
+      log('RecordPlatformAdapter: Pause recording failed: $e');
       rethrow;
     }
   }
@@ -128,9 +128,9 @@ class RecordPlatformAdapter extends AudioRecordingPlatform {
       await _recorder.resume();
       _isPaused = false;
 
-      debugPrint('RecordPlatformAdapter: Recording resumed');
+      log('RecordPlatformAdapter: Recording resumed');
     } catch (e) {
-      debugPrint('RecordPlatformAdapter: Resume recording failed: $e');
+      log('RecordPlatformAdapter: Resume recording failed: $e');
       rethrow;
     }
   }
@@ -147,13 +147,13 @@ class RecordPlatformAdapter extends AudioRecordingPlatform {
       _isPaused = false;
 
       if (path != null && await File(path).exists()) {
-        debugPrint('RecordPlatformAdapter: Recording stopped - $path');
+        log('RecordPlatformAdapter: Recording stopped - $path');
         return path;
       } else {
         throw Exception('Recording file not found after stop');
       }
     } catch (e) {
-      debugPrint('RecordPlatformAdapter: Stop recording failed: $e');
+      log('RecordPlatformAdapter: Stop recording failed: $e');
       rethrow;
     }
   }
@@ -169,12 +169,12 @@ class RecordPlatformAdapter extends AudioRecordingPlatform {
 
       if (_currentFilePath != null && await File(_currentFilePath!).exists()) {
         await File(_currentFilePath!).delete();
-        debugPrint('RecordPlatformAdapter: Recording file deleted');
+        log('RecordPlatformAdapter: Recording file deleted');
       }
 
       _currentFilePath = null;
     } catch (e) {
-      debugPrint('RecordPlatformAdapter: Cancel recording failed: $e');
+      log('RecordPlatformAdapter: Cancel recording failed: $e');
       rethrow;
     }
   }
@@ -185,7 +185,7 @@ class RecordPlatformAdapter extends AudioRecordingPlatform {
       final recorderState = await _recorder.isRecording();
       return recorderState && _isRecording;
     } catch (e) {
-      debugPrint('RecordPlatformAdapter: Check recording state failed: $e');
+      log('RecordPlatformAdapter: Check recording state failed: $e');
       return false;
     }
   }
@@ -200,7 +200,7 @@ class RecordPlatformAdapter extends AudioRecordingPlatform {
       final amplitude = await _recorder.getAmplitude();
       return amplitude.current.clamp(0.0, 1.0);
     } catch (e) {
-      debugPrint('RecordPlatformAdapter: Get amplitude failed: $e');
+      log('RecordPlatformAdapter: Get amplitude failed: $e');
       return 0.0;
     }
   }
@@ -210,7 +210,7 @@ class RecordPlatformAdapter extends AudioRecordingPlatform {
     try {
       return await _recorder.hasPermission();
     } catch (e) {
-      debugPrint('RecordPlatformAdapter: Permission check failed: $e');
+      log('RecordPlatformAdapter: Permission check failed: $e');
       return false;
     }
   }
@@ -221,7 +221,7 @@ class RecordPlatformAdapter extends AudioRecordingPlatform {
       final status = await Permission.microphone.request();
       return status == PermissionStatus.granted;
     } catch (e) {
-      debugPrint('RecordPlatformAdapter: Permission request failed: $e');
+      log('RecordPlatformAdapter: Permission request failed: $e');
       return false;
     }
   }
@@ -250,55 +250,55 @@ class RecordPlatformAdapter extends AudioRecordingPlatform {
   Future<void> _initializeIOS() async {
     // iOS-specific initialization
     // Configure AVAudioSession for recording
-    debugPrint('RecordPlatformAdapter: Initializing for iOS');
+    log('RecordPlatformAdapter: Initializing for iOS');
   }
 
   Future<void> _initializeAndroid() async {
     // Android-specific initialization
-    debugPrint('RecordPlatformAdapter: Initializing for Android');
+    log('RecordPlatformAdapter: Initializing for Android');
   }
 
   Future<void> _initializeMacOS() async {
     // macOS-specific initialization
-    debugPrint('RecordPlatformAdapter: Initializing for macOS');
+    log('RecordPlatformAdapter: Initializing for macOS');
 
     try {
       // Check if recording is supported on this platform
       final hasPermission = await _recorder.hasPermission();
-      debugPrint('RecordPlatformAdapter: Has permission: $hasPermission');
+      log('RecordPlatformAdapter: Has permission: $hasPermission');
 
       if (!hasPermission) {
-        debugPrint(
+        log(
           'RecordPlatformAdapter: Requesting microphone permission...',
         );
         final granted = await _recorder.hasPermission();
-        debugPrint('RecordPlatformAdapter: Permission granted: $granted');
+        log('RecordPlatformAdapter: Permission granted: $granted');
       }
 
       // Try to get input devices list to verify microphone availability
       final isRecording = await _recorder.isRecording();
-      debugPrint(
+      log(
         'RecordPlatformAdapter: Current recording state: $isRecording',
       );
 
       // Check if we can create a test recording (short duration)
-      debugPrint('RecordPlatformAdapter: Testing microphone availability...');
+      log('RecordPlatformAdapter: Testing microphone availability...');
 
-      debugPrint('RecordPlatformAdapter: Initialized for macOS');
+      log('RecordPlatformAdapter: Initialized for macOS');
     } catch (e) {
-      debugPrint('RecordPlatformAdapter: macOS initialization warning: $e');
+      log('RecordPlatformAdapter: macOS initialization warning: $e');
       // Don't throw here - allow graceful degradation
     }
   }
 
   Future<void> _initializeWindows() async {
     // Windows-specific initialization
-    debugPrint('RecordPlatformAdapter: Initializing for Windows');
+    log('RecordPlatformAdapter: Initializing for Windows');
   }
 
   Future<void> _initializeLinux() async {
     // Linux-specific initialization
-    debugPrint('RecordPlatformAdapter: Initializing for Linux');
+    log('RecordPlatformAdapter: Initializing for Linux');
   }
 
   // Helper method to get appropriate encoder for platform and format

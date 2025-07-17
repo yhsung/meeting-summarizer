@@ -1,7 +1,8 @@
 /// Factory for creating transcription service instances
 library;
 
-import 'package:flutter/foundation.dart';
+import 'dart:developer';
+
 
 import 'transcription_service_interface.dart';
 import 'openai_whisper_service.dart';
@@ -60,14 +61,14 @@ class TranscriptionServiceFactory {
     // Check OpenAI Whisper first (primary provider)
     final whisperService = getService(TranscriptionProvider.openaiWhisper);
     if (await whisperService.isServiceAvailable()) {
-      debugPrint('TranscriptionServiceFactory: Using OpenAI Whisper service');
+      log('TranscriptionServiceFactory: Using OpenAI Whisper service');
       return whisperService;
     }
 
     // Fallback to local Whisper if API is unavailable
     final localService = getService(TranscriptionProvider.localWhisper);
     if (await localService.isServiceAvailable()) {
-      debugPrint(
+      log(
         'TranscriptionServiceFactory: Using Local Whisper service as fallback',
       );
       return localService;
@@ -90,7 +91,7 @@ class TranscriptionServiceFactory {
     bool requiresSpeakerDiarization = false,
     String? preferredLanguage,
   }) async {
-    debugPrint(
+    log(
       'TranscriptionServiceFactory: Finding best service for requirements',
     );
 
@@ -99,7 +100,7 @@ class TranscriptionServiceFactory {
     final whisperService = getService(TranscriptionProvider.openaiWhisper);
 
     if (await whisperService.isServiceAvailable()) {
-      debugPrint(
+      log(
         'TranscriptionServiceFactory: Selected OpenAI Whisper service',
       );
       return whisperService;
@@ -122,7 +123,7 @@ class TranscriptionServiceFactory {
         final service = getService(provider);
         availability[provider] = await service.isServiceAvailable();
       } catch (e) {
-        debugPrint('TranscriptionServiceFactory: Error checking $provider: $e');
+        log('TranscriptionServiceFactory: Error checking $provider: $e');
         availability[provider] = false;
       }
     }
@@ -202,13 +203,13 @@ class TranscriptionServiceFactory {
 
   /// Dispose all service instances
   static Future<void> disposeAll() async {
-    debugPrint('TranscriptionServiceFactory: Disposing all service instances');
+    log('TranscriptionServiceFactory: Disposing all service instances');
 
     for (final service in _instances.values) {
       try {
         await service.dispose();
       } catch (e) {
-        debugPrint('TranscriptionServiceFactory: Error disposing service: $e');
+        log('TranscriptionServiceFactory: Error disposing service: $e');
       }
     }
 
@@ -219,7 +220,7 @@ class TranscriptionServiceFactory {
   static TranscriptionServiceInterface _createService(
     TranscriptionProvider provider,
   ) {
-    debugPrint('TranscriptionServiceFactory: Creating service for $provider');
+    log('TranscriptionServiceFactory: Creating service for $provider');
 
     switch (provider) {
       case TranscriptionProvider.openaiWhisper:

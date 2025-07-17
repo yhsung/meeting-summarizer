@@ -1,7 +1,8 @@
 /// Service for managing API keys securely
 library;
 
-import 'package:flutter/foundation.dart';
+import 'dart:developer';
+
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -34,26 +35,26 @@ class ApiKeyService {
     try {
       if (_useSecureStorage) {
         await _secureStorage.write(key: key, value: apiKey);
-        debugPrint(
+        log(
           'ApiKeyService: API key stored securely for provider: $provider',
         );
       } else {
         await _storeFallback(provider, apiKey);
-        debugPrint(
+        log(
           'ApiKeyService: API key stored in fallback storage for provider: $provider',
         );
       }
     } catch (e) {
-      debugPrint('ApiKeyService: Secure storage failed for $provider: $e');
+      log('ApiKeyService: Secure storage failed for $provider: $e');
 
       // Fall back to SharedPreferences if secure storage fails
       if (_useSecureStorage) {
-        debugPrint(
+        log(
           'ApiKeyService: Falling back to SharedPreferences for $provider',
         );
         _useSecureStorage = false;
         await _storeFallback(provider, apiKey);
-        debugPrint(
+        log(
           'ApiKeyService: API key stored in fallback storage for provider: $provider',
         );
       } else {
@@ -89,7 +90,7 @@ class ApiKeyService {
       if (_useSecureStorage) {
         final apiKey = await _secureStorage.read(key: key);
         if (apiKey != null) {
-          debugPrint(
+          log(
             'ApiKeyService: Retrieved API key from secure storage for provider: $provider',
           );
           return apiKey;
@@ -99,27 +100,27 @@ class ApiKeyService {
       // Try fallback storage
       final fallbackKey = await _getFallback(provider);
       if (fallbackKey != null) {
-        debugPrint(
+        log(
           'ApiKeyService: Retrieved API key from fallback storage for provider: $provider',
         );
         return fallbackKey;
       }
 
-      debugPrint('ApiKeyService: No API key found for provider: $provider');
+      log('ApiKeyService: No API key found for provider: $provider');
       return null;
     } catch (e) {
-      debugPrint('ApiKeyService: Secure storage failed for $provider: $e');
+      log('ApiKeyService: Secure storage failed for $provider: $e');
 
       // Fall back to SharedPreferences if secure storage fails
       if (_useSecureStorage) {
-        debugPrint(
+        log(
           'ApiKeyService: Falling back to SharedPreferences for $provider',
         );
         _useSecureStorage = false;
         return await _getFallback(provider);
       }
 
-      debugPrint('ApiKeyService: Failed to retrieve API key for $provider: $e');
+      log('ApiKeyService: Failed to retrieve API key for $provider: $e');
       return null;
     }
   }
@@ -137,7 +138,7 @@ class ApiKeyService {
 
       return null;
     } catch (e) {
-      debugPrint(
+      log(
         'ApiKeyService: Failed to retrieve from fallback storage for $provider: $e',
       );
       return null;
@@ -173,9 +174,9 @@ class ApiKeyService {
       // Also remove from fallback storage
       await _removeFallback(provider);
 
-      debugPrint('ApiKeyService: API key removed for provider: $provider');
+      log('ApiKeyService: API key removed for provider: $provider');
     } catch (e) {
-      debugPrint('ApiKeyService: Failed to remove API key for $provider: $e');
+      log('ApiKeyService: Failed to remove API key for $provider: $e');
       rethrow;
     }
   }
@@ -187,7 +188,7 @@ class ApiKeyService {
       final key = '$_fallbackPrefix${provider.toLowerCase()}';
       await prefs.remove(key);
     } catch (e) {
-      debugPrint(
+      log(
         'ApiKeyService: Failed to remove from fallback storage for $provider: $e',
       );
     }
@@ -229,12 +230,12 @@ class ApiKeyService {
         }
       }
 
-      debugPrint(
+      log(
         'ApiKeyService: Found ${providers.length} configured providers',
       );
       return providers;
     } catch (e) {
-      debugPrint('ApiKeyService: Failed to get configured providers: $e');
+      log('ApiKeyService: Failed to get configured providers: $e');
       return [];
     }
   }
@@ -250,9 +251,9 @@ class ApiKeyService {
         }
       }
 
-      debugPrint('ApiKeyService: All API keys cleared');
+      log('ApiKeyService: All API keys cleared');
     } catch (e) {
-      debugPrint('ApiKeyService: Failed to clear API keys: $e');
+      log('ApiKeyService: Failed to clear API keys: $e');
       rethrow;
     }
   }
@@ -304,18 +305,18 @@ class ApiKeyService {
     final keyToTest = apiKey ?? await getApiKey(provider);
 
     if (keyToTest == null || keyToTest.isEmpty) {
-      debugPrint('ApiKeyService: No API key available to test for $provider');
+      log('ApiKeyService: No API key available to test for $provider');
       return false;
     }
 
     if (!validateApiKeyFormat(provider, keyToTest)) {
-      debugPrint('ApiKeyService: API key format invalid for $provider');
+      log('ApiKeyService: API key format invalid for $provider');
       return false;
     }
 
     // For now, just return true if format is valid
     // In a full implementation, this would make actual API calls
-    debugPrint('ApiKeyService: API key format valid for $provider');
+    log('ApiKeyService: API key format valid for $provider');
     return true;
   }
 

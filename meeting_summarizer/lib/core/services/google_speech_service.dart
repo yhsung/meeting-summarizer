@@ -24,8 +24,8 @@ library;
 
 import 'dart:io';
 import 'dart:convert';
+import 'dart:developer';
 
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:googleapis/speech/v1.dart' as speech;
 import 'package:googleapis_auth/auth_io.dart' as auth;
@@ -99,13 +99,13 @@ class GoogleSpeechService implements TranscriptionServiceInterface {
     String? serviceAccountPath,
     Function(double progress, String status)? onProgress,
   }) async {
-    debugPrint(
+    log(
       'GoogleSpeechService: Initializing Google Speech-to-Text service',
     );
     onProgress?.call(0.0, 'Initializing service...');
 
     if (_isInitialized) {
-      debugPrint('GoogleSpeechService: Service already initialized');
+      log('GoogleSpeechService: Service already initialized');
       onProgress?.call(1.0, 'Service ready');
       return;
     }
@@ -118,10 +118,10 @@ class GoogleSpeechService implements TranscriptionServiceInterface {
       // Set up authentication
       if (apiKey != null && apiKey.isNotEmpty) {
         _apiKey = apiKey;
-        debugPrint('GoogleSpeechService: Using API key authentication');
+        log('GoogleSpeechService: Using API key authentication');
       } else if (serviceAccountPath != null && serviceAccountPath.isNotEmpty) {
         _serviceAccountPath = serviceAccountPath;
-        debugPrint('GoogleSpeechService: Using service account authentication');
+        log('GoogleSpeechService: Using service account authentication');
         await _initializeServiceAccountAuth();
       } else {
         throw TranscriptionError(
@@ -140,9 +140,9 @@ class GoogleSpeechService implements TranscriptionServiceInterface {
 
       _isInitialized = true;
       onProgress?.call(1.0, 'Service ready');
-      debugPrint('GoogleSpeechService: Initialization complete');
+      log('GoogleSpeechService: Initialization complete');
     } catch (e) {
-      debugPrint('GoogleSpeechService: Initialization failed: $e');
+      log('GoogleSpeechService: Initialization failed: $e');
       _isInitialized = false;
       throw TranscriptionError(
         type: TranscriptionErrorType.configurationError,
@@ -177,7 +177,7 @@ class GoogleSpeechService implements TranscriptionServiceInterface {
         [speech.SpeechApi.cloudPlatformScope],
       );
 
-      debugPrint(
+      log(
         'GoogleSpeechService: Service account authentication initialized',
       );
     } catch (e) {
@@ -192,23 +192,23 @@ class GoogleSpeechService implements TranscriptionServiceInterface {
 
   @override
   Future<bool> isServiceAvailable() async {
-    debugPrint('GoogleSpeechService: Checking service availability');
+    log('GoogleSpeechService: Checking service availability');
 
     // If not initialized, attempt automatic initialization
     if (!_isInitialized) {
-      debugPrint(
+      log(
         'GoogleSpeechService: Service not initialized, attempting automatic initialization',
       );
       try {
         await initialize();
       } catch (e) {
-        debugPrint('GoogleSpeechService: Automatic initialization failed: $e');
+        log('GoogleSpeechService: Automatic initialization failed: $e');
         return false;
       }
     }
 
     if (_apiKey == null && _authClient == null) {
-      debugPrint('GoogleSpeechService: No authentication configured');
+      log('GoogleSpeechService: No authentication configured');
       return false;
     }
 
@@ -216,7 +216,7 @@ class GoogleSpeechService implements TranscriptionServiceInterface {
       // Test the service with a simple request
       if (_speechApi != null) {
         // Use the Speech API to test connectivity
-        debugPrint('GoogleSpeechService: Testing service connectivity...');
+        log('GoogleSpeechService: Testing service connectivity...');
         // Note: We could implement a simple health check here if needed
         return true;
       } else if (_apiKey != null) {
@@ -250,25 +250,25 @@ class GoogleSpeechService implements TranscriptionServiceInterface {
 
         final isAvailable =
             response.statusCode == 400 || response.statusCode == 403;
-        debugPrint(
+        log(
           'GoogleSpeechService: API key test response: ${response.statusCode}',
         );
 
         if (response.statusCode == 401) {
-          debugPrint('GoogleSpeechService: API key is invalid or missing');
+          log('GoogleSpeechService: API key is invalid or missing');
         } else if (response.statusCode == 403) {
-          debugPrint(
+          log(
             'GoogleSpeechService: API key valid but may lack permissions or have quota issues',
           );
-          debugPrint(
+          log(
             'GoogleSpeechService: 403 Response details: ${response.body}',
           );
         } else if (response.statusCode == 404) {
-          debugPrint(
+          log(
             'GoogleSpeechService: API endpoint not found - check service configuration',
           );
         } else if (!isAvailable) {
-          debugPrint(
+          log(
             'GoogleSpeechService: Unexpected API key test response: ${response.statusCode}. Response: ${response.body}',
           );
         }
@@ -278,7 +278,7 @@ class GoogleSpeechService implements TranscriptionServiceInterface {
 
       return false;
     } catch (e) {
-      debugPrint('GoogleSpeechService: Service availability check failed: $e');
+      log('GoogleSpeechService: Service availability check failed: $e');
       return false;
     }
   }
@@ -288,12 +288,12 @@ class GoogleSpeechService implements TranscriptionServiceInterface {
     File audioFile,
     TranscriptionRequest request,
   ) async {
-    debugPrint(
+    log(
       'GoogleSpeechService: Starting transcription for file: ${audioFile.path}',
     );
 
     if (!_isInitialized) {
-      debugPrint(
+      log(
         'GoogleSpeechService: Transcription attempted on uninitialized service',
       );
       throw TranscriptionError(
@@ -341,7 +341,7 @@ class GoogleSpeechService implements TranscriptionServiceInterface {
         },
       );
 
-      debugPrint(
+      log(
         'GoogleSpeechService: Transcription completed successfully in ${processingTime.inMilliseconds}ms',
       );
       return result;
@@ -363,7 +363,7 @@ class GoogleSpeechService implements TranscriptionServiceInterface {
         additionalMetrics: {'error_message': e.toString()},
       );
 
-      debugPrint('GoogleSpeechService: Transcription failed: $e');
+      log('GoogleSpeechService: Transcription failed: $e');
       rethrow;
     }
   }
@@ -373,12 +373,12 @@ class GoogleSpeechService implements TranscriptionServiceInterface {
     List<int> audioBytes,
     TranscriptionRequest request,
   ) async {
-    debugPrint(
+    log(
       'GoogleSpeechService: Starting transcription for audio bytes (${audioBytes.length} bytes)',
     );
 
     if (!_isInitialized) {
-      debugPrint(
+      log(
         'GoogleSpeechService: Transcription attempted on uninitialized service',
       );
       throw TranscriptionError(
@@ -426,7 +426,7 @@ class GoogleSpeechService implements TranscriptionServiceInterface {
         },
       );
 
-      debugPrint(
+      log(
         'GoogleSpeechService: Transcription completed successfully in ${processingTime.inMilliseconds}ms',
       );
       return result;
@@ -448,7 +448,7 @@ class GoogleSpeechService implements TranscriptionServiceInterface {
         additionalMetrics: {'error_message': e.toString()},
       );
 
-      debugPrint('GoogleSpeechService: Transcription failed: $e');
+      log('GoogleSpeechService: Transcription failed: $e');
       rethrow;
     }
   }
@@ -462,7 +462,7 @@ class GoogleSpeechService implements TranscriptionServiceInterface {
 
   @override
   Future<TranscriptionLanguage?> detectLanguage(File audioFile) async {
-    debugPrint(
+    log(
       'GoogleSpeechService: Detecting language for file: ${audioFile.path}',
     );
 
@@ -481,12 +481,12 @@ class GoogleSpeechService implements TranscriptionServiceInterface {
 
       final result = await transcribeAudioBytes(sample, request);
 
-      debugPrint(
+      log(
         'GoogleSpeechService: Detected language: ${result.language?.displayName}',
       );
       return result.language;
     } catch (e) {
-      debugPrint('GoogleSpeechService: Language detection failed: $e');
+      log('GoogleSpeechService: Language detection failed: $e');
       return null;
     }
   }
@@ -498,7 +498,7 @@ class GoogleSpeechService implements TranscriptionServiceInterface {
 
   @override
   Future<void> dispose() async {
-    debugPrint('GoogleSpeechService: Disposing Google Speech service');
+    log('GoogleSpeechService: Disposing Google Speech service');
     _authClient?.close();
     _isInitialized = false;
   }
@@ -509,11 +509,11 @@ class GoogleSpeechService implements TranscriptionServiceInterface {
       // First try to load from app settings
       final apiKey = await _apiKeyService.getApiKey('google');
       if (apiKey != null && apiKey.isNotEmpty) {
-        debugPrint('GoogleSpeechService: Found API key in app settings');
+        log('GoogleSpeechService: Found API key in app settings');
         return apiKey;
       }
     } catch (e) {
-      debugPrint(
+      log(
         'GoogleSpeechService: Failed to load API key from settings: $e',
       );
     }
@@ -536,7 +536,7 @@ class GoogleSpeechService implements TranscriptionServiceInterface {
     apiKey = const String.fromEnvironment('GCLOUD_API_KEY');
     if (apiKey.isNotEmpty) return apiKey;
 
-    debugPrint(
+    log(
       'GoogleSpeechService: No API key found in environment variables',
     );
     return null;
@@ -596,7 +596,7 @@ class GoogleSpeechService implements TranscriptionServiceInterface {
     try {
       settingsApiKey = await _apiKeyService.getApiKey('google');
     } catch (e) {
-      debugPrint('GoogleSpeechService: Error checking settings API key: $e');
+      log('GoogleSpeechService: Error checking settings API key: $e');
     }
 
     return {
@@ -642,7 +642,7 @@ class GoogleSpeechService implements TranscriptionServiceInterface {
     String audioPath,
     TranscriptionRequest request,
   ) async {
-    debugPrint(
+    log(
       'GoogleSpeechService: Processing transcription with Google Speech API',
     );
 
@@ -651,16 +651,16 @@ class GoogleSpeechService implements TranscriptionServiceInterface {
       final useAsync = audioBytes.length > _maxAudioSizeBytes;
 
       if (useAsync) {
-        debugPrint(
+        log(
           'GoogleSpeechService: Using asynchronous recognition for large file',
         );
         return await _processAsyncTranscription(audioBytes, audioPath, request);
       } else {
-        debugPrint('GoogleSpeechService: Using synchronous recognition');
+        log('GoogleSpeechService: Using synchronous recognition');
         return await _processSyncTranscription(audioBytes, audioPath, request);
       }
     } catch (e) {
-      debugPrint('GoogleSpeechService: Transcription processing failed: $e');
+      log('GoogleSpeechService: Transcription processing failed: $e');
 
       if (e is TranscriptionError) {
         rethrow;
@@ -681,7 +681,7 @@ class GoogleSpeechService implements TranscriptionServiceInterface {
     String audioPath,
     TranscriptionRequest request,
   ) async {
-    debugPrint('GoogleSpeechService: Starting synchronous transcription');
+    log('GoogleSpeechService: Starting synchronous transcription');
 
     final startTime = DateTime.now();
 
@@ -721,7 +721,7 @@ class GoogleSpeechService implements TranscriptionServiceInterface {
     String audioPath,
     TranscriptionRequest request,
   ) async {
-    debugPrint('GoogleSpeechService: Starting asynchronous transcription');
+    log('GoogleSpeechService: Starting asynchronous transcription');
 
     if (audioBytes.length > _maxAudioSizeBytesAsync) {
       throw TranscriptionError(
@@ -759,12 +759,12 @@ class GoogleSpeechService implements TranscriptionServiceInterface {
     final sampleRate = _estimateSampleRate(audioFormat);
     final finalLanguageCode = languageCode == 'auto' ? 'en-US' : languageCode;
 
-    debugPrint('GoogleSpeechService: Building recognition request');
-    debugPrint('  Audio format: $audioFormat');
-    debugPrint('  Encoding: $encoding');
-    debugPrint('  Sample rate: $sampleRate Hz');
-    debugPrint('  Language code: $finalLanguageCode');
-    debugPrint('  Audio size: ${audioBytes.length} bytes');
+    log('GoogleSpeechService: Building recognition request');
+    log('  Audio format: $audioFormat');
+    log('  Encoding: $encoding');
+    log('  Sample rate: $sampleRate Hz');
+    log('  Language code: $finalLanguageCode');
+    log('  Audio size: ${audioBytes.length} bytes');
 
     // Create recognition config
     final config = speech.RecognitionConfig(
@@ -808,7 +808,7 @@ class GoogleSpeechService implements TranscriptionServiceInterface {
         maxSpeakerCount: validMaxSpeakers,
       );
 
-      debugPrint(
+      log(
         'GoogleSpeechService: Speaker diarization enabled, max speakers: $validMaxSpeakers',
       );
     }
@@ -855,7 +855,7 @@ class GoogleSpeechService implements TranscriptionServiceInterface {
 
     final body = jsonEncode(recognitionRequest.toJson());
 
-    debugPrint('GoogleSpeechService: Making HTTP request to Google Speech API');
+    log('GoogleSpeechService: Making HTTP request to Google Speech API');
 
     final response = await http.post(
       Uri.parse(url),
@@ -891,7 +891,7 @@ class GoogleSpeechService implements TranscriptionServiceInterface {
     final processingTime = DateTime.now().difference(startTime);
 
     if (response.results == null || response.results!.isEmpty) {
-      debugPrint('GoogleSpeechService: No transcription results returned');
+      log('GoogleSpeechService: No transcription results returned');
       return TranscriptionResult(
         text: '',
         confidence: 0.0,
@@ -956,7 +956,7 @@ class GoogleSpeechService implements TranscriptionServiceInterface {
       }
     }
 
-    debugPrint(
+    log(
       'GoogleSpeechService: Transcription completed - Text length: ${finalText.length}, Confidence: ${(averageConfidence * 100).toStringAsFixed(1)}%',
     );
 
@@ -1200,7 +1200,7 @@ class GoogleSpeechService implements TranscriptionServiceInterface {
       final durationMs = (fileSize * 8 / estimatedBitrate * 1000).round();
       return durationMs;
     } catch (e) {
-      debugPrint('GoogleSpeechService: Could not estimate audio duration: $e');
+      log('GoogleSpeechService: Could not estimate audio duration: $e');
       return 0;
     }
   }

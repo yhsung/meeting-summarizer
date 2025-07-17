@@ -17,8 +17,8 @@
 library;
 
 import 'dart:io';
+import 'dart:developer';
 
-import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import 'package:http/http.dart' as http;
@@ -88,12 +88,12 @@ class LocalWhisperService implements TranscriptionServiceInterface {
   Future<void> initialize({
     Function(double progress, String status)? onProgress,
   }) async {
-    debugPrint('LocalWhisperService: Initializing local Whisper service');
+    log('LocalWhisperService: Initializing local Whisper service');
     onProgress?.call(0.0, 'Initializing service...');
 
     // Check if already initialized
     if (_isInitialized) {
-      debugPrint('LocalWhisperService: Service already initialized');
+      log('LocalWhisperService: Service already initialized');
       onProgress?.call(1.0, 'Service ready');
       return;
     }
@@ -104,7 +104,7 @@ class LocalWhisperService implements TranscriptionServiceInterface {
 
       if (!await _modelStorageDirectory!.exists()) {
         await _modelStorageDirectory!.create(recursive: true);
-        debugPrint(
+        log(
           'LocalWhisperService: Created model storage directory: ${_modelStorageDirectory!.path}',
         );
       }
@@ -128,7 +128,7 @@ class LocalWhisperService implements TranscriptionServiceInterface {
       // Check if default model is available, download if not
       final hasDefaultModel = await _isModelAvailable(_defaultModel);
       if (!hasDefaultModel) {
-        debugPrint(
+        log(
           'LocalWhisperService: Default model not found, downloading automatically...',
         );
 
@@ -154,12 +154,12 @@ class LocalWhisperService implements TranscriptionServiceInterface {
                   );
                 },
           );
-          debugPrint(
+          log(
             'LocalWhisperService: Default model downloaded successfully',
           );
           onProgress?.call(0.9, 'Model download completed');
         } catch (e) {
-          debugPrint(
+          log(
             'LocalWhisperService: Failed to download default model: $e. Service will be limited until model is manually downloaded.',
           );
           onProgress?.call(0.9, 'Model download failed, continuing...');
@@ -170,9 +170,9 @@ class LocalWhisperService implements TranscriptionServiceInterface {
       }
 
       onProgress?.call(1.0, 'Service ready');
-      debugPrint('LocalWhisperService: Initialization complete');
+      log('LocalWhisperService: Initialization complete');
     } catch (e) {
-      debugPrint('LocalWhisperService: Initialization failed: $e');
+      log('LocalWhisperService: Initialization failed: $e');
       _isInitialized = false; // Reset initialization flag on error
       throw TranscriptionError(
         type: TranscriptionErrorType.configurationError,
@@ -185,11 +185,11 @@ class LocalWhisperService implements TranscriptionServiceInterface {
 
   @override
   Future<bool> isServiceAvailable() async {
-    debugPrint('LocalWhisperService: Checking service availability');
-    debugPrint('LocalWhisperService: _isInitialized = $_isInitialized');
+    log('LocalWhisperService: Checking service availability');
+    log('LocalWhisperService: _isInitialized = $_isInitialized');
 
     if (!_isInitialized) {
-      debugPrint(
+      log(
         'LocalWhisperService: Service not initialized, checking if models exist...',
       );
 
@@ -198,18 +198,18 @@ class LocalWhisperService implements TranscriptionServiceInterface {
 
       for (final modelName in _availableModels.keys) {
         final isAvailable = await _isModelAvailable(modelName);
-        debugPrint(
+        log(
           'LocalWhisperService: Model $modelName available: $isAvailable',
         );
         if (isAvailable) {
-          debugPrint(
+          log(
             'LocalWhisperService: Model found but service not initialized',
           );
           return false; // Models exist but service needs initialization
         }
       }
 
-      debugPrint(
+      log(
         'LocalWhisperService: Service not initialized and no models available',
       );
       return false;
@@ -218,18 +218,18 @@ class LocalWhisperService implements TranscriptionServiceInterface {
     // Check if at least one model is available
     for (final modelName in _availableModels.keys) {
       final isAvailable = await _isModelAvailable(modelName);
-      debugPrint(
+      log(
         'LocalWhisperService: Model $modelName available: $isAvailable',
       );
       if (isAvailable) {
-        debugPrint(
+        log(
           'LocalWhisperService: Service is available (model $modelName found)',
         );
         return true;
       }
     }
 
-    debugPrint(
+    log(
       'LocalWhisperService: Service initialized but no models available',
     );
     return false;
@@ -285,7 +285,7 @@ class LocalWhisperService implements TranscriptionServiceInterface {
     // Create whisper temp directory if it doesn't exist
     if (!await whisperTempDir.exists()) {
       await whisperTempDir.create(recursive: true);
-      debugPrint(
+      log(
         'LocalWhisperService: Created whisper temp directory: ${whisperTempDir.path}',
       );
     }
@@ -313,10 +313,10 @@ class LocalWhisperService implements TranscriptionServiceInterface {
       final copiedFileSize = await tempFile.length();
       final originalFileSize = await audioFile.length();
 
-      debugPrint(
+      log(
         'LocalWhisperService: Original file: ${audioFile.path} ($originalFileSize bytes)',
       );
-      debugPrint(
+      log(
         'LocalWhisperService: Copied to: ${tempFile.path} ($copiedFileSize bytes)',
       );
 
@@ -329,7 +329,7 @@ class LocalWhisperService implements TranscriptionServiceInterface {
         );
       }
     } catch (e) {
-      debugPrint('LocalWhisperService: Failed to copy audio file: $e');
+      log('LocalWhisperService: Failed to copy audio file: $e');
       throw TranscriptionError(
         type: TranscriptionErrorType.audioFormatError,
         message: 'Failed to prepare audio file for Whisper: $e',
@@ -348,7 +348,7 @@ class LocalWhisperService implements TranscriptionServiceInterface {
       final bytes = await file.openRead(0, 10).first;
       return bytes.isNotEmpty;
     } catch (e) {
-      debugPrint('LocalWhisperService: File access test failed: $e');
+      log('LocalWhisperService: File access test failed: $e');
       return false;
     }
   }
@@ -374,19 +374,19 @@ class LocalWhisperService implements TranscriptionServiceInterface {
             final stat = await entity.stat();
             if (stat.modified.isBefore(cutoffTime)) {
               await entity.delete();
-              debugPrint(
+              log(
                 'LocalWhisperService: Cleaned up old temp file: ${entity.path}',
               );
             }
           } catch (e) {
-            debugPrint(
+            log(
               'LocalWhisperService: Could not clean up temp file ${entity.path}: $e',
             );
           }
         }
       }
     } catch (e) {
-      debugPrint('LocalWhisperService: Cleanup failed: $e');
+      log('LocalWhisperService: Cleanup failed: $e');
     }
   }
 
@@ -396,11 +396,11 @@ class LocalWhisperService implements TranscriptionServiceInterface {
     try {
       final appSupportPath = Platform.environment['HOME'];
       if (appSupportPath != null && appSupportPath.contains('Containers')) {
-        debugPrint('LocalWhisperService: Detected sandboxed environment');
+        log('LocalWhisperService: Detected sandboxed environment');
         return true;
       }
     } catch (e) {
-      debugPrint('LocalWhisperService: Could not determine sandbox status: $e');
+      log('LocalWhisperService: Could not determine sandbox status: $e');
     }
     return false;
   }
@@ -517,12 +517,12 @@ class LocalWhisperService implements TranscriptionServiceInterface {
     File audioFile,
     TranscriptionRequest request,
   ) async {
-    debugPrint(
+    log(
       'LocalWhisperService: Starting local transcription for file: ${audioFile.path}',
     );
 
     if (!_isInitialized) {
-      debugPrint(
+      log(
         'LocalWhisperService: Transcription attempted on uninitialized service for file: ${audioFile.path}',
       );
       throw TranscriptionError(
@@ -566,7 +566,7 @@ class LocalWhisperService implements TranscriptionServiceInterface {
         },
       );
 
-      debugPrint(
+      log(
         'LocalWhisperService: Local transcription completed successfully',
       );
       return result;
@@ -591,7 +591,7 @@ class LocalWhisperService implements TranscriptionServiceInterface {
         },
       );
 
-      debugPrint('LocalWhisperService: Local transcription failed: $e');
+      log('LocalWhisperService: Local transcription failed: $e');
       rethrow;
     }
   }
@@ -601,12 +601,12 @@ class LocalWhisperService implements TranscriptionServiceInterface {
     List<int> audioBytes,
     TranscriptionRequest request,
   ) async {
-    debugPrint(
+    log(
       'LocalWhisperService: Starting local transcription for audio bytes',
     );
 
     if (!_isInitialized) {
-      debugPrint(
+      log(
         'LocalWhisperService: Transcription attempted on uninitialized service for audio bytes',
       );
       throw TranscriptionError(
@@ -650,7 +650,7 @@ class LocalWhisperService implements TranscriptionServiceInterface {
         },
       );
 
-      debugPrint(
+      log(
         'LocalWhisperService: Local transcription completed successfully',
       );
       return result;
@@ -675,7 +675,7 @@ class LocalWhisperService implements TranscriptionServiceInterface {
         },
       );
 
-      debugPrint('LocalWhisperService: Local transcription failed: $e');
+      log('LocalWhisperService: Local transcription failed: $e');
       rethrow;
     }
   }
@@ -704,7 +704,7 @@ class LocalWhisperService implements TranscriptionServiceInterface {
 
   @override
   Future<TranscriptionLanguage?> detectLanguage(File audioFile) async {
-    debugPrint(
+    log(
       'LocalWhisperService: Detecting language for file: ${audioFile.path}',
     );
 
@@ -718,12 +718,12 @@ class LocalWhisperService implements TranscriptionServiceInterface {
       // Transcribe with language detection (using smaller sample for efficiency)
       final result = await transcribeAudioFile(audioFile, request);
 
-      debugPrint(
+      log(
         'LocalWhisperService: Detected language: ${result.language?.displayName}',
       );
       return result.language;
     } catch (e) {
-      debugPrint('LocalWhisperService: Language detection failed: $e');
+      log('LocalWhisperService: Language detection failed: $e');
       return null;
     }
   }
@@ -735,14 +735,14 @@ class LocalWhisperService implements TranscriptionServiceInterface {
 
   @override
   Future<void> dispose() async {
-    debugPrint('LocalWhisperService: Disposing local service');
+    log('LocalWhisperService: Disposing local service');
     _isInitialized = false;
   }
 
   /// Check if a specific model is available locally
   Future<bool> _isModelAvailable(String modelName) async {
     if (_modelStorageDirectory == null) {
-      debugPrint('LocalWhisperService: Model storage directory is null');
+      log('LocalWhisperService: Model storage directory is null');
       return false;
     }
 
@@ -750,13 +750,13 @@ class LocalWhisperService implements TranscriptionServiceInterface {
       path.join(_modelStorageDirectory!.path, '$modelName.bin'),
     );
     final exists = await modelFile.exists();
-    debugPrint(
+    log(
       'LocalWhisperService: Checking model file ${modelFile.path}: exists = $exists',
     );
 
     if (exists) {
       final fileSize = await modelFile.length();
-      debugPrint(
+      log(
         'LocalWhisperService: Model file size: ${(fileSize / (1024 * 1024)).toStringAsFixed(1)} MB',
       );
     }
@@ -792,7 +792,7 @@ class LocalWhisperService implements TranscriptionServiceInterface {
       );
     }
 
-    debugPrint('LocalWhisperService: Starting download for model: $modelName');
+    log('LocalWhisperService: Starting download for model: $modelName');
 
     final modelFile = File(
       path.join(_modelStorageDirectory!.path, '$modelName.bin'),
@@ -800,7 +800,7 @@ class LocalWhisperService implements TranscriptionServiceInterface {
 
     // Check if model already exists
     if (await modelFile.exists()) {
-      debugPrint('LocalWhisperService: Model $modelName already exists');
+      log('LocalWhisperService: Model $modelName already exists');
       return;
     }
 
@@ -871,11 +871,11 @@ class LocalWhisperService implements TranscriptionServiceInterface {
 
       onProgress?.call(1.0, status: 'Download completed');
 
-      debugPrint(
+      log(
         'LocalWhisperService: Model $modelName downloaded successfully (${(downloadedSize / (1024 * 1024)).toStringAsFixed(1)} MB)',
       );
     } catch (e) {
-      debugPrint(
+      log(
         'LocalWhisperService: Failed to download model $modelName: $e',
       );
 
@@ -926,7 +926,7 @@ class LocalWhisperService implements TranscriptionServiceInterface {
     }
 
     _currentModel = modelName;
-    debugPrint('LocalWhisperService: Active model set to: $modelName');
+    log('LocalWhisperService: Active model set to: $modelName');
   }
 
   /// Validate audio file before processing
@@ -988,7 +988,7 @@ class LocalWhisperService implements TranscriptionServiceInterface {
     String audioPath,
     TranscriptionRequest request,
   ) async {
-    debugPrint(
+    log(
       'LocalWhisperService: Processing transcription with model: $_currentModel',
     );
 
@@ -1043,7 +1043,7 @@ class LocalWhisperService implements TranscriptionServiceInterface {
         }
       }
     } catch (e) {
-      debugPrint('LocalWhisperService: Transcription processing failed: $e');
+      log('LocalWhisperService: Transcription processing failed: $e');
 
       if (e is TranscriptionError) {
         rethrow;
@@ -1090,7 +1090,7 @@ class LocalWhisperService implements TranscriptionServiceInterface {
       final durationMs = (fileSize * 8 / estimatedBitrate * 1000).round();
       return durationMs;
     } catch (e) {
-      debugPrint('LocalWhisperService: Could not estimate audio duration: $e');
+      log('LocalWhisperService: Could not estimate audio duration: $e');
       return 0;
     }
   }
@@ -1140,7 +1140,7 @@ class LocalWhisperService implements TranscriptionServiceInterface {
     // Create whisper temp directory if it doesn't exist
     if (!await whisperTempDir.exists()) {
       await whisperTempDir.create(recursive: true);
-      debugPrint(
+      log(
         'LocalWhisperService: Created whisper temp directory: ${whisperTempDir.path}',
       );
     }
@@ -1154,7 +1154,7 @@ class LocalWhisperService implements TranscriptionServiceInterface {
     );
 
     await tempFile.writeAsBytes(audioBytes);
-    debugPrint(
+    log(
       'LocalWhisperService: Created temporary audio file: ${tempFile.path} (${audioBytes.length} bytes)',
     );
     return tempFile;
@@ -1165,7 +1165,7 @@ class LocalWhisperService implements TranscriptionServiceInterface {
     File audioFile,
     TranscriptionRequest request,
   ) async {
-    debugPrint(
+    log(
       'LocalWhisperService: Running inference with local Whisper model',
     );
 
@@ -1191,27 +1191,27 @@ class LocalWhisperService implements TranscriptionServiceInterface {
       }
 
       final fileSize = await wavFile.length();
-      debugPrint('LocalWhisperService: Audio file path: ${wavFile.path}');
-      debugPrint('LocalWhisperService: Audio file size: $fileSize bytes');
-      debugPrint(
+      log('LocalWhisperService: Audio file path: ${wavFile.path}');
+      log('LocalWhisperService: Audio file size: $fileSize bytes');
+      log(
         'LocalWhisperService: Audio file exists: ${await wavFile.exists()}',
       );
-      debugPrint(
+      log(
         'LocalWhisperService: Sandboxed environment: ${_isSandboxed()}',
       );
 
       // Additional debug info for sandboxed environments
       try {
         final fileStats = await wavFile.stat();
-        debugPrint(
+        log(
           'LocalWhisperService: File permissions mode: ${fileStats.mode}',
         );
-        debugPrint('LocalWhisperService: File type: ${fileStats.type}');
-        debugPrint(
+        log('LocalWhisperService: File type: ${fileStats.type}');
+        log(
           'LocalWhisperService: File is accessible: ${await _testFileAccess(wavFile)}',
         );
       } catch (e) {
-        debugPrint('LocalWhisperService: Could not read file stats: $e');
+        log('LocalWhisperService: Could not read file stats: $e');
       }
 
       // Create transcription request
@@ -1225,12 +1225,12 @@ class LocalWhisperService implements TranscriptionServiceInterface {
       );
 
       // Perform transcription
-      debugPrint('LocalWhisperService: Starting Whisper transcription...');
-      debugPrint('LocalWhisperService: Using model: $_currentModel');
-      debugPrint(
+      log('LocalWhisperService: Starting Whisper transcription...');
+      log('LocalWhisperService: Using model: $_currentModel');
+      log(
         'LocalWhisperService: Audio path for Whisper: ${wavFile.path}',
       );
-      debugPrint('LocalWhisperService: File size: $fileSize bytes');
+      log('LocalWhisperService: File size: $fileSize bytes');
 
       final startTime = DateTime.now();
 
@@ -1240,12 +1240,12 @@ class LocalWhisperService implements TranscriptionServiceInterface {
           transcribeRequest: transcribeRequest,
         );
 
-        debugPrint('LocalWhisperService: Whisper transcription successful');
+        log('LocalWhisperService: Whisper transcription successful');
       } catch (whisperError) {
-        debugPrint(
+        log(
           'LocalWhisperService: Whisper transcription failed with error: $whisperError',
         );
-        debugPrint(
+        log(
           'LocalWhisperService: Error type: ${whisperError.runtimeType}',
         );
 
@@ -1270,10 +1270,10 @@ class LocalWhisperService implements TranscriptionServiceInterface {
       final String transcriptionText = transcriptionResponse.text;
       final processingTime = DateTime.now().difference(startTime);
 
-      debugPrint(
+      log(
         'LocalWhisperService: Transcription completed in ${processingTime.inMilliseconds}ms',
       );
-      debugPrint(
+      log(
         'LocalWhisperService: Transcription text length: ${transcriptionText.length}',
       );
 
@@ -1291,7 +1291,7 @@ class LocalWhisperService implements TranscriptionServiceInterface {
           await wavFile.delete();
         }
       } catch (e) {
-        debugPrint(
+        log(
           'LocalWhisperService: Failed to clean up temporary file: $e',
         );
       }
@@ -1322,7 +1322,7 @@ class LocalWhisperService implements TranscriptionServiceInterface {
         },
       );
     } catch (e) {
-      debugPrint('LocalWhisperService: Transcription failed: $e');
+      log('LocalWhisperService: Transcription failed: $e');
 
       // Clean up temporary file in case of error
       try {
@@ -1330,7 +1330,7 @@ class LocalWhisperService implements TranscriptionServiceInterface {
           await wavFile.delete();
         }
       } catch (cleanupError) {
-        debugPrint(
+        log(
           'LocalWhisperService: Failed to clean up temporary file after error: $cleanupError',
         );
       }

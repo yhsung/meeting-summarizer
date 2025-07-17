@@ -1,6 +1,8 @@
 /// Factory for creating AI provider implementations
 library;
 
+import 'dart:developer';
+
 import 'package:flutter/foundation.dart';
 
 import 'ai_summarization_service_interface.dart';
@@ -235,7 +237,7 @@ class AIProviderFactory {
     AISummarizationServiceInterface Function(AIProviderConfig) factory,
   ) {
     _providers[provider] = factory;
-    debugPrint('AIProviderFactory: Registered provider ${provider.id}');
+    log('AIProviderFactory: Registered provider ${provider.id}');
   }
 
   /// Create a summarization service instance
@@ -255,7 +257,7 @@ class AIProviderFactory {
     if (factory == null) {
       // Return mock service in debug mode for development
       if (kDebugMode && config.provider != AIProvider.mock) {
-        debugPrint(
+        log(
           'AIProviderFactory: Provider ${config.provider.id} not registered, '
           'returning mock service for development',
         );
@@ -269,7 +271,7 @@ class AIProviderFactory {
 
     try {
       final service = factory(config);
-      debugPrint(
+      log(
         'AIProviderFactory: Created service for provider ${config.provider.id}',
       );
       return service;
@@ -463,6 +465,6 @@ class AIProviderFactory {
   /// Clear all registered providers (for testing)
   static void clearProviders() {
     _providers.clear();
-    debugPrint('AIProviderFactory: Cleared all providers');
+    log('AIProviderFactory: Cleared all providers');
   }
 }

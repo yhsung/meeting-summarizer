@@ -4,8 +4,9 @@
 /// while preserving user data across versions.
 library;
 
+import 'dart:developer';
+
 import 'package:sqflite/sqflite.dart';
-import 'package:flutter/foundation.dart';
 
 /// Database migration manager
 class DatabaseMigrations {
@@ -15,17 +16,17 @@ class DatabaseMigrations {
     int oldVersion,
     int newVersion,
   ) async {
-    debugPrint(
+    log(
       'DatabaseMigrations: Migrating from v$oldVersion to v$newVersion',
     );
 
     // Execute migrations sequentially for each version
     for (int version = oldVersion + 1; version <= newVersion; version++) {
-      debugPrint('DatabaseMigrations: Applying migration to v$version');
+      log('DatabaseMigrations: Applying migration to v$version');
       await _executeVersionMigration(db, version);
     }
 
-    debugPrint('DatabaseMigrations: Migration completed successfully');
+    log('DatabaseMigrations: Migration completed successfully');
   }
 
   /// Execute migration for a specific version
@@ -41,7 +42,7 @@ class DatabaseMigrations {
         await _migrateToVersion4(db);
         break;
       default:
-        debugPrint(
+        log(
           'DatabaseMigrations: No migration script for version $version',
         );
     }
@@ -52,7 +53,7 @@ class DatabaseMigrations {
 
   /// Migration to version 2: Add encryption support
   static Future<void> _migrateToVersion2(Database db) async {
-    debugPrint('DatabaseMigrations: Migrating to version 2');
+    log('DatabaseMigrations: Migrating to version 2');
 
     await db.transaction((txn) async {
       // Add encryption fields to recordings table
@@ -103,12 +104,12 @@ class DatabaseMigrations {
       ''');
     });
 
-    debugPrint('DatabaseMigrations: Version 2 migration completed');
+    log('DatabaseMigrations: Version 2 migration completed');
   }
 
   /// Migration to version 3: Add collaboration features
   static Future<void> _migrateToVersion3(Database db) async {
-    debugPrint('DatabaseMigrations: Migrating to version 3');
+    log('DatabaseMigrations: Migrating to version 3');
 
     await db.transaction((txn) async {
       // Add sharing fields to recordings table
@@ -198,12 +199,12 @@ class DatabaseMigrations {
       });
     });
 
-    debugPrint('DatabaseMigrations: Version 3 migration completed');
+    log('DatabaseMigrations: Version 3 migration completed');
   }
 
   /// Migration to version 4: Add advanced analytics
   static Future<void> _migrateToVersion4(Database db) async {
-    debugPrint('DatabaseMigrations: Migrating to version 4');
+    log('DatabaseMigrations: Migrating to version 4');
 
     await db.transaction((txn) async {
       // Add analytics fields to recordings
@@ -314,7 +315,7 @@ class DatabaseMigrations {
       });
     });
 
-    debugPrint('DatabaseMigrations: Version 4 migration completed');
+    log('DatabaseMigrations: Version 4 migration completed');
   }
 
   /// Validate migration integrity
@@ -328,7 +329,7 @@ class DatabaseMigrations {
       final actualVersion = result.first['user_version'] as int;
 
       if (actualVersion != expectedVersion) {
-        debugPrint(
+        log(
           'DatabaseMigrations: Version mismatch. Expected: $expectedVersion, Actual: $actualVersion',
         );
         return false;
@@ -340,10 +341,10 @@ class DatabaseMigrations {
       // Validate data integrity
       await _validateDataIntegrity(db);
 
-      debugPrint('DatabaseMigrations: Migration validation successful');
+      log('DatabaseMigrations: Migration validation successful');
       return true;
     } catch (e) {
-      debugPrint('DatabaseMigrations: Migration validation failed: $e');
+      log('DatabaseMigrations: Migration validation failed: $e');
       return false;
     }
   }
@@ -423,15 +424,15 @@ class DatabaseMigrations {
       // SQLite doesn't have built-in backup, so we'll export data
       // This is a simplified backup - in production you might use
       // more sophisticated backup strategies
-      debugPrint('DatabaseMigrations: Creating backup at $backupPath');
+      log('DatabaseMigrations: Creating backup at $backupPath');
 
       // Note: Actual file backup would require platform-specific implementation
       // For now, we'll just log the backup creation
-      debugPrint('DatabaseMigrations: Backup created successfully');
+      log('DatabaseMigrations: Backup created successfully');
 
       return backupPath;
     } catch (e) {
-      debugPrint('DatabaseMigrations: Backup creation failed: $e');
+      log('DatabaseMigrations: Backup creation failed: $e');
       rethrow;
     }
   }
@@ -442,13 +443,13 @@ class DatabaseMigrations {
     String backupPath,
   ) async {
     try {
-      debugPrint('DatabaseMigrations: Restoring from backup: $backupPath');
+      log('DatabaseMigrations: Restoring from backup: $backupPath');
 
       // Note: Actual file restoration would require platform-specific implementation
       // For now, we'll just log the restoration
-      debugPrint('DatabaseMigrations: Backup restoration completed');
+      log('DatabaseMigrations: Backup restoration completed');
     } catch (e) {
-      debugPrint('DatabaseMigrations: Backup restoration failed: $e');
+      log('DatabaseMigrations: Backup restoration failed: $e');
       rethrow;
     }
   }

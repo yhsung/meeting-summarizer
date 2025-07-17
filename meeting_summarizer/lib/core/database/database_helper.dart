@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:flutter/foundation.dart';
+import 'dart:developer';
+
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:uuid/uuid.dart';
@@ -57,7 +58,7 @@ class DatabaseHelper {
       final databaseName = _customDatabaseName ?? DatabaseSchema.databaseName;
       final path = join(databasesPath, databaseName);
 
-      debugPrint('DatabaseHelper: Initializing database at $path');
+      log('DatabaseHelper: Initializing database at $path');
 
       // Create database directory if it doesn't exist
       final directory = Directory(dirname(path));
@@ -73,7 +74,7 @@ class DatabaseHelper {
         onConfigure: _onConfigure,
       );
     } catch (e) {
-      debugPrint('DatabaseHelper: Database initialization failed: $e');
+      log('DatabaseHelper: Database initialization failed: $e');
       rethrow;
     }
   }
@@ -90,7 +91,7 @@ class DatabaseHelper {
 
   /// Create database tables and initial data
   Future<void> _onCreate(Database db, int version) async {
-    debugPrint('DatabaseHelper: Creating database schema version $version');
+    log('DatabaseHelper: Creating database schema version $version');
 
     try {
       // Execute all schema statements in a transaction
@@ -121,16 +122,16 @@ class DatabaseHelper {
         }
       });
 
-      debugPrint('DatabaseHelper: Database schema created successfully');
+      log('DatabaseHelper: Database schema created successfully');
     } catch (e) {
-      debugPrint('DatabaseHelper: Database creation failed: $e');
+      log('DatabaseHelper: Database creation failed: $e');
       rethrow;
     }
   }
 
   /// Handle database upgrades with proper migration system
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    debugPrint(
+    log(
       'DatabaseHelper: Upgrading database from v$oldVersion to v$newVersion',
     );
 
@@ -164,18 +165,18 @@ class DatabaseHelper {
           throw Exception('Migration validation failed');
         }
 
-        debugPrint('DatabaseHelper: Database upgrade completed successfully');
+        log('DatabaseHelper: Database upgrade completed successfully');
       } catch (migrationError) {
-        debugPrint(
+        log(
           'DatabaseHelper: Migration failed, attempting to restore backup',
         );
 
         // Attempt to restore from backup
         try {
           await DatabaseMigrations.restoreFromBackup(db.path, backupPath);
-          debugPrint('DatabaseHelper: Backup restored successfully');
+          log('DatabaseHelper: Backup restored successfully');
         } catch (restoreError) {
-          debugPrint(
+          log(
             'DatabaseHelper: Backup restoration failed: $restoreError',
           );
         }
@@ -183,7 +184,7 @@ class DatabaseHelper {
         rethrow;
       }
     } catch (e) {
-      debugPrint('DatabaseHelper: Database upgrade failed: $e');
+      log('DatabaseHelper: Database upgrade failed: $e');
       rethrow;
     }
   }
@@ -193,11 +194,11 @@ class DatabaseHelper {
     if (_customDatabaseName != null && _instanceDatabase != null) {
       await _instanceDatabase!.close();
       _instanceDatabase = null;
-      debugPrint('DatabaseHelper: Instance database connection closed');
+      log('DatabaseHelper: Instance database connection closed');
     } else if (_database != null) {
       await _database!.close();
       _database = null;
-      debugPrint('DatabaseHelper: Database connection closed');
+      log('DatabaseHelper: Database connection closed');
     }
   }
 
@@ -208,10 +209,10 @@ class DatabaseHelper {
     final db = await database;
     try {
       await db.insert('recordings', recording.toDatabase());
-      debugPrint('DatabaseHelper: Inserted recording ${recording.id}');
+      log('DatabaseHelper: Inserted recording ${recording.id}');
       return recording.id;
     } catch (e) {
-      debugPrint('DatabaseHelper: Failed to insert recording: $e');
+      log('DatabaseHelper: Failed to insert recording: $e');
       rethrow;
     }
   }
@@ -229,7 +230,7 @@ class DatabaseHelper {
       if (result.isEmpty) return null;
       return Recording.fromDatabase(result.first);
     } catch (e) {
-      debugPrint('DatabaseHelper: Failed to get recording $id: $e');
+      log('DatabaseHelper: Failed to get recording $id: $e');
       return null;
     }
   }
@@ -281,7 +282,7 @@ class DatabaseHelper {
 
       return result.map((row) => Recording.fromDatabase(row)).toList();
     } catch (e) {
-      debugPrint('DatabaseHelper: Failed to get recordings: $e');
+      log('DatabaseHelper: Failed to get recordings: $e');
       return [];
     }
   }
@@ -296,10 +297,10 @@ class DatabaseHelper {
         where: 'id = ?',
         whereArgs: [recording.id],
       );
-      debugPrint('DatabaseHelper: Updated recording ${recording.id}');
+      log('DatabaseHelper: Updated recording ${recording.id}');
       return updated > 0;
     } catch (e) {
-      debugPrint('DatabaseHelper: Failed to update recording: $e');
+      log('DatabaseHelper: Failed to update recording: $e');
       return false;
     }
   }
@@ -314,10 +315,10 @@ class DatabaseHelper {
         where: 'id = ?',
         whereArgs: [id],
       );
-      debugPrint('DatabaseHelper: Soft deleted recording $id');
+      log('DatabaseHelper: Soft deleted recording $id');
       return updated > 0;
     } catch (e) {
-      debugPrint('DatabaseHelper: Failed to delete recording: $e');
+      log('DatabaseHelper: Failed to delete recording: $e');
       return false;
     }
   }
@@ -341,10 +342,10 @@ class DatabaseHelper {
         where: 'id = ?',
         whereArgs: [id],
       );
-      debugPrint('DatabaseHelper: Permanently deleted recording $id');
+      log('DatabaseHelper: Permanently deleted recording $id');
       return deleted > 0;
     } catch (e) {
-      debugPrint('DatabaseHelper: Failed to permanently delete recording: $e');
+      log('DatabaseHelper: Failed to permanently delete recording: $e');
       return false;
     }
   }
@@ -356,10 +357,10 @@ class DatabaseHelper {
     final db = await database;
     try {
       await db.insert('transcriptions', transcription.toDatabase());
-      debugPrint('DatabaseHelper: Inserted transcription ${transcription.id}');
+      log('DatabaseHelper: Inserted transcription ${transcription.id}');
       return transcription.id;
     } catch (e) {
-      debugPrint('DatabaseHelper: Failed to insert transcription: $e');
+      log('DatabaseHelper: Failed to insert transcription: $e');
       rethrow;
     }
   }
@@ -377,7 +378,7 @@ class DatabaseHelper {
       if (result.isEmpty) return null;
       return Transcription.fromDatabase(result.first);
     } catch (e) {
-      debugPrint('DatabaseHelper: Failed to get transcription $id: $e');
+      log('DatabaseHelper: Failed to get transcription $id: $e');
       return null;
     }
   }
@@ -397,7 +398,7 @@ class DatabaseHelper {
 
       return result.map((row) => Transcription.fromDatabase(row)).toList();
     } catch (e) {
-      debugPrint(
+      log(
         'DatabaseHelper: Failed to get transcriptions for recording $recordingId: $e',
       );
       return [];
@@ -414,10 +415,10 @@ class DatabaseHelper {
         where: 'id = ?',
         whereArgs: [transcription.id],
       );
-      debugPrint('DatabaseHelper: Updated transcription ${transcription.id}');
+      log('DatabaseHelper: Updated transcription ${transcription.id}');
       return updated > 0;
     } catch (e) {
-      debugPrint('DatabaseHelper: Failed to update transcription: $e');
+      log('DatabaseHelper: Failed to update transcription: $e');
       return false;
     }
   }
@@ -431,10 +432,10 @@ class DatabaseHelper {
         where: 'id = ?',
         whereArgs: [id],
       );
-      debugPrint('DatabaseHelper: Deleted transcription $id');
+      log('DatabaseHelper: Deleted transcription $id');
       return deleted > 0;
     } catch (e) {
-      debugPrint('DatabaseHelper: Failed to delete transcription: $e');
+      log('DatabaseHelper: Failed to delete transcription: $e');
       return false;
     }
   }
@@ -446,10 +447,10 @@ class DatabaseHelper {
     final db = await database;
     try {
       await db.insert('summaries', summary.toDatabase());
-      debugPrint('DatabaseHelper: Inserted summary ${summary.id}');
+      log('DatabaseHelper: Inserted summary ${summary.id}');
       return summary.id;
     } catch (e) {
-      debugPrint('DatabaseHelper: Failed to insert summary: $e');
+      log('DatabaseHelper: Failed to insert summary: $e');
       rethrow;
     }
   }
@@ -467,7 +468,7 @@ class DatabaseHelper {
       if (result.isEmpty) return null;
       return models.Summary.fromDatabase(result.first);
     } catch (e) {
-      debugPrint('DatabaseHelper: Failed to get summary $id: $e');
+      log('DatabaseHelper: Failed to get summary $id: $e');
       return null;
     }
   }
@@ -487,7 +488,7 @@ class DatabaseHelper {
 
       return result.map((row) => models.Summary.fromDatabase(row)).toList();
     } catch (e) {
-      debugPrint(
+      log(
         'DatabaseHelper: Failed to get summaries for transcription $transcriptionId: $e',
       );
       return [];
@@ -504,10 +505,10 @@ class DatabaseHelper {
         where: 'id = ?',
         whereArgs: [summary.id],
       );
-      debugPrint('DatabaseHelper: Updated summary ${summary.id}');
+      log('DatabaseHelper: Updated summary ${summary.id}');
       return updated > 0;
     } catch (e) {
-      debugPrint('DatabaseHelper: Failed to update summary: $e');
+      log('DatabaseHelper: Failed to update summary: $e');
       return false;
     }
   }
@@ -521,10 +522,10 @@ class DatabaseHelper {
         where: 'id = ?',
         whereArgs: [id],
       );
-      debugPrint('DatabaseHelper: Deleted summary $id');
+      log('DatabaseHelper: Deleted summary $id');
       return deleted > 0;
     } catch (e) {
-      debugPrint('DatabaseHelper: Failed to delete summary: $e');
+      log('DatabaseHelper: Failed to delete summary: $e');
       return false;
     }
   }
@@ -545,7 +546,7 @@ class DatabaseHelper {
       if (result.isEmpty) return null;
       return result.first['value'] as String;
     } catch (e) {
-      debugPrint('DatabaseHelper: Failed to get setting $key: $e');
+      log('DatabaseHelper: Failed to get setting $key: $e');
       return null;
     }
   }
@@ -563,7 +564,7 @@ class DatabaseHelper {
       if (result.isEmpty) return null;
       return AppSettings.fromDatabase(result.first);
     } catch (e) {
-      debugPrint('DatabaseHelper: Failed to get app setting $key: $e');
+      log('DatabaseHelper: Failed to get app setting $key: $e');
       return null;
     }
   }
@@ -583,7 +584,7 @@ class DatabaseHelper {
 
       return result.map((row) => AppSettings.fromDatabase(row)).toList();
     } catch (e) {
-      debugPrint(
+      log(
         'DatabaseHelper: Failed to get settings for category ${category.value}: $e',
       );
       return [];
@@ -605,7 +606,7 @@ class DatabaseHelper {
       );
 
       if (updated > 0) {
-        debugPrint('DatabaseHelper: Updated setting $key');
+        log('DatabaseHelper: Updated setting $key');
         return true;
       }
 
@@ -621,10 +622,10 @@ class DatabaseHelper {
         'updated_at': now,
       });
 
-      debugPrint('DatabaseHelper: Inserted new setting $key');
+      log('DatabaseHelper: Inserted new setting $key');
       return true;
     } catch (e) {
-      debugPrint('DatabaseHelper: Failed to set setting $key: $e');
+      log('DatabaseHelper: Failed to set setting $key: $e');
       return false;
     }
   }
@@ -638,10 +639,10 @@ class DatabaseHelper {
         setting.toDatabase(),
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
-      debugPrint('DatabaseHelper: Upserted setting ${setting.key}');
+      log('DatabaseHelper: Upserted setting ${setting.key}');
       return true;
     } catch (e) {
-      debugPrint('DatabaseHelper: Failed to upsert setting: $e');
+      log('DatabaseHelper: Failed to upsert setting: $e');
       return false;
     }
   }
@@ -661,7 +662,7 @@ class DatabaseHelper {
 
       return result;
     } catch (e) {
-      debugPrint('DatabaseHelper: Search failed for query "$query": $e');
+      log('DatabaseHelper: Search failed for query "$query": $e');
       return [];
     }
   }
@@ -705,7 +706,7 @@ class DatabaseHelper {
         'settings': settingsCount,
       };
     } catch (e) {
-      debugPrint('DatabaseHelper: Failed to get database stats: $e');
+      log('DatabaseHelper: Failed to get database stats: $e');
       return {};
     }
   }
@@ -725,10 +726,10 @@ class DatabaseHelper {
         whereArgs: [cutoffDate.millisecondsSinceEpoch],
       );
 
-      debugPrint('DatabaseHelper: Cleaned up $deletedCount old recordings');
+      log('DatabaseHelper: Cleaned up $deletedCount old recordings');
       return deletedCount;
     } catch (e) {
-      debugPrint('DatabaseHelper: Cleanup failed: $e');
+      log('DatabaseHelper: Cleanup failed: $e');
       return 0;
     }
   }
@@ -744,9 +745,9 @@ class DatabaseHelper {
     final db = await database;
     try {
       await db.execute('VACUUM');
-      debugPrint('DatabaseHelper: Database vacuumed successfully');
+      log('DatabaseHelper: Database vacuumed successfully');
     } catch (e) {
-      debugPrint('DatabaseHelper: Database vacuum failed: $e');
+      log('DatabaseHelper: Database vacuum failed: $e');
     }
   }
 
@@ -815,7 +816,7 @@ class DatabaseHelper {
 
       return stats;
     } catch (e) {
-      debugPrint('DatabaseHelper: Failed to get performance stats: $e');
+      log('DatabaseHelper: Failed to get performance stats: $e');
       return {};
     }
   }
@@ -847,7 +848,7 @@ class DatabaseHelper {
 
       return {'total_indexes': result.length, 'index_details': indexInfo};
     } catch (e) {
-      debugPrint('DatabaseHelper: Failed to get index usage stats: $e');
+      log('DatabaseHelper: Failed to get index usage stats: $e');
       return {};
     }
   }
@@ -887,7 +888,7 @@ class DatabaseHelper {
       stats['query_plans'] = queryPlans;
       return stats;
     } catch (e) {
-      debugPrint('DatabaseHelper: Failed to get query performance stats: $e');
+      log('DatabaseHelper: Failed to get query performance stats: $e');
       await db.execute('PRAGMA query_only = OFF'); // Ensure it's turned off
       return {};
     }
@@ -935,7 +936,7 @@ class DatabaseHelper {
 
       return tableStats;
     } catch (e) {
-      debugPrint('DatabaseHelper: Failed to get table statistics: $e');
+      log('DatabaseHelper: Failed to get table statistics: $e');
       return {};
     }
   }
@@ -952,7 +953,7 @@ class DatabaseHelper {
         'cache_spill': cacheSpill.first['cache_spill'],
       };
     } catch (e) {
-      debugPrint('DatabaseHelper: Failed to get cache statistics: $e');
+      log('DatabaseHelper: Failed to get cache statistics: $e');
       return {};
     }
   }
@@ -966,7 +967,7 @@ class DatabaseHelper {
       final startTime = DateTime.now();
 
       // Analyze tables for optimization opportunities
-      debugPrint('DatabaseHelper: Starting database optimization');
+      log('DatabaseHelper: Starting database optimization');
 
       // Update table statistics
       await db.execute('ANALYZE');
@@ -1004,13 +1005,13 @@ class DatabaseHelper {
           .inMilliseconds;
       optimizations['success'] = true;
 
-      debugPrint(
+      log(
         'DatabaseHelper: Database optimization completed in ${optimizations['optimization_time_ms']}ms',
       );
 
       return optimizations;
     } catch (e) {
-      debugPrint('DatabaseHelper: Database optimization failed: $e');
+      log('DatabaseHelper: Database optimization failed: $e');
       optimizations['success'] = false;
       optimizations['error'] = e.toString();
       return optimizations;
@@ -1023,7 +1024,7 @@ class DatabaseHelper {
     final benchmarks = <String, Map<String, dynamic>>{};
 
     try {
-      debugPrint(
+      log(
         'DatabaseHelper: Starting query benchmarks with $iterations iterations',
       );
 
@@ -1092,10 +1093,10 @@ class DatabaseHelper {
         }
       }
 
-      debugPrint('DatabaseHelper: Query benchmarks completed');
+      log('DatabaseHelper: Query benchmarks completed');
       return benchmarks;
     } catch (e) {
-      debugPrint('DatabaseHelper: Query benchmarking failed: $e');
+      log('DatabaseHelper: Query benchmarking failed: $e');
       return {};
     }
   }
@@ -1174,7 +1175,7 @@ class DatabaseHelper {
 
       return suggestions;
     } catch (e) {
-      debugPrint(
+      log(
         'DatabaseHelper: Failed to generate optimization suggestions: $e',
       );
       return ['Unable to analyze performance - check database integrity'];
@@ -1201,9 +1202,9 @@ class DatabaseHelper {
       }
       await database;
 
-      debugPrint('DatabaseHelper: Database recreated successfully');
+      log('DatabaseHelper: Database recreated successfully');
     } catch (e) {
-      debugPrint('DatabaseHelper: Database recreation failed: $e');
+      log('DatabaseHelper: Database recreation failed: $e');
       rethrow;
     }
   }

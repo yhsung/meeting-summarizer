@@ -1,5 +1,7 @@
 import 'dart:convert';
-import 'dart:math';
+import 'dart:math' hide log;
+import 'dart:developer';
+
 import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -26,9 +28,9 @@ class EncryptionService {
   static Future<void> initialize() async {
     try {
       await _ensureMasterKey();
-      debugPrint('EncryptionService: Initialized successfully');
+      log('EncryptionService: Initialized successfully');
     } catch (e) {
-      debugPrint('EncryptionService: Initialization failed: $e');
+      log('EncryptionService: Initialization failed: $e');
       rethrow;
     }
   }
@@ -42,7 +44,7 @@ class EncryptionService {
         key: _masterKeyId,
         value: base64.encode(masterKey),
       );
-      debugPrint('EncryptionService: Master key created');
+      log('EncryptionService: Master key created');
     }
   }
 
@@ -65,10 +67,10 @@ class EncryptionService {
 
       await _secureStorage.write(key: keyId, value: base64.encode(key));
 
-      debugPrint('EncryptionService: Created encryption key for $purpose');
+      log('EncryptionService: Created encryption key for $purpose');
       return keyId;
     } catch (e) {
-      debugPrint('EncryptionService: Failed to create encryption key: $e');
+      log('EncryptionService: Failed to create encryption key: $e');
       rethrow;
     }
   }
@@ -81,7 +83,7 @@ class EncryptionService {
 
       return base64.decode(keyString);
     } catch (e) {
-      debugPrint('EncryptionService: Failed to get encryption key: $e');
+      log('EncryptionService: Failed to get encryption key: $e');
       return null;
     }
   }
@@ -94,7 +96,7 @@ class EncryptionService {
     try {
       final key = await _getEncryptionKey(keyId);
       if (key == null) {
-        debugPrint('EncryptionService: Encryption key not found: $keyId');
+        log('EncryptionService: Encryption key not found: $keyId');
         return null;
       }
 
@@ -111,7 +113,7 @@ class EncryptionService {
         'keyId': keyId,
       };
     } catch (e) {
-      debugPrint('EncryptionService: Encryption failed: $e');
+      log('EncryptionService: Encryption failed: $e');
       return null;
     }
   }
@@ -121,13 +123,13 @@ class EncryptionService {
     try {
       final keyId = encryptedData['keyId'];
       if (keyId == null) {
-        debugPrint('EncryptionService: No key ID in encrypted data');
+        log('EncryptionService: No key ID in encrypted data');
         return null;
       }
 
       final key = await _getEncryptionKey(keyId);
       if (key == null) {
-        debugPrint('EncryptionService: Decryption key not found: $keyId');
+        log('EncryptionService: Decryption key not found: $keyId');
         return null;
       }
 
@@ -138,7 +140,7 @@ class EncryptionService {
       final plaintext = await _decryptAESGCM(ciphertext, key, iv, tag);
       return utf8.decode(plaintext);
     } catch (e) {
-      debugPrint('EncryptionService: Decryption failed: $e');
+      log('EncryptionService: Decryption failed: $e');
       return null;
     }
   }
@@ -224,10 +226,10 @@ class EncryptionService {
   static Future<bool> deleteEncryptionKey(String keyId) async {
     try {
       await _secureStorage.delete(key: keyId);
-      debugPrint('EncryptionService: Deleted encryption key: $keyId');
+      log('EncryptionService: Deleted encryption key: $keyId');
       return true;
     } catch (e) {
-      debugPrint('EncryptionService: Failed to delete encryption key: $e');
+      log('EncryptionService: Failed to delete encryption key: $e');
       return false;
     }
   }
@@ -238,7 +240,7 @@ class EncryptionService {
       final allKeys = await _secureStorage.readAll();
       return allKeys.keys.where((key) => key.startsWith(_keyPrefix)).toList();
     } catch (e) {
-      debugPrint('EncryptionService: Failed to list encryption keys: $e');
+      log('EncryptionService: Failed to list encryption keys: $e');
       return [];
     }
   }
@@ -247,9 +249,9 @@ class EncryptionService {
   static Future<void> clearAllKeys() async {
     try {
       await _secureStorage.deleteAll();
-      debugPrint('EncryptionService: Cleared all encryption keys');
+      log('EncryptionService: Cleared all encryption keys');
     } catch (e) {
-      debugPrint('EncryptionService: Failed to clear keys: $e');
+      log('EncryptionService: Failed to clear keys: $e');
       rethrow;
     }
   }
@@ -267,7 +269,7 @@ class EncryptionService {
 
       return readValue == testValue;
     } catch (e) {
-      debugPrint('EncryptionService: Encryption not available: $e');
+      log('EncryptionService: Encryption not available: $e');
       return false;
     }
   }

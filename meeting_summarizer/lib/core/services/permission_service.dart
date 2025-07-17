@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:flutter/foundation.dart';
+import 'dart:developer';
+
 import 'package:permission_handler/permission_handler.dart' as ph;
 
 import 'permission_service_interface.dart';
@@ -36,9 +37,9 @@ class PermissionService implements PermissionServiceInterface {
       await _startPermissionMonitoring();
 
       _isInitialized = true;
-      debugPrint('PermissionService: Initialized successfully');
+      log('PermissionService: Initialized successfully');
     } catch (e) {
-      debugPrint('PermissionService: Initialization failed: $e');
+      log('PermissionService: Initialization failed: $e');
       rethrow;
     }
   }
@@ -48,7 +49,7 @@ class PermissionService implements PermissionServiceInterface {
     _monitoringTimer?.cancel();
     await _permissionStateController.close();
     _isInitialized = false;
-    debugPrint('PermissionService: Disposed');
+    log('PermissionService: Disposed');
   }
 
   @override
@@ -57,7 +58,7 @@ class PermissionService implements PermissionServiceInterface {
       // For macOS, assume permissions are granted for now
       // This is a workaround since permission_handler doesn't fully support macOS
       if (Platform.isMacOS) {
-        debugPrint(
+        log(
           'PermissionService: macOS detected, assuming $type permission is granted',
         );
         final state = PermissionState.granted;
@@ -74,10 +75,10 @@ class PermissionService implements PermissionServiceInterface {
 
       return state;
     } catch (e) {
-      debugPrint('PermissionService: Check permission failed for $type: $e');
+      log('PermissionService: Check permission failed for $type: $e');
       // For macOS, fallback to granted state
       if (Platform.isMacOS) {
-        debugPrint(
+        log(
           'PermissionService: macOS fallback, assuming $type permission is granted',
         );
         final state = PermissionState.granted;
@@ -114,7 +115,7 @@ class PermissionService implements PermissionServiceInterface {
 
       // For macOS, assume permissions are granted for now
       if (Platform.isMacOS) {
-        debugPrint(
+        log(
           'PermissionService: macOS detected, granting $type permission',
         );
         final state = PermissionState.granted;
@@ -146,7 +147,7 @@ class PermissionService implements PermissionServiceInterface {
       // Request permission with retry mechanism
       return await _requestWithRetry(type, effectiveConfig);
     } catch (e) {
-      debugPrint('PermissionService: Request permission failed for $type: $e');
+      log('PermissionService: Request permission failed for $type: $e');
       return PermissionResult.error('Permission request failed: $e');
     }
   }
@@ -171,7 +172,7 @@ class PermissionService implements PermissionServiceInterface {
     try {
       return await ph.openAppSettings();
     } catch (e) {
-      debugPrint('PermissionService: Open app settings failed: $e');
+      log('PermissionService: Open app settings failed: $e');
       return false;
     }
   }
@@ -194,7 +195,7 @@ class PermissionService implements PermissionServiceInterface {
 
       return false;
     } catch (e) {
-      debugPrint(
+      log(
         'PermissionService: Should show rationale check failed for $type: $e',
       );
       return false;
@@ -244,7 +245,7 @@ class PermissionService implements PermissionServiceInterface {
     _lastRequestTimes.clear();
     _requestHistory.clear();
     _currentStates.clear();
-    debugPrint('PermissionService: Permission tracking reset');
+    log('PermissionService: Permission tracking reset');
   }
 
   @override
@@ -344,7 +345,7 @@ class PermissionService implements PermissionServiceInterface {
   ) async {
     // In a real implementation, this would show a dialog to the user
     // For now, we'll return true to proceed with the request
-    debugPrint('PermissionService: Would show rationale for $type');
+    log('PermissionService: Would show rationale for $type');
     return true;
   }
 
@@ -354,7 +355,7 @@ class PermissionService implements PermissionServiceInterface {
   ) async {
     // In a real implementation, this would show a dialog and potentially open settings
     // For now, we'll try to open settings directly
-    debugPrint(
+    log(
       'PermissionService: Would show settings redirect dialog for $type',
     );
     return await openAppSettings();
@@ -499,7 +500,7 @@ class PermissionService implements PermissionServiceInterface {
           _permissionStateController.add(Map.from(_currentStates));
         }
       } catch (e) {
-        debugPrint('PermissionService: Monitoring error: $e');
+        log('PermissionService: Monitoring error: $e');
       }
     });
   }

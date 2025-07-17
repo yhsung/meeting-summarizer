@@ -3,9 +3,9 @@ library;
 
 import 'dart:async';
 import 'dart:io';
-import 'dart:math';
+import 'dart:math' hide log;
+import 'dart:developer';
 
-import 'package:flutter/foundation.dart';
 
 /// Types of transcription errors
 enum TranscriptionErrorType {
@@ -519,7 +519,7 @@ class RetryExecutor {
 
     for (int attempt = 1; attempt <= retryPolicy.maxAttempts; attempt++) {
       try {
-        debugPrint(
+        log(
           'RetryExecutor: Attempting $operationName (attempt $attempt/${retryPolicy.maxAttempts})',
         );
 
@@ -532,7 +532,7 @@ class RetryExecutor {
       } catch (e) {
         final error = _convertToTranscriptionError(e);
 
-        debugPrint(
+        log(
           'RetryExecutor: $operationName failed on attempt $attempt: ${error.message}',
         );
 
@@ -543,7 +543,7 @@ class RetryExecutor {
             retryPolicy.isRetryable(error.type);
 
         if (!shouldRetry) {
-          debugPrint(
+          log(
             'RetryExecutor: $operationName failed permanently after $attempt attempts',
           );
           throw error;
@@ -555,7 +555,7 @@ class RetryExecutor {
           suggestedDelay: error.suggestedRetryDelay,
         );
 
-        debugPrint(
+        log(
           'RetryExecutor: Retrying $operationName after ${delay.inSeconds}s delay',
         );
         await Future.delayed(delay);

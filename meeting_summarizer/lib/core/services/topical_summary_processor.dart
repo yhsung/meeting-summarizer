@@ -2,7 +2,8 @@
 library;
 
 import 'dart:async';
-import 'package:flutter/foundation.dart';
+import 'dart:developer';
+
 import 'package:uuid/uuid.dart';
 
 import '../enums/summary_type.dart';
@@ -219,7 +220,7 @@ Return action items organized by topic with clear assignments.''';
       final response = await aiCall(prompt, systemPrompt);
       return _parseTopicActionItems(response, topics);
     } catch (e) {
-      debugPrint('TopicalSummaryProcessor: Action item extraction failed: $e');
+      log('TopicalSummaryProcessor: Action item extraction failed: $e');
       return [];
     }
   }
@@ -256,7 +257,7 @@ Return decisions organized by topic with clear context.''';
       final response = await aiCall(prompt, systemPrompt);
       return _parseTopicDecisions(response, topics);
     } catch (e) {
-      debugPrint('TopicalSummaryProcessor: Decision extraction failed: $e');
+      log('TopicalSummaryProcessor: Decision extraction failed: $e');
       return [];
     }
   }

@@ -2,7 +2,8 @@
 library;
 
 import 'dart:async';
-import 'dart:math' as math;
+import 'dart:math' as math hide log;
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -199,7 +200,7 @@ class _RecordingScreenState extends State<RecordingScreen>
             'File size: ${(analysisResult.fileSize / 1024).toStringAsFixed(1)}KB. '
             'Please check microphone permissions and try again.',
           );
-          debugPrint('AudioAnalysis: $analysisResult');
+          log('AudioAnalysis: $analysisResult');
         }
       }
     } catch (e) {
