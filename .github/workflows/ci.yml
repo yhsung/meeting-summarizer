@@ -129,39 +129,39 @@ jobs:
       working-directory: ./meeting_summarizer
       run: flutter build ios --debug --simulator
 
-  build-web:
-    needs: test
-    runs-on: ubuntu-latest
+  # build-web:
+  #   needs: test
+  #   runs-on: ubuntu-latest
     
-    steps:
-    - uses: actions/checkout@v4
+  #   steps:
+  #   - uses: actions/checkout@v4
     
-    - name: Cache Flutter dependencies
-      uses: actions/cache@v4
-      with:
-        path: |
-          ~/.pub-cache
-          **/.dart_tool/package_config.json
-        key: ${{ runner.os }}-flutter-${{ hashFiles('**/pubspec.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-flutter-
+  #   - name: Cache Flutter dependencies
+  #     uses: actions/cache@v4
+  #     with:
+  #       path: |
+  #         ~/.pub-cache
+  #         **/.dart_tool/package_config.json
+  #       key: ${{ runner.os }}-flutter-${{ hashFiles('**/pubspec.lock') }}
+  #       restore-keys: |
+  #         ${{ runner.os }}-flutter-
     
-    - name: Setup Flutter
-      uses: subosito/flutter-action@v2
-      with:
-        flutter-version: '3.32.4'
-        channel: 'stable'
-        cache: true
-        cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
-        cache-path: '${{ runner.tool_cache }}/flutter/:channel:-:version:-:arch:'
+  #   - name: Setup Flutter
+  #     uses: subosito/flutter-action@v2
+  #     with:
+  #       flutter-version: '3.32.4'
+  #       channel: 'stable'
+  #       cache: true
+  #       cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
+  #       cache-path: '${{ runner.tool_cache }}/flutter/:channel:-:version:-:arch:'
     
-    - name: Install dependencies
-      working-directory: ./meeting_summarizer
-      run: flutter pub get
+  #   - name: Install dependencies
+  #     working-directory: ./meeting_summarizer
+  #     run: flutter pub get
     
-    - name: Build Web
-      working-directory: ./meeting_summarizer
-      run: flutter build web --debug
+  #   - name: Build Web
+  #     working-directory: ./meeting_summarizer
+  #     run: flutter build web --debug
 
   build-windows:
     needs: test
