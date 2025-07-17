@@ -3,7 +3,6 @@ library;
 
 import 'dart:developer';
 
-
 import '../models/transcription_request.dart';
 import '../services/transcription_service_factory.dart';
 import '../../features/audio_recording/presentation/widgets/transcription_settings_dialog.dart';

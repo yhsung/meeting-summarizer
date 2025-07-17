@@ -16,9 +16,7 @@ class DatabaseMigrations {
     int oldVersion,
     int newVersion,
   ) async {
-    log(
-      'DatabaseMigrations: Migrating from v$oldVersion to v$newVersion',
-    );
+    log('DatabaseMigrations: Migrating from v$oldVersion to v$newVersion');
 
     // Execute migrations sequentially for each version
     for (int version = oldVersion + 1; version <= newVersion; version++) {
@@ -42,9 +40,7 @@ class DatabaseMigrations {
         await _migrateToVersion4(db);
         break;
       default:
-        log(
-          'DatabaseMigrations: No migration script for version $version',
-        );
+        log('DatabaseMigrations: No migration script for version $version');
     }
 
     // Always update the database version after migration

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 import 'package:image/image.dart' as img;
@@ -330,7 +331,7 @@ class PreviewService implements PreviewServiceInterface {
       } catch (e) {
         // Continue with next file on error
         if (kDebugMode) {
-          print(
+          log(
             'Failed to generate thumbnail for ${fileMetadata.fileName}: $e',
           );
         }

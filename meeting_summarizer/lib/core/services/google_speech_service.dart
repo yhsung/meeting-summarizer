@@ -99,9 +99,7 @@ class GoogleSpeechService implements TranscriptionServiceInterface {
     String? serviceAccountPath,
     Function(double progress, String status)? onProgress,
   }) async {
-    log(
-      'GoogleSpeechService: Initializing Google Speech-to-Text service',
-    );
+    log('GoogleSpeechService: Initializing Google Speech-to-Text service');
     onProgress?.call(0.0, 'Initializing service...');
 
     if (_isInitialized) {
@@ -177,9 +175,7 @@ class GoogleSpeechService implements TranscriptionServiceInterface {
         [speech.SpeechApi.cloudPlatformScope],
       );
 
-      log(
-        'GoogleSpeechService: Service account authentication initialized',
-      );
+      log('GoogleSpeechService: Service account authentication initialized');
     } catch (e) {
       throw TranscriptionError(
         type: TranscriptionErrorType.configurationError,
@@ -260,9 +256,7 @@ class GoogleSpeechService implements TranscriptionServiceInterface {
           log(
             'GoogleSpeechService: API key valid but may lack permissions or have quota issues',
           );
-          log(
-            'GoogleSpeechService: 403 Response details: ${response.body}',
-          );
+          log('GoogleSpeechService: 403 Response details: ${response.body}');
         } else if (response.statusCode == 404) {
           log(
             'GoogleSpeechService: API endpoint not found - check service configuration',
@@ -462,9 +456,7 @@ class GoogleSpeechService implements TranscriptionServiceInterface {
 
   @override
   Future<TranscriptionLanguage?> detectLanguage(File audioFile) async {
-    log(
-      'GoogleSpeechService: Detecting language for file: ${audioFile.path}',
-    );
+    log('GoogleSpeechService: Detecting language for file: ${audioFile.path}');
 
     try {
       // Create a request with auto language detection
@@ -513,9 +505,7 @@ class GoogleSpeechService implements TranscriptionServiceInterface {
         return apiKey;
       }
     } catch (e) {
-      log(
-        'GoogleSpeechService: Failed to load API key from settings: $e',
-      );
+      log('GoogleSpeechService: Failed to load API key from settings: $e');
     }
 
     // Fall back to environment variables
@@ -536,9 +526,7 @@ class GoogleSpeechService implements TranscriptionServiceInterface {
     apiKey = const String.fromEnvironment('GCLOUD_API_KEY');
     if (apiKey.isNotEmpty) return apiKey;
 
-    log(
-      'GoogleSpeechService: No API key found in environment variables',
-    );
+    log('GoogleSpeechService: No API key found in environment variables');
     return null;
   }
 
@@ -642,9 +630,7 @@ class GoogleSpeechService implements TranscriptionServiceInterface {
     String audioPath,
     TranscriptionRequest request,
   ) async {
-    log(
-      'GoogleSpeechService: Processing transcription with Google Speech API',
-    );
+    log('GoogleSpeechService: Processing transcription with Google Speech API');
 
     try {
       // Determine if we should use synchronous or asynchronous recognition

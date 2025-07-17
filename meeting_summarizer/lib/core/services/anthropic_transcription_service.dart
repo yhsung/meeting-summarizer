@@ -4,7 +4,6 @@ library;
 import 'dart:io';
 import 'dart:developer';
 
-
 import '../models/transcription_result.dart';
 import '../models/transcription_request.dart';
 import '../models/transcription_usage_stats.dart';
@@ -43,9 +42,7 @@ class AnthropicTranscriptionService implements TranscriptionServiceInterface {
       }
 
       _isInitialized = true;
-      log(
-        'AnthropicTranscriptionService: Service initialized successfully',
-      );
+      log('AnthropicTranscriptionService: Service initialized successfully');
     } catch (e) {
       log('AnthropicTranscriptionService: Failed to initialize: $e');
       rethrow;
@@ -58,9 +55,7 @@ class AnthropicTranscriptionService implements TranscriptionServiceInterface {
       final apiKey = await _apiKeyService.getApiKey('anthropic');
       return apiKey != null && apiKey.isNotEmpty;
     } catch (e) {
-      log(
-        'AnthropicTranscriptionService: Error checking availability: $e',
-      );
+      log('AnthropicTranscriptionService: Error checking availability: $e');
       return false;
     }
   }

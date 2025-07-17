@@ -3,7 +3,6 @@ library;
 
 import 'dart:developer';
 
-
 import 'transcription_service_interface.dart';
 import 'openai_whisper_service.dart';
 import 'local_whisper_service.dart';
@@ -91,18 +90,14 @@ class TranscriptionServiceFactory {
     bool requiresSpeakerDiarization = false,
     String? preferredLanguage,
   }) async {
-    log(
-      'TranscriptionServiceFactory: Finding best service for requirements',
-    );
+    log('TranscriptionServiceFactory: Finding best service for requirements');
 
     // For now, only OpenAI Whisper is available
     // In the future, this could rank services based on capabilities
     final whisperService = getService(TranscriptionProvider.openaiWhisper);
 
     if (await whisperService.isServiceAvailable()) {
-      log(
-        'TranscriptionServiceFactory: Selected OpenAI Whisper service',
-      );
+      log('TranscriptionServiceFactory: Selected OpenAI Whisper service');
       return whisperService;
     }
 

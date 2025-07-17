@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'dart:developer';
 
-
 import 'audio_recording_platform.dart';
 
 /// Enhanced platform interface with background recording capabilities

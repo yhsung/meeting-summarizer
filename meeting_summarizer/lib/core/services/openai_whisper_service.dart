@@ -276,9 +276,7 @@ class OpenAIWhisperService implements TranscriptionServiceInterface {
 
   @override
   Future<TranscriptionLanguage?> detectLanguage(File audioFile) async {
-    log(
-      'OpenAIWhisperService: Detecting language for file: ${audioFile.path}',
-    );
+    log('OpenAIWhisperService: Detecting language for file: ${audioFile.path}');
 
     try {
       // Create a request with auto language detection

@@ -131,9 +131,7 @@ class DatabaseHelper {
 
   /// Handle database upgrades with proper migration system
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    log(
-      'DatabaseHelper: Upgrading database from v$oldVersion to v$newVersion',
-    );
+    log('DatabaseHelper: Upgrading database from v$oldVersion to v$newVersion');
 
     // Validate version compatibility
     if (oldVersion < DatabaseSchema.minSupportedVersion) {
@@ -167,18 +165,14 @@ class DatabaseHelper {
 
         log('DatabaseHelper: Database upgrade completed successfully');
       } catch (migrationError) {
-        log(
-          'DatabaseHelper: Migration failed, attempting to restore backup',
-        );
+        log('DatabaseHelper: Migration failed, attempting to restore backup');
 
         // Attempt to restore from backup
         try {
           await DatabaseMigrations.restoreFromBackup(db.path, backupPath);
           log('DatabaseHelper: Backup restored successfully');
         } catch (restoreError) {
-          log(
-            'DatabaseHelper: Backup restoration failed: $restoreError',
-          );
+          log('DatabaseHelper: Backup restoration failed: $restoreError');
         }
 
         rethrow;
@@ -1175,9 +1169,7 @@ class DatabaseHelper {
 
       return suggestions;
     } catch (e) {
-      log(
-        'DatabaseHelper: Failed to generate optimization suggestions: $e',
-      );
+      log('DatabaseHelper: Failed to generate optimization suggestions: $e');
       return ['Unable to analyze performance - check database integrity'];
     }
   }

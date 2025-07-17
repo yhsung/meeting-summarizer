@@ -128,9 +128,7 @@ class BackgroundRecordingManager {
       _isBackgroundRecordingEnabled = false;
       _addEvent(BackgroundRecordingEvent.disabled);
     } catch (e) {
-      log(
-        'BackgroundRecordingManager: Failed to disable background: $e',
-      );
+      log('BackgroundRecordingManager: Failed to disable background: $e');
     }
   }
 

@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:developer';
 
-
 import '../../../../core/models/audio_configuration.dart';
 import '../../../../core/models/recording_session.dart';
 import '../../../../core/services/audio_service_interface.dart';
@@ -43,9 +42,7 @@ class BackgroundAudioService implements AudioServiceInterface {
   /// Safely add session update to stream controller if not disposed
   void _addSessionUpdate(RecordingSession session) {
     if (_isDisposed || _sessionController.isClosed) {
-      log(
-        'BackgroundAudioService: Cannot add session update after disposal',
-      );
+      log('BackgroundAudioService: Cannot add session update after disposal');
       return;
     }
     _sessionController.add(session);

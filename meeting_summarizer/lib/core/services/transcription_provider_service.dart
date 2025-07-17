@@ -170,9 +170,7 @@ class TranscriptionProviderService {
   Future<void> clearForceLocalWhisperOverride() async {
     try {
       await _secureStorage.delete(key: _forceLocalWhisperKey);
-      log(
-        'TranscriptionProviderService: Force local whisper override cleared',
-      );
+      log('TranscriptionProviderService: Force local whisper override cleared');
     } catch (e) {
       log(
         'TranscriptionProviderService: Error clearing force local whisper override: $e',

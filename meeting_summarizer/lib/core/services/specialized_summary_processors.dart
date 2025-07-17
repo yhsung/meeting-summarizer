@@ -260,9 +260,7 @@ Provide a comprehensive list of all actionable items:''';
         return now.add(Duration(days: daysUntilFriday));
       }
     } catch (e) {
-      log(
-        'ActionItemsProcessor: Date parsing failed for "$dateStr": $e',
-      );
+      log('ActionItemsProcessor: Date parsing failed for "$dateStr": $e');
     }
 
     return null;

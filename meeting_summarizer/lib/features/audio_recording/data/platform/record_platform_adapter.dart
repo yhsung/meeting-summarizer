@@ -37,9 +37,7 @@ class RecordPlatformAdapter extends AudioRecordingPlatform {
       }
 
       _isInitialized = true;
-      log(
-        'RecordPlatformAdapter: Initialized for ${Platform.operatingSystem}',
-      );
+      log('RecordPlatformAdapter: Initialized for ${Platform.operatingSystem}');
     } catch (e) {
       log('RecordPlatformAdapter: Initialization failed: $e');
       rethrow;
@@ -268,18 +266,14 @@ class RecordPlatformAdapter extends AudioRecordingPlatform {
       log('RecordPlatformAdapter: Has permission: $hasPermission');
 
       if (!hasPermission) {
-        log(
-          'RecordPlatformAdapter: Requesting microphone permission...',
-        );
+        log('RecordPlatformAdapter: Requesting microphone permission...');
         final granted = await _recorder.hasPermission();
         log('RecordPlatformAdapter: Permission granted: $granted');
       }
 
       // Try to get input devices list to verify microphone availability
       final isRecording = await _recorder.isRecording();
-      log(
-        'RecordPlatformAdapter: Current recording state: $isRecording',
-      );
+      log('RecordPlatformAdapter: Current recording state: $isRecording');
 
       // Check if we can create a test recording (short duration)
       log('RecordPlatformAdapter: Testing microphone availability...');

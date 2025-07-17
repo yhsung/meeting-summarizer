@@ -221,9 +221,7 @@ class EncryptedDatabaseService {
         metadata: encryptedMetadata ?? recording.metadata,
       );
     } catch (e) {
-      log(
-        'EncryptedDatabaseService: Encryption failed for recording: $e',
-      );
+      log('EncryptedDatabaseService: Encryption failed for recording: $e');
       return recording; // Return unencrypted on failure
     }
   }
@@ -320,9 +318,7 @@ class EncryptedDatabaseService {
         metadata: decryptedMetadata,
       );
     } catch (e) {
-      log(
-        'EncryptedDatabaseService: Decryption failed for recording: $e',
-      );
+      log('EncryptedDatabaseService: Decryption failed for recording: $e');
       return recording; // Return as-is on failure
     }
   }
@@ -348,9 +344,7 @@ class EncryptedDatabaseService {
       );
       return result;
     } catch (e) {
-      log(
-        'EncryptedDatabaseService: Failed to insert transcription: $e',
-      );
+      log('EncryptedDatabaseService: Failed to insert transcription: $e');
       rethrow;
     }
   }
@@ -392,9 +386,7 @@ class EncryptedDatabaseService {
 
       return transcription.copyWith(text: encryptedText ?? transcription.text);
     } catch (e) {
-      log(
-        'EncryptedDatabaseService: Encryption failed for transcription: $e',
-      );
+      log('EncryptedDatabaseService: Encryption failed for transcription: $e');
       return transcription;
     }
   }
@@ -426,9 +418,7 @@ class EncryptedDatabaseService {
 
       return transcription.copyWith(text: decryptedText);
     } catch (e) {
-      log(
-        'EncryptedDatabaseService: Decryption failed for transcription: $e',
-      );
+      log('EncryptedDatabaseService: Decryption failed for transcription: $e');
       return transcription;
     }
   }
@@ -510,9 +500,7 @@ class EncryptedDatabaseService {
 
       return await _databaseHelper!.updateTranscription(processedTranscription);
     } catch (e) {
-      log(
-        'EncryptedDatabaseService: Failed to update transcription: $e',
-      );
+      log('EncryptedDatabaseService: Failed to update transcription: $e');
       return false;
     }
   }

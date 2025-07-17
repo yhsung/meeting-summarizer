@@ -6,7 +6,6 @@ import 'dart:io';
 import 'dart:math' hide log;
 import 'dart:developer';
 
-
 /// Types of transcription errors
 enum TranscriptionErrorType {
   /// Network connectivity issues

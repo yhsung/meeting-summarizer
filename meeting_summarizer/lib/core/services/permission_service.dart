@@ -115,9 +115,7 @@ class PermissionService implements PermissionServiceInterface {
 
       // For macOS, assume permissions are granted for now
       if (Platform.isMacOS) {
-        log(
-          'PermissionService: macOS detected, granting $type permission',
-        );
+        log('PermissionService: macOS detected, granting $type permission');
         final state = PermissionState.granted;
         _currentStates[type] = state;
         return PermissionResult.granted();
@@ -355,9 +353,7 @@ class PermissionService implements PermissionServiceInterface {
   ) async {
     // In a real implementation, this would show a dialog and potentially open settings
     // For now, we'll try to open settings directly
-    log(
-      'PermissionService: Would show settings redirect dialog for $type',
-    );
+    log('PermissionService: Would show settings redirect dialog for $type');
     return await openAppSettings();
   }
 

@@ -8,7 +8,6 @@ import 'dart:async';
 import 'dart:math' hide log;
 import 'dart:developer';
 
-
 import '../database/database_helper.dart';
 
 /// Performance threshold levels for alerting and optimization
@@ -155,9 +154,7 @@ class DatabasePerformanceService {
           .inMilliseconds;
       results['success'] = true;
 
-      log(
-        'DatabasePerformanceService: Optimization completed successfully',
-      );
+      log('DatabasePerformanceService: Optimization completed successfully');
       return results;
     } catch (e) {
       log('DatabasePerformanceService: Optimization failed: $e');
@@ -278,9 +275,7 @@ class DatabasePerformanceService {
       if (score >= 40) return PerformanceLevel.poor;
       return PerformanceLevel.critical;
     } catch (e) {
-      log(
-        'DatabasePerformanceService: Failed to assess performance level: $e',
-      );
+      log('DatabasePerformanceService: Failed to assess performance level: $e');
       return PerformanceLevel.fair;
     }
   }
@@ -462,9 +457,7 @@ class DatabasePerformanceService {
 
       return indicators;
     } catch (e) {
-      log(
-        'DatabasePerformanceService: Failed to get health indicators: $e',
-      );
+      log('DatabasePerformanceService: Failed to get health indicators: $e');
       return {'overall_health': 'unknown'};
     }
   }

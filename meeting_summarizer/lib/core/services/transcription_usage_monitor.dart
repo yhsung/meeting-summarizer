@@ -368,9 +368,7 @@ class TranscriptionUsageMonitor {
         final content = await _statsFile!.readAsString();
         final json = jsonDecode(content) as Map<String, dynamic>;
         _currentStats = TranscriptionUsageStats.fromJson(json);
-        log(
-          'TranscriptionUsageMonitor: Loaded existing usage statistics',
-        );
+        log('TranscriptionUsageMonitor: Loaded existing usage statistics');
       } else {
         _currentStats = TranscriptionUsageStats.empty();
         log(
@@ -424,9 +422,7 @@ class TranscriptionUsageMonitor {
 
       await _metricsFile!.writeAsString(jsonEncode(existingMetrics));
     } catch (e) {
-      log(
-        'TranscriptionUsageMonitor: Error recording detailed metrics: $e',
-      );
+      log('TranscriptionUsageMonitor: Error recording detailed metrics: $e');
     }
   }
 

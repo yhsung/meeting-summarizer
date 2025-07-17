@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'dart:math' as math;
+import 'dart:developer';
 
 import 'package:fftea/fftea.dart';
 
@@ -158,9 +159,7 @@ class AudioEnhancementService implements AudioEnhancementServiceInterface {
         yield result.enhancedAudioData;
       } catch (e) {
         // Log error but continue processing
-        // Note: In production, use proper logging framework instead of print
-        // ignore: avoid_print
-        print('Error processing audio stream: $e');
+        log('Error processing audio stream: $e');
         yield audioData; // Return original data if processing fails
       }
     }

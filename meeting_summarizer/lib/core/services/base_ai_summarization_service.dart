@@ -65,9 +65,7 @@ abstract class BaseAISummarizationService
     try {
       await initializeProvider();
       _isInitialized = true;
-      log(
-        'BaseAISummarizationService: Initialized ${config.provider.id}',
-      );
+      log('BaseAISummarizationService: Initialized ${config.provider.id}');
     } catch (e, stackTrace) {
       throw SummarizationExceptions.initializationFailed(
         'Provider initialization failed',

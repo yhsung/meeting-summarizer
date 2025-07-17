@@ -173,9 +173,7 @@ class AudioRecordingService implements AudioServiceInterface {
             configuration.outputDirectory ??
             (await getApplicationDocumentsDirectory()).path;
       } catch (e) {
-        log(
-          'AudioRecordingService: Failed to get documents directory: $e',
-        );
+        log('AudioRecordingService: Failed to get documents directory: $e');
         // Fallback to current directory for tests
         directory = '.';
       }
@@ -255,9 +253,7 @@ class AudioRecordingService implements AudioServiceInterface {
     dynamic error,
     AudioConfiguration configuration,
   ) {
-    log(
-      'AudioRecordingService: Platform recording start failed: $error',
-    );
+    log('AudioRecordingService: Platform recording start failed: $error');
 
     String userMessage;
     String technicalDetails = error.toString();
@@ -290,9 +286,7 @@ class AudioRecordingService implements AudioServiceInterface {
 
   /// Handle unexpected failures during recording start
   void _handleUnexpectedStartFailure(dynamic error) {
-    log(
-      'AudioRecordingService: Unexpected start recording failure: $error',
-    );
+    log('AudioRecordingService: Unexpected start recording failure: $error');
 
     String userMessage = 'Recording failed due to an unexpected error.';
     if (error.toString().contains('already')) {
@@ -361,9 +355,7 @@ class AudioRecordingService implements AudioServiceInterface {
       if (path != null && await File(path).exists()) {
         // For debugging, let's skip enhancement and use original file
         String finalPath = path;
-        log(
-          'AudioRecordingService: Using original file for now - $finalPath',
-        );
+        log('AudioRecordingService: Using original file for now - $finalPath');
 
         // Apply post-processing enhancement if enabled
         // TODO: Re-enable enhancement after fixing silence issue
@@ -606,18 +598,14 @@ class AudioRecordingService implements AudioServiceInterface {
         }
       },
       onError: (error) {
-        log(
-          'AudioRecordingService: Permission monitoring error: $error',
-        );
+        log('AudioRecordingService: Permission monitoring error: $error');
       },
     );
   }
 
   /// Handle permission state changes with graceful degradation
   void _handlePermissionStateChange(PermissionState newState) {
-    log(
-      'AudioRecordingService: Microphone permission changed to: $newState',
-    );
+    log('AudioRecordingService: Microphone permission changed to: $newState');
 
     switch (newState) {
       case PermissionState.granted:
@@ -665,9 +653,7 @@ class AudioRecordingService implements AudioServiceInterface {
 
   /// Handle when permission is permanently denied
   void _handlePermissionPermanentlyDenied() {
-    log(
-      'AudioRecordingService: Microphone permission permanently denied',
-    );
+    log('AudioRecordingService: Microphone permission permanently denied');
 
     if (_currentSession?.state.isActive == true) {
       _gracefullyStopRecording(
@@ -744,9 +730,7 @@ class AudioRecordingService implements AudioServiceInterface {
         final currentDuration = _currentSession?.duration ?? Duration.zero;
         final currentPath = _currentSession?.filePath;
 
-        log(
-          'AudioRecordingService: Gracefully stopping recording - $message',
-        );
+        log('AudioRecordingService: Gracefully stopping recording - $message');
 
         // Stop the recording
         cancelRecording();
@@ -769,9 +753,7 @@ class AudioRecordingService implements AudioServiceInterface {
         );
       }
     } catch (e) {
-      log(
-        'AudioRecordingService: Error during graceful recording stop: $e',
-      );
+      log('AudioRecordingService: Error during graceful recording stop: $e');
       // Fallback to basic error state
       _updateSession(
         RecordingState.error,
@@ -860,9 +842,7 @@ class AudioRecordingService implements AudioServiceInterface {
 
       // Provide guided flow based on current state
       final guidance = _getPermissionGuidance(currentState);
-      log(
-        'AudioRecordingService: Permission guidance - ${guidance.message}',
-      );
+      log('AudioRecordingService: Permission guidance - ${guidance.message}');
 
       // Create configuration with guidance
       final config = PermissionConfig(

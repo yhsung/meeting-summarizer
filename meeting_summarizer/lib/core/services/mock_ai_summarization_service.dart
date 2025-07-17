@@ -32,9 +32,7 @@ class MockAISummarizationService extends BaseAISummarizationService {
     // Register specialized processors
     _registerSpecializedProcessors();
 
-    log(
-      'MockAISummarizationService: Initialized with specialized processors',
-    );
+    log('MockAISummarizationService: Initialized with specialized processors');
   }
 
   /// Register specialized processors for different summary types

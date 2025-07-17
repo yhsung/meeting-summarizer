@@ -35,9 +35,7 @@ class ApiKeyService {
     try {
       if (_useSecureStorage) {
         await _secureStorage.write(key: key, value: apiKey);
-        log(
-          'ApiKeyService: API key stored securely for provider: $provider',
-        );
+        log('ApiKeyService: API key stored securely for provider: $provider');
       } else {
         await _storeFallback(provider, apiKey);
         log(
@@ -49,9 +47,7 @@ class ApiKeyService {
 
       // Fall back to SharedPreferences if secure storage fails
       if (_useSecureStorage) {
-        log(
-          'ApiKeyService: Falling back to SharedPreferences for $provider',
-        );
+        log('ApiKeyService: Falling back to SharedPreferences for $provider');
         _useSecureStorage = false;
         await _storeFallback(provider, apiKey);
         log(
@@ -113,9 +109,7 @@ class ApiKeyService {
 
       // Fall back to SharedPreferences if secure storage fails
       if (_useSecureStorage) {
-        log(
-          'ApiKeyService: Falling back to SharedPreferences for $provider',
-        );
+        log('ApiKeyService: Falling back to SharedPreferences for $provider');
         _useSecureStorage = false;
         return await _getFallback(provider);
       }
@@ -230,9 +224,7 @@ class ApiKeyService {
         }
       }
 
-      log(
-        'ApiKeyService: Found ${providers.length} configured providers',
-      );
+      log('ApiKeyService: Found ${providers.length} configured providers');
       return providers;
     } catch (e) {
       log('ApiKeyService: Failed to get configured providers: $e');

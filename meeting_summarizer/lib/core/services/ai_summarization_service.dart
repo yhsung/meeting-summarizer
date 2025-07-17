@@ -84,9 +84,7 @@ class AISummarizationService implements AISummarizationServiceInterface {
       await _activeService!.initialize();
 
       _currentConfig = config;
-      log(
-        'AISummarizationService: Configured with ${config.provider.id}',
-      );
+      log('AISummarizationService: Configured with ${config.provider.id}');
     } catch (e, stackTrace) {
       throw SummarizationExceptions.initializationFailed(
         'Provider configuration failed: $e',
