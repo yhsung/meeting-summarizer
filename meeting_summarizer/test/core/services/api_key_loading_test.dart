@@ -1,11 +1,35 @@
 /// Test Google Speech service API key loading from settings vs environment
 library;
 
+import 'dart:io';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_summarizer/core/services/google_speech_service.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  // Mock path_provider platform channel
+  setUpAll(() {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+      const MethodChannel('plugins.flutter.io/path_provider'),
+      (methodCall) async {
+        if (methodCall.method == 'getApplicationDocumentsDirectory') {
+          return Directory.systemTemp.createTempSync('test_docs').path;
+        }
+        return null;
+      },
+    );
+  });
+
+  tearDownAll(() {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+      const MethodChannel('plugins.flutter.io/path_provider'),
+      null,
+    );
+  });
 
   group('Google Speech API Key Loading Priority', () {
     test('should attempt to load API key from app settings first', () async {

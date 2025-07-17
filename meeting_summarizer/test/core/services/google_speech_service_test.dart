@@ -2,6 +2,7 @@
 library;
 
 import 'dart:io';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_summarizer/core/services/google_speech_service.dart';
 import 'package:meeting_summarizer/core/models/transcription_request.dart';
@@ -10,6 +11,29 @@ import 'package:meeting_summarizer/core/services/transcription_error_handler.dar
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  // Mock path_provider platform channel
+  setUpAll(() {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+      const MethodChannel('plugins.flutter.io/path_provider'),
+      (methodCall) async {
+        if (methodCall.method == 'getApplicationDocumentsDirectory') {
+          return Directory.systemTemp.createTempSync('test_docs').path;
+        }
+        return null;
+      },
+    );
+  });
+
+  tearDownAll(() {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+      const MethodChannel('plugins.flutter.io/path_provider'),
+      null,
+    );
+  });
+
   group('GoogleSpeechService', () {
     late GoogleSpeechService service;
 

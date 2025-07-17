@@ -14,22 +14,22 @@ void main() {
   setUpAll(() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
-      const MethodChannel('plugins.flutter.io/path_provider'),
-      (methodCall) async {
-        if (methodCall.method == 'getApplicationDocumentsDirectory') {
-          return Directory.systemTemp.createTempSync('test_docs').path;
-        }
-        return null;
-      },
-    );
+          const MethodChannel('plugins.flutter.io/path_provider'),
+          (methodCall) async {
+            if (methodCall.method == 'getApplicationDocumentsDirectory') {
+              return Directory.systemTemp.createTempSync('test_docs').path;
+            }
+            return null;
+          },
+        );
   });
 
   tearDownAll(() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
-      const MethodChannel('plugins.flutter.io/path_provider'),
-      null,
-    );
+          const MethodChannel('plugins.flutter.io/path_provider'),
+          null,
+        );
   });
 
   group('GoogleSpeechService Initialization', () {
@@ -87,7 +87,11 @@ void main() {
       try {
         await service.initializeWithCredentials(apiKey: 'test-api-key');
         // If we get here, initialization succeeded (expected behavior)
-        expect(true, isTrue, reason: 'Should accept API key during initialization');
+        expect(
+          true,
+          isTrue,
+          reason: 'Should accept API key during initialization',
+        );
       } catch (e) {
         // If initialization fails, it should be due to other issues (like auth setup)
         expect(e, isA<TranscriptionError>());
