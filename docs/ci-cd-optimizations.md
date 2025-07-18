@@ -99,7 +99,7 @@ The GitHub Actions CI/CD pipeline has been significantly optimized to reduce bui
 - Optimized for each platform's characteristics
 
 ### Runner Optimization
-- **Ubuntu**: Used for Android and Web builds (fastest)
+- **Ubuntu**: Used for Android builds (fastest, Web build temporarily disabled)
 - **macOS**: Required for iOS and macOS builds
 - **Windows**: Used for Windows builds
 
@@ -139,13 +139,13 @@ jobs:
 | Test | 2-3 min | 45s-1min | ~2 min | 67% |
 | Android Build | 4-6 min | 1.5-2.5 min | ~3.5 min | 58% |
 | iOS/macOS Build | 3-5 min | 1-2 min | ~3 min | 60% |
-| Web Build | 2-4 min | 1-1.5 min | ~2.5 min | 63% |
+| Web Build | 2-4 min | Disabled | ~3 min | 100% |
 | Windows Build | 3-5 min | 1-2 min | ~3 min | 60% |
 
 ### Total Pipeline Savings
 - **Before**: 15-25 minutes total
-- **After**: 6-10 minutes total  
-- **Savings**: 60-75% reduction in total pipeline time
+- **After**: 5-8 minutes total (including Web build removal)
+- **Savings**: 65-80% reduction in total pipeline time
 
 ## Cache Storage Optimization
 

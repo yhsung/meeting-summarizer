@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Google Speech-to-Text Service**: Comprehensive implementation with automatic initialization
+  - Complete API integration with validation and error handling
+  - Automatic service availability detection and fallback strategies
+  - Comprehensive test suite with platform channel mocking
+  - Example setup checker for debugging Google Speech API configuration
 - **File Picker Integration**: Cross-platform audio file selection with support for multiple formats
   - Added `file_picker ^8.1.4` dependency
   - Support for mp3, wav, m4a, aac, flac, ogg, wma formats
@@ -23,6 +28,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Updated both Debug and Release entitlements consistently
 
 ### Changed
+- **Logging System Refactoring**: Replaced print statements with dart:developer log across entire codebase
+  - Migrated from print/debugPrint to professional logging system
+  - Improved debugging capabilities with structured logging
+  - Enhanced performance by avoiding console output in production
+  - Updated test files and example code to use consistent logging approach
 - **Custom Tab Bar Implementation**: Replaced TabController with custom null-safe tab implementation
   - Dynamic tab management based on transcription results
   - Context-aware tabs (Transcript, Timeline, Speakers, Details)
@@ -35,6 +45,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Improved error handling and debugging
 
 ### Fixed
+- **Google Speech Service Platform Channel Issues**: Resolved MissingPluginException in test environment
+  - Added proper path_provider platform channel mocking to remaining test files
+  - Enhanced test reliability with comprehensive platform channel setup
+  - Fixed test failures due to missing platform implementations
+- **Local Whisper Service macOS Compatibility**: Enhanced sandbox compatibility and error handling
+  - Improved macOS sandbox environment support
+  - Better audio file processing error handling
+  - Enhanced cross-platform compatibility
 - **Android Build Issues**: Resolved Flutter v1/v2 embedding compatibility problems
   - Fixed "cannot find symbol PluginRegistry.Registrar" compilation error
   - Eliminated Flutter embedding API conflicts
@@ -46,6 +64,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Improved defensive programming practices
 
 ### Removed
+- **Unused BSD Logging System**: Removed legacy logging files and related components
+  - Cleaned up old logging infrastructure in favor of dart:developer
+  - Removed unused logging-related files and dependencies
+  - Simplified codebase and reduced maintenance overhead
 - **Unused Dependencies**: Cleaned up project dependencies for better performance
   - Removed `syncfusion_flutter_pdfviewer ^26.2.14` (unused and causing build conflicts)
   - Eliminated unnecessary package overhead
@@ -59,6 +81,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Performance
 - **CI/CD Pipeline Optimizations**: Major performance improvements in automated builds
+  - **Web build temporarily disabled** for CI performance optimization
   - **60-80% faster** Flutter setup across all jobs
   - **50-70% faster** dependency installation
   - **Major savings** for Android builds with Gradle caching

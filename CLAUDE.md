@@ -45,7 +45,14 @@ For detailed project structure, architecture overview, and file organization, se
 
 For detailed information about recent updates, improvements, and changes to the project, see: [`CHANGELOG.md`](CHANGELOG.md)
 
-Key recent improvements include file picker integration, CI/CD performance optimizations (60-75% faster builds), custom tab bar implementation, and comprehensive documentation updates. For CI/CD optimization details, see: [`docs/ci-cd-optimizations.md`](docs/ci-cd-optimizations.md)
+Key recent improvements include:
+- **Google Speech-to-Text Service**: Complete implementation with automatic initialization and comprehensive testing
+- **Logging System Refactoring**: Replaced print statements with dart:developer log across codebase for better debugging
+- **CI/CD Optimizations**: Web build temporarily disabled for performance, improved caching and build strategies
+- **Testing Infrastructure**: Enhanced platform channel mocking for better test reliability
+- **Path Provider Integration**: Improved macOS sandbox compatibility and error handling
+
+For CI/CD optimization details, see: [`docs/ci-cd-optimizations.md`](docs/ci-cd-optimizations.md)
 
 ## Audio Enhancement
 
@@ -147,9 +154,11 @@ flutter analyze                           # Check for static analysis issues
 flutter test                              # Run all unit and widget tests
 
 # Verify builds before git tracking
-flutter build web                         # Verify web compilation
+# Note: Web build currently disabled in CI for performance optimization
 flutter build apk --debug                 # Verify Android compilation
 flutter build macos                       # Verify macOS compilation (if targeting)
+flutter build windows --debug             # Verify Windows compilation (if targeting)
+flutter build ios --debug --simulator     # Verify iOS compilation (if targeting)
 
 # Update documentation to reflect changes
 # CRITICAL: Update CLAUDE.md directory structure to reflect any new files/services
