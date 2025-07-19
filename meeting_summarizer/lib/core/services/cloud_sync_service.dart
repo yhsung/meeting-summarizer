@@ -10,6 +10,7 @@ import '../models/cloud_sync/sync_conflict.dart' as conflict_models;
 import '../models/cloud_sync/sync_operation.dart';
 import '../models/cloud_sync/file_change.dart' as file_change_models;
 import 'encryption_service.dart';
+import 'cloud_encryption_service.dart';
 import 'cloud_providers/cloud_provider_factory.dart';
 import 'cloud_providers/cloud_provider_interface.dart';
 import 'conflict_detection_service.dart';
@@ -36,6 +37,8 @@ class CloudSyncService implements CloudSyncInterface {
   final IncrementalTransferManager _incrementalTransfer =
       IncrementalTransferManager.instance;
   final ChangeTrackingService _changeTracking = ChangeTrackingService.instance;
+  final CloudEncryptionService _cloudEncryption =
+      CloudEncryptionService.instance;
   final Map<CloudProvider, CloudProviderInterface> _connectedProviders = {};
   final Map<String, SyncOperation> _activeOperations = {};
   final Map<String, conflict_models.SyncConflict> _pendingConflicts = {};
@@ -70,8 +73,9 @@ class CloudSyncService implements CloudSyncInterface {
     try {
       log('CloudSyncService: Initializing...');
 
-      // Initialize encryption service
+      // Initialize encryption services
       await EncryptionService.initialize();
+      await CloudEncryptionService.initialize();
 
       // Initialize provider factory
       await _providerFactory.initialize();
@@ -943,6 +947,246 @@ class CloudSyncService implements CloudSyncInterface {
   /// Get event stream for incremental transfers
   Stream<TransferEvent> get incrementalSyncEventStream =>
       _incrementalTransfer.eventStream;
+
+  // ENCRYPTED SYNC OPERATIONS
+
+  /// Upload file with encryption to cloud provider
+  Future<bool> uploadFileEncrypted({
+    required String filePath,
+    required String remotePath,
+    required CloudProvider provider,
+    Map<String, dynamic>? metadata,
+    Function(double progress)? onProgress,
+  }) async {
+    try {
+      log(
+        'CloudSyncService: Uploading encrypted file $filePath to ${provider.displayName}',
+      );
+
+      final providerInterface = _connectedProviders[provider];
+      if (providerInterface == null) {
+        throw StateError('Provider ${provider.displayName} is not connected');
+      }
+
+      // Encrypt the file
+      final encryptedResult = await _cloudEncryption.encryptFile(
+        filePath: filePath,
+        provider: provider,
+      );
+
+      // Encrypt metadata if provided
+      Map<String, String>? encryptedMetadata;
+      if (metadata != null) {
+        encryptedMetadata = await _cloudEncryption.encryptMetadata(
+          metadata: {
+            ...metadata,
+            'encryptionInfo': encryptedResult.metadata.toJson(),
+          },
+          provider: provider,
+        );
+      }
+
+      // Create temporary encrypted file
+      final tempFile = File('$filePath.encrypted.tmp');
+      await tempFile.writeAsBytes(encryptedResult.encryptedData);
+
+      try {
+        // Upload encrypted file data
+        final uploadResult = await providerInterface.uploadFile(
+          localFilePath: tempFile.path,
+          remoteFilePath: remotePath,
+          metadata: encryptedMetadata ?? {},
+          onProgress: onProgress,
+        );
+
+        if (uploadResult) {
+          log(
+            'CloudSyncService: Successfully uploaded encrypted file to ${provider.displayName}',
+          );
+        }
+
+        return uploadResult;
+      } finally {
+        // Clean up temporary file
+        if (await tempFile.exists()) {
+          await tempFile.delete();
+        }
+      }
+    } catch (e, stackTrace) {
+      log(
+        'CloudSyncService: Error uploading encrypted file: $e',
+        stackTrace: stackTrace,
+      );
+      return false;
+    }
+  }
+
+  /// Download and decrypt file from cloud provider
+  Future<bool> downloadFileDecrypted({
+    required String remotePath,
+    required String localPath,
+    required CloudProvider provider,
+    Function(double progress)? onProgress,
+  }) async {
+    try {
+      log(
+        'CloudSyncService: Downloading encrypted file $remotePath from ${provider.displayName}',
+      );
+
+      final providerInterface = _connectedProviders[provider];
+      if (providerInterface == null) {
+        throw StateError('Provider ${provider.displayName} is not connected');
+      }
+
+      // Download encrypted file
+      final downloadResult = await providerInterface.downloadFile(
+        remoteFilePath: remotePath,
+        localFilePath: localPath,
+        onProgress: onProgress,
+      );
+
+      if (!downloadResult) {
+        return false;
+      }
+
+      // Get encrypted metadata from provider
+      final encryptedMetadata = await providerInterface.getFileMetadata(
+        remotePath,
+      );
+      if (encryptedMetadata == null) {
+        throw StateError('No metadata found for encrypted file');
+      }
+
+      // Decrypt metadata to get encryption info
+      final decryptedMetadata = await _cloudEncryption.decryptMetadata(
+        encryptedMetadata: encryptedMetadata.map(
+          (k, v) => MapEntry(k, v.toString()),
+        ),
+      );
+
+      final encryptionInfo =
+          decryptedMetadata['encryptionInfo'] as Map<String, dynamic>?;
+      if (encryptionInfo == null) {
+        throw StateError('No encryption info found in metadata');
+      }
+
+      // Read encrypted file data
+      final encryptedData = await File(localPath).readAsBytes();
+
+      // Decrypt file
+      final fileMetadata = EncryptedFileMetadata.fromJson(encryptionInfo);
+      final decryptedData = await _cloudEncryption.decryptFile(
+        encryptedData: encryptedData,
+        metadata: fileMetadata,
+      );
+
+      // Write decrypted data back to file
+      await File(localPath).writeAsBytes(decryptedData);
+
+      log(
+        'CloudSyncService: Successfully downloaded and decrypted file from ${provider.displayName}',
+      );
+      return true;
+    } catch (e, stackTrace) {
+      log(
+        'CloudSyncService: Error downloading encrypted file: $e',
+        stackTrace: stackTrace,
+      );
+      return false;
+    }
+  }
+
+  /// Perform encrypted incremental sync
+  Future<TransferResult> syncFileIncrementalEncrypted({
+    required String filePath,
+    required CloudProvider provider,
+    delta_sync.SyncDirection direction = delta_sync.SyncDirection.bidirectional,
+    bool forceFullSync = false,
+    Function(TransferProgress progress)? onProgress,
+  }) async {
+    try {
+      log(
+        'CloudSyncService: Starting encrypted incremental sync for $filePath',
+      );
+
+      final providerInterface = _connectedProviders[provider];
+      if (providerInterface == null) {
+        throw StateError('Provider ${provider.displayName} is not connected');
+      }
+
+      // Detect file changes
+      final fileChange = await _changeTracking.detectFileChange(
+        filePath: filePath,
+        provider: provider,
+        providerInterface: providerInterface,
+      );
+
+      if (fileChange == null && !forceFullSync) {
+        return TransferResult(
+          success: true,
+          message: 'No changes detected',
+          transferId:
+              'encrypted_incremental_${DateTime.now().millisecondsSinceEpoch}',
+        );
+      }
+
+      // If there are changes, encrypt the changed chunks
+      if (fileChange != null && fileChange.changedChunks != null) {
+        final encryptedChunks = await _cloudEncryption.encryptFileChunks(
+          chunks: fileChange.changedChunks!,
+          provider: provider,
+        );
+
+        // Store encrypted chunks information
+        log(
+          'CloudSyncService: Encrypted ${encryptedChunks.length} changed chunks',
+        );
+      }
+
+      // Use the incremental transfer manager with encryption support
+      return await _incrementalTransfer.syncFile(
+        filePath: filePath,
+        provider: provider,
+        providerInterface: providerInterface,
+        direction: direction,
+        forceFullSync: forceFullSync,
+        onProgress: onProgress,
+      );
+    } catch (e, stackTrace) {
+      log(
+        'CloudSyncService: Error in encrypted incremental sync: $e',
+        stackTrace: stackTrace,
+      );
+      return TransferResult(
+        success: false,
+        message: 'Encrypted incremental sync failed: $e',
+        transferId: 'error_${DateTime.now().millisecondsSinceEpoch}',
+      );
+    }
+  }
+
+  /// Create encrypted provider key for new connections
+  Future<String> createProviderEncryptionKey(CloudProvider provider) async {
+    return await _cloudEncryption.createCloudProviderKey(provider);
+  }
+
+  /// Create file-specific encryption key
+  Future<String> createFileEncryptionKey(
+    String filePath,
+    CloudProvider provider,
+  ) async {
+    return await _cloudEncryption.createFileEncryptionKey(filePath, provider);
+  }
+
+  /// Check if encryption is available
+  Future<bool> isEncryptionAvailable() async {
+    return await _cloudEncryption.isEncryptionAvailable();
+  }
+
+  /// List all encryption keys for debugging
+  Future<List<String>> listEncryptionKeys() async {
+    return await _cloudEncryption.listCloudEncryptionKeys();
+  }
 
   /// Dispose resources
   void dispose() {

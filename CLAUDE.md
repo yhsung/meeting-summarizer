@@ -426,6 +426,7 @@ Git workflow with quality gates is detailed in `/git-workflow` command. Key inte
 - TaskMaster tasks reference in commit messages
 - Quality gates enforced before commits
 - Documentation updates for structural changes
+- Increase minor version by 1 in pubspec.yaml
 - GitHub CLI integration for PR creation
 
 ### Parallel Development with Git Worktrees

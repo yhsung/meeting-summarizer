@@ -93,6 +93,7 @@ project/                   # absolute path /Volumes/Samsung970EVOPlus/dev-projec
 │   │   │       ├── audio_enhancement_service_interface.dart # Audio enhancement interface with noise reduction, echo cancellation, AGC
 │   │   │       ├── audio_enhancement_service.dart         # Audio enhancement implementation using FFT-based processing
 │   │   │       ├── encryption_service.dart                # AES-256-GCM encryption service with secure key management
+│   │   │       ├── cloud_encryption_service.dart          # Enhanced cloud-specific encryption with file/chunk/metadata encryption
 │   │   │       ├── encrypted_database_service.dart        # Database service with transparent encryption/decryption
 │   │   │       ├── ai_summarization_service_interface.dart # AI summarization service interface
 │   │   │       ├── base_ai_summarization_service.dart     # Base implementation with common functionality
@@ -187,7 +188,8 @@ project/                   # absolute path /Volumes/Samsung970EVOPlus/dev-projec
 │   │   │       ├── quality_scoring_service_test.dart     # Quality scoring comprehensive tests (15 test cases)
 │   │   │       ├── file_categorization_service_test.dart # File categorization and tagging tests
 │   │   │       ├── advanced_search_service_test.dart     # Comprehensive search functionality tests (28 test cases)
-│   │   │       └── export_service_test.dart              # Multi-format export system tests (20 test cases)
+│   │   │       ├── export_service_test.dart              # Multi-format export system tests (20 test cases)
+│   │   │       └── cloud_encryption_service_test.dart   # Cloud encryption service comprehensive tests (15 test groups)
 │   │   ├── features/
 │   │   │   └── audio_recording/
 │   │   │       ├── audio_recording_service_test.dart
