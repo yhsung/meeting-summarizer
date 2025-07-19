@@ -226,7 +226,11 @@ class CloudEncryptionService {
         final salt = _generateSalt();
         final derivedKey = await _deriveKey(encryptionKey, salt);
 
-        final encryptedData = await _encryptAESGCM(Uint8List.fromList(chunk.data!), derivedKey, iv);
+        final encryptedData = await _encryptAESGCM(
+          Uint8List.fromList(chunk.data!),
+          derivedKey,
+          iv,
+        );
 
         final encryptedChunk = EncryptedFileChunk(
           index: chunk.index,

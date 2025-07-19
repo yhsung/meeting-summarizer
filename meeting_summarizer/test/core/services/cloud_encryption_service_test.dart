@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:crypto/crypto.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -133,7 +134,7 @@ void main() {
             encryptedData: encryptedResult.encryptedData,
             metadata: corruptedMetadata,
           ),
-          throwsA(isA<StateError>()),
+          throwsA(isA<FormatException>()),
         );
       });
 
@@ -152,22 +153,31 @@ void main() {
 
     group('Chunk Encryption', () {
       test('should encrypt and decrypt file chunks', () async {
+        final chunk1Data = Uint8List.fromList(
+          'hello worl'.codeUnits,
+        ); // 10 bytes
+        final chunk2Data = Uint8List.fromList(' test!'.codeUnits); // 6 bytes
+
+        // Calculate actual checksums
+        final checksum1 = sha256.convert(chunk1Data).toString();
+        final checksum2 = sha256.convert(chunk2Data).toString();
+
         final chunks = [
           FileChunk(
             index: 0,
             offset: 0,
             size: 10,
-            checksum: 'checksum1',
+            checksum: checksum1,
             isChanged: true,
-            data: Uint8List.fromList('hello world'.codeUnits.take(10).toList()),
+            data: chunk1Data,
           ),
           FileChunk(
             index: 1,
             offset: 10,
             size: 6,
-            checksum: 'checksum2',
+            checksum: checksum2,
             isChanged: true,
-            data: Uint8List.fromList(' test!'.codeUnits),
+            data: chunk2Data,
           ),
         ];
 
@@ -191,8 +201,8 @@ void main() {
         expect(decryptedChunks.length, equals(2));
         expect(decryptedChunks[0].size, equals(10));
         expect(decryptedChunks[1].size, equals(6));
-        expect(decryptedChunks[0].checksum, equals('checksum1'));
-        expect(decryptedChunks[1].checksum, equals('checksum2'));
+        expect(decryptedChunks[0].checksum, equals(checksum1));
+        expect(decryptedChunks[1].checksum, equals(checksum2));
       });
 
       test('should handle chunk without data', () async {

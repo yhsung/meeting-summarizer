@@ -394,5 +394,225 @@ void main() {
         },
       );
     });
+
+    group('Password-Based Encryption', () {
+      test('should encrypt and decrypt with password', () async {
+        const testData = 'password protected data';
+        const password = 'secure_password_123';
+
+        final encrypted = await EncryptionService.encryptWithPassword(
+          testData,
+          password,
+        );
+        expect(encrypted, isNotNull);
+        expect(encrypted!['data'], isNotEmpty);
+        expect(encrypted['salt'], isNotEmpty);
+        expect(encrypted['iv'], isNotEmpty);
+        expect(encrypted['tag'], isNotEmpty);
+        expect(encrypted['iterations'], isNotEmpty);
+
+        final decrypted = await EncryptionService.decryptWithPassword(
+          encrypted,
+          password,
+        );
+        expect(decrypted, equals(testData));
+      });
+
+      test('should fail with wrong password', () async {
+        const testData = 'password protected data';
+        const password = 'correct_password';
+        const wrongPassword = 'wrong_password';
+
+        final encrypted = await EncryptionService.encryptWithPassword(
+          testData,
+          password,
+        );
+        expect(encrypted, isNotNull);
+
+        final decrypted = await EncryptionService.decryptWithPassword(
+          encrypted!,
+          wrongPassword,
+        );
+        expect(decrypted, isNull);
+      });
+
+      test('should handle empty password and data', () async {
+        const testData = '';
+        const password = 'password';
+
+        final encrypted = await EncryptionService.encryptWithPassword(
+          testData,
+          password,
+        );
+        expect(encrypted, isNotNull);
+
+        final decrypted = await EncryptionService.decryptWithPassword(
+          encrypted!,
+          password,
+        );
+        expect(decrypted, equals(testData));
+      });
+
+      test('should produce different results with same password and data', () async {
+        const testData = 'same data';
+        const password = 'same password';
+
+        final encrypted1 = await EncryptionService.encryptWithPassword(
+          testData,
+          password,
+        );
+        final encrypted2 = await EncryptionService.encryptWithPassword(
+          testData,
+          password,
+        );
+
+        expect(encrypted1, isNotNull);
+        expect(encrypted2, isNotNull);
+        expect(encrypted1!['data'], isNot(equals(encrypted2!['data'])));
+        expect(encrypted1['salt'], isNot(equals(encrypted2['salt'])));
+        expect(encrypted1['iv'], isNot(equals(encrypted2['iv'])));
+      });
+    });
+  });
+
+  group('SecureKeyManager Tests', () {
+    group('Key Rotation', () {
+      test('should rotate key successfully', () async {
+        final originalKeyId = await EncryptionService.createEncryptionKey('test_rotation');
+        
+        final newKeyId = await SecureKeyManager.rotateKey(originalKeyId);
+        expect(newKeyId, isNotNull);
+        expect(newKeyId, isNot(equals(originalKeyId)));
+        expect(newKeyId!, contains('rotated'));
+
+        // Original key should still exist (for backward compatibility)
+        final keys = await EncryptionService.listEncryptionKeys();
+        expect(keys, contains(originalKeyId));
+        expect(keys, contains(newKeyId));
+      });
+
+      test('should handle rotation of non-existent key', () async {
+        const nonExistentKeyId = 'non_existent_key';
+        
+        final newKeyId = await SecureKeyManager.rotateKey(nonExistentKeyId);
+        expect(newKeyId, isNull);
+      });
+    });
+
+    group('Key Backup and Recovery', () {
+      test('should create and restore key backup', () async {
+        final originalKeyId = await EncryptionService.createEncryptionKey('test_backup');
+        const masterPassword = 'backup_password_123';
+
+        // Create backup
+        final backupSuccess = await SecureKeyManager.createKeyBackup(
+          originalKeyId,
+          masterPassword,
+        );
+        expect(backupSuccess, isTrue);
+
+        // List backups
+        final backups = await SecureKeyManager.listKeyBackups();
+        expect(backups, isNotEmpty);
+        expect(backups.first['originalKeyId'], equals(originalKeyId));
+        expect(backups.first['isPasswordProtected'], isTrue);
+
+        // Restore from backup
+        final backupId = backups.first['backupId'] as String;
+        final restoredKeyId = await SecureKeyManager.restoreKeyFromBackup(
+          backupId,
+          masterPassword,
+        );
+        expect(restoredKeyId, isNotNull);
+        expect(restoredKeyId!, contains('restored'));
+
+        // Test that restored key works
+        const testData = 'test data for restored key';
+        final encrypted = await EncryptionService.encryptData(testData, restoredKeyId);
+        expect(encrypted, isNotNull);
+
+        final decrypted = await EncryptionService.decryptData(encrypted!);
+        expect(decrypted, equals(testData));
+      });
+
+      test('should fail backup restoration with wrong password', () async {
+        final originalKeyId = await EncryptionService.createEncryptionKey('test_wrong_password');
+        const masterPassword = 'correct_password';
+        const wrongPassword = 'wrong_password';
+
+        final backupSuccess = await SecureKeyManager.createKeyBackup(
+          originalKeyId,
+          masterPassword,
+        );
+        expect(backupSuccess, isTrue);
+
+        final backups = await SecureKeyManager.listKeyBackups();
+        final backupId = backups.last['backupId'] as String;
+
+        final restoredKeyId = await SecureKeyManager.restoreKeyFromBackup(
+          backupId,
+          wrongPassword,
+        );
+        expect(restoredKeyId, isNull);
+      });
+
+      test('should handle backup of non-existent key', () async {
+        const nonExistentKeyId = 'non_existent_key';
+        const masterPassword = 'password';
+
+        final backupSuccess = await SecureKeyManager.createKeyBackup(
+          nonExistentKeyId,
+          masterPassword,
+        );
+        expect(backupSuccess, isFalse);
+      });
+    });
+
+    group('Secure Key Deletion', () {
+      test('should securely delete key', () async {
+        final keyId = await EncryptionService.createEncryptionKey('test_secure_delete');
+        
+        // Verify key exists
+        final keysBefore = await EncryptionService.listEncryptionKeys();
+        expect(keysBefore, contains(keyId));
+
+        // Securely delete key
+        final deleteSuccess = await SecureKeyManager.secureDeleteKey(keyId);
+        expect(deleteSuccess, isTrue);
+
+        // Verify key is deleted
+        final keysAfter = await EncryptionService.listEncryptionKeys();
+        expect(keysAfter, isNot(contains(keyId)));
+      });
+
+      test('should handle deletion of non-existent key', () async {
+        const nonExistentKeyId = 'non_existent_key';
+
+        final deleteSuccess = await SecureKeyManager.secureDeleteKey(nonExistentKeyId);
+        expect(deleteSuccess, isTrue); // Should not throw, just return true
+      });
+    });
+
+    group('Key Backup Listing', () {
+      test('should list all key backups', () async {
+        // Create multiple keys and backups
+        final keyId1 = await EncryptionService.createEncryptionKey('test_list_1');
+        final keyId2 = await EncryptionService.createEncryptionKey('test_list_2');
+        
+        await SecureKeyManager.createKeyBackup(keyId1, 'password1');
+        await SecureKeyManager.createKeyBackup(keyId2, 'password2');
+
+        final backups = await SecureKeyManager.listKeyBackups();
+        expect(backups.length, greaterThanOrEqualTo(2));
+
+        // Check that backups contain required metadata
+        for (final backup in backups) {
+          expect(backup, containsPair('backupId', isA<String>()));
+          expect(backup, containsPair('originalKeyId', isA<String>()));
+          expect(backup, containsPair('createdAt', isA<String>()));
+          expect(backup, containsPair('isPasswordProtected', isTrue));
+        }
+      });
+    });
   });
 }

@@ -20,6 +20,12 @@ class SyncOperation {
   final Duration? estimatedTimeRemaining;
   final Map<String, dynamic> metadata;
 
+  // Queue-specific properties
+  final int priority;
+  final bool isQueueable;
+  final DateTime? queuedAt;
+  final DateTime? scheduledAt;
+
   const SyncOperation({
     required this.id,
     required this.type,
@@ -38,6 +44,10 @@ class SyncOperation {
     this.maxRetries = 3,
     this.estimatedTimeRemaining,
     this.metadata = const {},
+    this.priority = 0,
+    this.isQueueable = true,
+    this.queuedAt,
+    this.scheduledAt,
   });
 
   /// Check if operation is currently running
@@ -51,6 +61,29 @@ class SyncOperation {
 
   /// Check if operation can be retried
   bool get canRetry => isFailed && retryCount < maxRetries;
+
+  /// Check if operation is queued for offline processing
+  bool get isQueued => status == SyncOperationStatus.queued && queuedAt != null;
+
+  /// Check if operation is scheduled for future execution
+  bool get isScheduled =>
+      scheduledAt != null && scheduledAt!.isAfter(DateTime.now());
+
+  /// Get priority display text
+  String get priorityDisplayText {
+    switch (priority) {
+      case 3:
+        return 'Critical';
+      case 2:
+        return 'High';
+      case 1:
+        return 'Normal';
+      case 0:
+        return 'Low';
+      default:
+        return 'Priority $priority';
+    }
+  }
 
   /// Get operation duration
   Duration? get duration {
@@ -120,6 +153,10 @@ class SyncOperation {
     int? maxRetries,
     Duration? estimatedTimeRemaining,
     Map<String, dynamic>? metadata,
+    int? priority,
+    bool? isQueueable,
+    DateTime? queuedAt,
+    DateTime? scheduledAt,
   }) {
     return SyncOperation(
       id: id ?? this.id,
@@ -140,6 +177,10 @@ class SyncOperation {
       estimatedTimeRemaining:
           estimatedTimeRemaining ?? this.estimatedTimeRemaining,
       metadata: metadata ?? this.metadata,
+      priority: priority ?? this.priority,
+      isQueueable: isQueueable ?? this.isQueueable,
+      queuedAt: queuedAt ?? this.queuedAt,
+      scheduledAt: scheduledAt ?? this.scheduledAt,
     );
   }
 
@@ -163,6 +204,10 @@ class SyncOperation {
       'maxRetries': maxRetries,
       'estimatedTimeRemaining': estimatedTimeRemaining?.inMilliseconds,
       'metadata': metadata,
+      'priority': priority,
+      'isQueueable': isQueueable,
+      'queuedAt': queuedAt?.toIso8601String(),
+      'scheduledAt': scheduledAt?.toIso8601String(),
     };
   }
 
@@ -197,6 +242,14 @@ class SyncOperation {
           ? Duration(milliseconds: json['estimatedTimeRemaining'] as int)
           : null,
       metadata: Map<String, dynamic>.from(json['metadata'] as Map? ?? {}),
+      priority: json['priority'] as int? ?? 0,
+      isQueueable: json['isQueueable'] as bool? ?? true,
+      queuedAt: json['queuedAt'] != null
+          ? DateTime.parse(json['queuedAt'] as String)
+          : null,
+      scheduledAt: json['scheduledAt'] != null
+          ? DateTime.parse(json['scheduledAt'] as String)
+          : null,
     );
   }
 

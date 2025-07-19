@@ -46,6 +46,7 @@ dependencies:
   record: ^6.0.0
   uuid: ^4.5.1
   path: ^1.9.0
+  connectivity_plus: ^6.0.5
   
   # Audio processing dependencies
   fftea: ^1.5.0+1
@@ -56,6 +57,7 @@ dependencies:
   
   # Cryptography dependencies
   crypto: ^3.0.5
+  pointycastle: ^3.9.1
   
   # Google Cloud Speech-to-Text API
   googleapis: ^13.2.0

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 import '../interfaces/cloud_sync_interface.dart';
 import '../models/cloud_sync/cloud_provider.dart';
@@ -19,6 +20,9 @@ import 'version_management_service.dart';
 import 'incremental_transfer_manager.dart';
 import 'change_tracking_service.dart';
 import 'delta_sync_service.dart' as delta_sync;
+import 'offline_queue_service.dart';
+import 'network_connectivity_service.dart';
+import 'retry_manager.dart';
 
 /// Main cloud synchronization service that coordinates multiple providers
 class CloudSyncService implements CloudSyncInterface {
@@ -39,6 +43,10 @@ class CloudSyncService implements CloudSyncInterface {
   final ChangeTrackingService _changeTracking = ChangeTrackingService.instance;
   final CloudEncryptionService _cloudEncryption =
       CloudEncryptionService.instance;
+  final OfflineQueueService _offlineQueue = OfflineQueueService.instance;
+  final NetworkConnectivityService _networkConnectivity =
+      NetworkConnectivityService.instance;
+  final RetryManager _retryManager = RetryManager.instance;
   final Map<CloudProvider, CloudProviderInterface> _connectedProviders = {};
   final Map<String, SyncOperation> _activeOperations = {};
   final Map<String, conflict_models.SyncConflict> _pendingConflicts = {};
@@ -48,6 +56,10 @@ class CloudSyncService implements CloudSyncInterface {
   bool _syncPaused = false;
   Duration _syncInterval = const Duration(minutes: 15);
   Timer? _autoSyncTimer;
+
+  // Background queue processing
+  bool _backgroundProcessingEnabled = true;
+  StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
 
   final StreamController<SyncStatus> _syncStatusController =
       StreamController<SyncStatus>.broadcast();
@@ -86,6 +98,15 @@ class CloudSyncService implements CloudSyncInterface {
       // Initialize incremental sync services
       await _incrementalTransfer.initialize();
       await _changeTracking.initialize();
+
+      // Initialize offline queue and connectivity services
+      await _offlineQueue.initialize();
+      await _networkConnectivity.initialize();
+
+      // Start background queue processing
+      if (_backgroundProcessingEnabled) {
+        _startBackgroundQueueProcessing();
+      }
 
       // Start auto-sync timer if enabled
       if (_autoSyncEnabled && !_syncPaused) {
@@ -181,6 +202,8 @@ class CloudSyncService implements CloudSyncInterface {
     required CloudProvider provider,
     bool encryptBeforeUpload = true,
     Map<String, dynamic> metadata = const {},
+    int priority = 0,
+    bool queueIfOffline = true,
   }) async {
     final operation = SyncOperation(
       id: _generateOperationId(),
@@ -191,13 +214,37 @@ class CloudSyncService implements CloudSyncInterface {
       status: SyncOperationStatus.queued,
       createdAt: DateTime.now(),
       metadata: metadata,
+      priority: priority,
+      isQueueable: queueIfOffline,
     );
 
     _activeOperations[operation.id] = operation;
     _operationController.add(operation);
 
-    // Execute upload in background
-    _executeUpload(operation, encryptBeforeUpload);
+    // Check connectivity and queue if offline
+    if (queueIfOffline && !await _networkConnectivity.isConnected) {
+      log(
+        'CloudSyncService: No connectivity, queuing upload operation ${operation.id}',
+      );
+
+      await _offlineQueue.enqueueOperation(
+        operation: operation,
+        priority: priority,
+      );
+
+      final queuedOperation = operation.copyWith(
+        status: SyncOperationStatus.queued,
+        queuedAt: DateTime.now(),
+      );
+
+      _activeOperations[operation.id] = queuedOperation;
+      _operationController.add(queuedOperation);
+
+      return queuedOperation;
+    }
+
+    // Execute upload in background with retry support
+    _executeUploadWithRetry(operation, encryptBeforeUpload);
 
     return operation;
   }
@@ -208,6 +255,8 @@ class CloudSyncService implements CloudSyncInterface {
     required String localFilePath,
     required CloudProvider provider,
     bool decryptAfterDownload = true,
+    int priority = 0,
+    bool queueIfOffline = true,
   }) async {
     final operation = SyncOperation(
       id: _generateOperationId(),
@@ -217,13 +266,37 @@ class CloudSyncService implements CloudSyncInterface {
       provider: provider,
       status: SyncOperationStatus.queued,
       createdAt: DateTime.now(),
+      priority: priority,
+      isQueueable: queueIfOffline,
     );
 
     _activeOperations[operation.id] = operation;
     _operationController.add(operation);
 
-    // Execute download in background
-    _executeDownload(operation, decryptAfterDownload);
+    // Check connectivity and queue if offline
+    if (queueIfOffline && !await _networkConnectivity.isConnected) {
+      log(
+        'CloudSyncService: No connectivity, queuing download operation ${operation.id}',
+      );
+
+      await _offlineQueue.enqueueOperation(
+        operation: operation,
+        priority: priority,
+      );
+
+      final queuedOperation = operation.copyWith(
+        status: SyncOperationStatus.queued,
+        queuedAt: DateTime.now(),
+      );
+
+      _activeOperations[operation.id] = queuedOperation;
+      _operationController.add(queuedOperation);
+
+      return queuedOperation;
+    }
+
+    // Execute download in background with retry support
+    _executeDownloadWithRetry(operation, decryptAfterDownload);
 
     return operation;
   }
@@ -516,7 +589,9 @@ class CloudSyncService implements CloudSyncInterface {
   Future<void> pauseSync() async {
     _syncPaused = true;
     _stopAutoSyncTimer();
-    log('CloudSyncService: Sync paused');
+    log(
+      'CloudSyncService: Sync paused (including background queue processing)',
+    );
   }
 
   @override
@@ -527,7 +602,15 @@ class CloudSyncService implements CloudSyncInterface {
       _startAutoSyncTimer();
     }
 
-    log('CloudSyncService: Sync resumed');
+    log(
+      'CloudSyncService: Sync resumed (including background queue processing)',
+    );
+
+    // Trigger background queue processing if connectivity is available
+    if (_backgroundProcessingEnabled &&
+        await _networkConnectivity.isConnected) {
+      _processOfflineQueueInBackground();
+    }
   }
 
   @override
@@ -549,6 +632,73 @@ class CloudSyncService implements CloudSyncInterface {
     _autoSyncTimer = null;
   }
 
+  /// Start background queue processing when connectivity is restored
+  void _startBackgroundQueueProcessing() {
+    _stopBackgroundQueueProcessing();
+
+    log('CloudSyncService: Starting background queue processing');
+
+    // Listen for connectivity changes
+    _connectivitySubscription = _networkConnectivity.connectivityStream.listen(
+      (connectivityResults) {
+        _onConnectivityChanged(connectivityResults);
+      },
+      onError: (error) {
+        log('CloudSyncService: Connectivity stream error: $error');
+      },
+    );
+  }
+
+  /// Stop background queue processing
+  void _stopBackgroundQueueProcessing() {
+    _connectivitySubscription?.cancel();
+    _connectivitySubscription = null;
+  }
+
+  /// Handle connectivity changes for background queue processing
+  Future<void> _onConnectivityChanged(List<ConnectivityResult> results) async {
+    if (!_backgroundProcessingEnabled || _syncPaused) {
+      return;
+    }
+
+    // Check if we have any connection (not just none)
+    final hasConnection = results.any(
+      (result) => result != ConnectivityResult.none,
+    );
+
+    if (hasConnection) {
+      log(
+        'CloudSyncService: Connectivity restored, checking internet and processing queue',
+      );
+
+      // Verify actual internet connectivity (not just network connection)
+      if (await _networkConnectivity.isConnected) {
+        log(
+          'CloudSyncService: Internet connectivity confirmed, processing offline queue',
+        );
+
+        // Process the offline queue in background
+        _processOfflineQueueInBackground();
+      } else {
+        log('CloudSyncService: Network connected but no internet access');
+      }
+    } else {
+      log('CloudSyncService: Connectivity lost');
+    }
+  }
+
+  /// Process offline queue in background without blocking
+  void _processOfflineQueueInBackground() {
+    // Process queue asynchronously to avoid blocking the connectivity callback
+    Future.delayed(const Duration(seconds: 1), () async {
+      try {
+        await processOfflineQueue();
+      } catch (e) {
+        log('CloudSyncService: Error in background queue processing: $e');
+      }
+    });
+  }
+
   String _generateOperationId() {
     return 'op_${DateTime.now().millisecondsSinceEpoch}';
   }
@@ -563,36 +713,36 @@ class CloudSyncService implements CloudSyncInterface {
     return 'unknown';
   }
 
-  Future<void> _executeUpload(SyncOperation operation, bool encrypt) async {
+  /// Execute upload with retry logic and connectivity awareness
+  Future<void> _executeUploadWithRetry(
+    SyncOperation operation,
+    bool encrypt,
+  ) async {
     try {
-      final updatedOperation = operation.copyWith(
-        status: SyncOperationStatus.running,
-        startedAt: DateTime.now(),
+      await _retryManager.executeWithRetry(
+        operationId: operation.id,
+        operation: () => _performUpload(operation, encrypt),
+        policy: const ExponentialBackoffPolicy(maxRetries: 3),
+        requiresConnectivity: true,
+        onRetry: (error, attemptNumber) {
+          log(
+            'CloudSyncService: Upload retry attempt $attemptNumber for ${operation.id}: $error',
+          );
+
+          final retryingOperation = operation.copyWith(
+            status: SyncOperationStatus.running,
+            retryCount: attemptNumber,
+            error: error.toString(),
+          );
+
+          _activeOperations[operation.id] = retryingOperation;
+          _operationController.add(retryingOperation);
+        },
       );
-      _activeOperations[operation.id] = updatedOperation;
-      _operationController.add(updatedOperation);
-
-      final providerInterface = _connectedProviders[operation.provider];
-      if (providerInterface == null) {
-        throw StateError(
-          'Provider ${operation.provider.displayName} not connected',
-        );
-      }
-
-      // Here you would implement the actual upload logic
-      // For now, simulate completion
-      await Future.delayed(const Duration(seconds: 2));
-
-      final completedOperation = updatedOperation.copyWith(
-        status: SyncOperationStatus.completed,
-        completedAt: DateTime.now(),
-        progressPercentage: 100.0,
+    } catch (e) {
+      log(
+        'CloudSyncService: Upload failed after retries for ${operation.id}: $e',
       );
-
-      _activeOperations[operation.id] = completedOperation;
-      _operationController.add(completedOperation);
-    } catch (e, stackTrace) {
-      log('CloudSyncService: Upload failed: $e', stackTrace: stackTrace);
 
       final failedOperation = operation.copyWith(
         status: SyncOperationStatus.failed,
@@ -605,36 +755,36 @@ class CloudSyncService implements CloudSyncInterface {
     }
   }
 
-  Future<void> _executeDownload(SyncOperation operation, bool decrypt) async {
+  /// Execute download with retry logic and connectivity awareness
+  Future<void> _executeDownloadWithRetry(
+    SyncOperation operation,
+    bool decrypt,
+  ) async {
     try {
-      final updatedOperation = operation.copyWith(
-        status: SyncOperationStatus.running,
-        startedAt: DateTime.now(),
+      await _retryManager.executeWithRetry(
+        operationId: operation.id,
+        operation: () => _performDownload(operation, decrypt),
+        policy: const ExponentialBackoffPolicy(maxRetries: 3),
+        requiresConnectivity: true,
+        onRetry: (error, attemptNumber) {
+          log(
+            'CloudSyncService: Download retry attempt $attemptNumber for ${operation.id}: $error',
+          );
+
+          final retryingOperation = operation.copyWith(
+            status: SyncOperationStatus.running,
+            retryCount: attemptNumber,
+            error: error.toString(),
+          );
+
+          _activeOperations[operation.id] = retryingOperation;
+          _operationController.add(retryingOperation);
+        },
       );
-      _activeOperations[operation.id] = updatedOperation;
-      _operationController.add(updatedOperation);
-
-      final providerInterface = _connectedProviders[operation.provider];
-      if (providerInterface == null) {
-        throw StateError(
-          'Provider ${operation.provider.displayName} not connected',
-        );
-      }
-
-      // Here you would implement the actual download logic
-      // For now, simulate completion
-      await Future.delayed(const Duration(seconds: 2));
-
-      final completedOperation = updatedOperation.copyWith(
-        status: SyncOperationStatus.completed,
-        completedAt: DateTime.now(),
-        progressPercentage: 100.0,
+    } catch (e) {
+      log(
+        'CloudSyncService: Download failed after retries for ${operation.id}: $e',
       );
-
-      _activeOperations[operation.id] = completedOperation;
-      _operationController.add(completedOperation);
-    } catch (e, stackTrace) {
-      log('CloudSyncService: Download failed: $e', stackTrace: stackTrace);
 
       final failedOperation = operation.copyWith(
         status: SyncOperationStatus.failed,
@@ -645,6 +795,66 @@ class CloudSyncService implements CloudSyncInterface {
       _activeOperations[operation.id] = failedOperation;
       _operationController.add(failedOperation);
     }
+  }
+
+  /// Perform the actual upload operation
+  Future<void> _performUpload(SyncOperation operation, bool encrypt) async {
+    final updatedOperation = operation.copyWith(
+      status: SyncOperationStatus.running,
+      startedAt: DateTime.now(),
+    );
+    _activeOperations[operation.id] = updatedOperation;
+    _operationController.add(updatedOperation);
+
+    final providerInterface = _connectedProviders[operation.provider];
+    if (providerInterface == null) {
+      throw StateError(
+        'Provider ${operation.provider.displayName} not connected',
+      );
+    }
+
+    // Here you would implement the actual upload logic
+    // For now, simulate completion
+    await Future.delayed(const Duration(seconds: 2));
+
+    final completedOperation = updatedOperation.copyWith(
+      status: SyncOperationStatus.completed,
+      completedAt: DateTime.now(),
+      progressPercentage: 100.0,
+    );
+
+    _activeOperations[operation.id] = completedOperation;
+    _operationController.add(completedOperation);
+  }
+
+  /// Perform the actual download operation
+  Future<void> _performDownload(SyncOperation operation, bool decrypt) async {
+    final updatedOperation = operation.copyWith(
+      status: SyncOperationStatus.running,
+      startedAt: DateTime.now(),
+    );
+    _activeOperations[operation.id] = updatedOperation;
+    _operationController.add(updatedOperation);
+
+    final providerInterface = _connectedProviders[operation.provider];
+    if (providerInterface == null) {
+      throw StateError(
+        'Provider ${operation.provider.displayName} not connected',
+      );
+    }
+
+    // Here you would implement the actual download logic
+    // For now, simulate completion
+    await Future.delayed(const Duration(seconds: 2));
+
+    final completedOperation = updatedOperation.copyWith(
+      status: SyncOperationStatus.completed,
+      completedAt: DateTime.now(),
+      progressPercentage: 100.0,
+    );
+
+    _activeOperations[operation.id] = completedOperation;
+    _operationController.add(completedOperation);
   }
 
   Future<List<SyncOperation>> _syncProvider(
@@ -1188,13 +1398,275 @@ class CloudSyncService implements CloudSyncInterface {
     return await _cloudEncryption.listCloudEncryptionKeys();
   }
 
+  // OFFLINE QUEUE MANAGEMENT
+
+  /// Get offline queue statistics
+  Future<QueueStatistics> getOfflineQueueStatistics() async {
+    return await _offlineQueue.getQueueStatistics();
+  }
+
+  /// Get priority statistics for offline queue
+  Future<PriorityStatistics> getQueuePriorityStatistics() async {
+    return await _offlineQueue.getPriorityStatistics();
+  }
+
+  /// Get pending operations in offline queue
+  Future<List<QueuedOperation>> getPendingQueuedOperations() async {
+    return await _offlineQueue.getPendingOperations();
+  }
+
+  /// Get queued operations by status
+  Future<List<QueuedOperation>> getQueuedOperationsByStatus(
+    QueueOperationStatus status,
+  ) async {
+    return await _offlineQueue.getOperationsByStatus(status);
+  }
+
+  /// Manually retry a failed queued operation
+  Future<bool> retryQueuedOperation(String operationId) async {
+    try {
+      await _offlineQueue.updateOperationStatus(
+        operationId: operationId,
+        status: QueueOperationStatus.pending,
+      );
+      log('CloudSyncService: Queued operation $operationId for retry');
+      return true;
+    } catch (e) {
+      log(
+        'CloudSyncService: Failed to retry queued operation $operationId: $e',
+      );
+      return false;
+    }
+  }
+
+  /// Remove operation from offline queue
+  Future<bool> removeQueuedOperation(String operationId) async {
+    try {
+      final removed = await _offlineQueue.dequeueOperation(operationId);
+      if (removed) {
+        log('CloudSyncService: Removed operation $operationId from queue');
+      }
+      return removed;
+    } catch (e) {
+      log(
+        'CloudSyncService: Failed to remove queued operation $operationId: $e',
+      );
+      return false;
+    }
+  }
+
+  /// Update operation priority in offline queue
+  Future<bool> updateQueuedOperationPriority({
+    required String operationId,
+    required int newPriority,
+  }) async {
+    try {
+      final updated = await _offlineQueue.updateOperationPriority(
+        operationId: operationId,
+        newPriority: newPriority,
+      );
+      if (updated) {
+        log(
+          'CloudSyncService: Updated operation $operationId priority to $newPriority',
+        );
+      }
+      return updated;
+    } catch (e) {
+      log('CloudSyncService: Failed to update operation priority: $e');
+      return false;
+    }
+  }
+
+  /// Promote operation to high priority
+  Future<bool> promoteOperationToHighPriority(String operationId) async {
+    try {
+      final promoted = await _offlineQueue.promoteToHighPriority(operationId);
+      if (promoted) {
+        log(
+          'CloudSyncService: Promoted operation $operationId to high priority',
+        );
+      }
+      return promoted;
+    } catch (e) {
+      log('CloudSyncService: Failed to promote operation to high priority: $e');
+      return false;
+    }
+  }
+
+  /// Demote operation to low priority
+  Future<bool> demoteOperationToLowPriority(String operationId) async {
+    try {
+      final demoted = await _offlineQueue.demoteToLowPriority(operationId);
+      if (demoted) {
+        log('CloudSyncService: Demoted operation $operationId to low priority');
+      }
+      return demoted;
+    } catch (e) {
+      log('CloudSyncService: Failed to demote operation to low priority: $e');
+      return false;
+    }
+  }
+
+  /// Get high priority operations from queue
+  Future<List<QueuedOperation>> getHighPriorityQueuedOperations() async {
+    return await _offlineQueue.getHighPriorityOperations();
+  }
+
+  /// Get operations by specific priority level
+  Future<List<QueuedOperation>> getQueuedOperationsByPriority(
+    int priority,
+  ) async {
+    return await _offlineQueue.getOperationsByPriority(priority);
+  }
+
+  /// Clear all operations from offline queue
+  Future<void> clearOfflineQueue() async {
+    try {
+      await _offlineQueue.clearQueue();
+      log('CloudSyncService: Cleared offline queue');
+    } catch (e) {
+      log('CloudSyncService: Failed to clear offline queue: $e');
+    }
+  }
+
+  /// Process queued operations manually (for testing/debugging)
+  Future<void> processOfflineQueue() async {
+    try {
+      if (!await _networkConnectivity.isConnected) {
+        log('CloudSyncService: No connectivity available for processing queue');
+        return;
+      }
+
+      final pendingOps = await _offlineQueue
+          .getPendingOperationsByPriorityOrder();
+      log(
+        'CloudSyncService: Processing ${pendingOps.length} queued operations',
+      );
+
+      for (final queuedOp in pendingOps) {
+        try {
+          // Reconstruct SyncOperation from queued operation
+          final syncOp = SyncOperation.fromJson(queuedOp.metadata);
+
+          // Process the operation based on its type
+          switch (queuedOp.operationType) {
+            case SyncOperationType.upload:
+              await _performUpload(syncOp, true);
+              break;
+            case SyncOperationType.download:
+              await _performDownload(syncOp, true);
+              break;
+            case SyncOperationType.delete:
+            case SyncOperationType.metadata:
+              // TODO: Implement delete and metadata operations
+              log(
+                'CloudSyncService: ${queuedOp.operationType} operations not yet implemented',
+              );
+              break;
+          }
+
+          // Mark as completed and remove from queue
+          await _offlineQueue.updateOperationStatus(
+            operationId: queuedOp.id,
+            status: QueueOperationStatus.completed,
+          );
+          await _offlineQueue.dequeueOperation(queuedOp.id);
+        } catch (e) {
+          log(
+            'CloudSyncService: Failed to process queued operation ${queuedOp.id}: $e',
+          );
+
+          // Update retry count and status
+          if (queuedOp.retryCount < queuedOp.maxRetries) {
+            await _offlineQueue.updateOperationStatus(
+              operationId: queuedOp.id,
+              status: QueueOperationStatus.retrying,
+              errorMessage: e.toString(),
+              incrementRetry: true,
+            );
+          } else {
+            await _offlineQueue.updateOperationStatus(
+              operationId: queuedOp.id,
+              status: QueueOperationStatus.failed,
+              errorMessage: 'Max retries exceeded: ${e.toString()}',
+            );
+          }
+        }
+      }
+    } catch (e) {
+      log('CloudSyncService: Error processing offline queue: $e');
+    }
+  }
+
+  /// Get stream of offline queue status updates
+  Stream<QueueStatusUpdate> get offlineQueueStatusStream =>
+      _offlineQueue.statusStream;
+
+  /// Get retry manager statistics
+  RetryStatistics getRetryStatistics() {
+    return _retryManager.getStatistics();
+  }
+
+  /// Get active retry operations
+  Map<String, RetryContext> get activeRetryOperations =>
+      _retryManager.activeRetries;
+
+  /// Cancel an active retry operation
+  void cancelRetryOperation(String operationId) {
+    _retryManager.cancelRetry(operationId);
+  }
+
+  /// Get stream of retry status updates
+  Stream<RetryStatusUpdate> get retryStatusStream => _retryManager.statusStream;
+
+  // BACKGROUND PROCESSING CONTROL
+
+  /// Enable or disable background queue processing
+  Future<void> setBackgroundProcessingEnabled(bool enabled) async {
+    if (_backgroundProcessingEnabled == enabled) return;
+
+    _backgroundProcessingEnabled = enabled;
+
+    if (enabled && _isInitialized) {
+      _startBackgroundQueueProcessing();
+      log('CloudSyncService: Background queue processing enabled');
+    } else {
+      _stopBackgroundQueueProcessing();
+      log('CloudSyncService: Background queue processing disabled');
+    }
+  }
+
+  /// Check if background queue processing is enabled
+  bool get isBackgroundProcessingEnabled => _backgroundProcessingEnabled;
+
+  /// Manually trigger background queue processing (for testing)
+  Future<void> triggerBackgroundProcessing() async {
+    if (!_backgroundProcessingEnabled) {
+      log('CloudSyncService: Background processing is disabled');
+      return;
+    }
+
+    if (!await _networkConnectivity.isConnected) {
+      log(
+        'CloudSyncService: No connectivity available for background processing',
+      );
+      return;
+    }
+
+    log('CloudSyncService: Manually triggering background queue processing');
+    await processOfflineQueue();
+  }
+
   /// Dispose resources
   void dispose() {
     _stopAutoSyncTimer();
+    _stopBackgroundQueueProcessing();
     _syncStatusController.close();
     _operationController.close();
     _conflictController.close();
     _incrementalTransfer.dispose();
     _changeTracking.dispose();
+    _offlineQueue.dispose();
+    _retryManager.dispose();
   }
 }

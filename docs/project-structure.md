@@ -92,7 +92,7 @@ project/                   # absolute path /Volumes/Samsung970EVOPlus/dev-projec
 │   │   │       ├── file_size_optimizer.dart               # File size optimization strategies
 │   │   │       ├── audio_enhancement_service_interface.dart # Audio enhancement interface with noise reduction, echo cancellation, AGC
 │   │   │       ├── audio_enhancement_service.dart         # Audio enhancement implementation using FFT-based processing
-│   │   │       ├── encryption_service.dart                # AES-256-GCM encryption service with secure key management
+│   │   │       ├── encryption_service.dart                # Enhanced AES-256-GCM encryption with PBKDF2, key rotation, and SecureKeyManager
 │   │   │       ├── cloud_encryption_service.dart          # Enhanced cloud-specific encryption with file/chunk/metadata encryption
 │   │   │       ├── encrypted_database_service.dart        # Database service with transparent encryption/decryption
 │   │   │       ├── ai_summarization_service_interface.dart # AI summarization service interface
@@ -244,8 +244,8 @@ The application features a comprehensive database system with optional encryptio
 - **Search Integration**: Full-text search capabilities with FTS5
 
 #### Encryption Layer
-- **AES-256-GCM**: Military-grade encryption for sensitive data
-- **Key Management**: Secure key derivation and storage using Flutter Secure Storage
+- **AES-256-GCM**: Production-grade encryption using PointyCastle cryptographic library
+- **Key Management**: Advanced SecureKeyManager with PBKDF2 key derivation, key rotation, backup/recovery workflows
 - **Transparent Operation**: Automatic encryption/decryption at the service layer
 - **Field-Level Encryption**: Selective encryption of sensitive fields (descriptions, transcriptions)
 
