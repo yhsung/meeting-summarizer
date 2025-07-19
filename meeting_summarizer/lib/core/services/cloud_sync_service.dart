@@ -8,12 +8,16 @@ import '../models/cloud_sync/cloud_provider.dart';
 import '../models/cloud_sync/sync_status.dart';
 import '../models/cloud_sync/sync_conflict.dart' as conflict_models;
 import '../models/cloud_sync/sync_operation.dart';
+import '../models/cloud_sync/file_change.dart' as file_change_models;
 import 'encryption_service.dart';
 import 'cloud_providers/cloud_provider_factory.dart';
 import 'cloud_providers/cloud_provider_interface.dart';
 import 'conflict_detection_service.dart';
 import 'conflict_resolution_service.dart' as conflict_resolution_service;
 import 'version_management_service.dart';
+import 'incremental_transfer_manager.dart';
+import 'change_tracking_service.dart';
+import 'delta_sync_service.dart' as delta_sync;
 
 /// Main cloud synchronization service that coordinates multiple providers
 class CloudSyncService implements CloudSyncInterface {
@@ -29,6 +33,9 @@ class CloudSyncService implements CloudSyncInterface {
       conflict_resolution_service.ConflictResolutionService.instance;
   final VersionManagementService _versionManagement =
       VersionManagementService.instance;
+  final IncrementalTransferManager _incrementalTransfer =
+      IncrementalTransferManager.instance;
+  final ChangeTrackingService _changeTracking = ChangeTrackingService.instance;
   final Map<CloudProvider, CloudProviderInterface> _connectedProviders = {};
   final Map<String, SyncOperation> _activeOperations = {};
   final Map<String, conflict_models.SyncConflict> _pendingConflicts = {};
@@ -71,6 +78,10 @@ class CloudSyncService implements CloudSyncInterface {
 
       // Initialize conflict resolution services
       await _versionManagement.initialize();
+
+      // Initialize incremental sync services
+      await _incrementalTransfer.initialize();
+      await _changeTracking.initialize();
 
       // Start auto-sync timer if enabled
       if (_autoSyncEnabled && !_syncPaused) {
@@ -747,11 +758,199 @@ class CloudSyncService implements CloudSyncInterface {
     }
   }
 
+  /// Perform incremental sync for a single file
+  Future<TransferResult> syncFileIncremental({
+    required String filePath,
+    required CloudProvider provider,
+    SyncDirection direction = SyncDirection.bidirectional,
+    bool forceFullSync = false,
+    Function(TransferProgress progress)? onProgress,
+  }) async {
+    if (!_isInitialized) await initialize();
+
+    final providerInterface = _connectedProviders[provider];
+    if (providerInterface == null) {
+      throw StateError('Provider ${provider.displayName} not connected');
+    }
+
+    try {
+      log('CloudSyncService: Starting incremental sync for $filePath');
+
+      // Determine sync direction based on change detection
+      delta_sync.SyncDirection syncDirection;
+      if (direction == SyncDirection.upload) {
+        syncDirection = delta_sync.SyncDirection.upload;
+      } else if (direction == SyncDirection.download) {
+        syncDirection = delta_sync.SyncDirection.download;
+      } else {
+        // For bidirectional, detect which direction is needed
+        final fileChange = await _changeTracking.detectFileChange(
+          filePath: filePath,
+          provider: provider,
+          providerInterface: providerInterface,
+        );
+
+        if (fileChange == null) {
+          return TransferResult(
+            success: true,
+            message: 'No changes detected',
+            transferId: 'no_changes_${DateTime.now().millisecondsSinceEpoch}',
+          );
+        }
+
+        // For now, default to upload for bidirectional
+        syncDirection = delta_sync.SyncDirection.upload;
+      }
+
+      final result = await _incrementalTransfer.syncFile(
+        filePath: filePath,
+        provider: provider,
+        providerInterface: providerInterface,
+        direction: syncDirection,
+        forceFullSync: forceFullSync,
+        onProgress: onProgress,
+      );
+
+      log('CloudSyncService: Incremental sync completed for $filePath');
+      return result;
+    } catch (e, stackTrace) {
+      log(
+        'CloudSyncService: Incremental sync failed for $filePath: $e',
+        stackTrace: stackTrace,
+      );
+      rethrow;
+    }
+  }
+
+  /// Perform incremental sync for multiple files
+  Future<List<TransferResult>> syncFilesIncremental({
+    required List<String> filePaths,
+    required CloudProvider provider,
+    SyncDirection direction = SyncDirection.bidirectional,
+    bool forceFullSync = false,
+    Function(String filePath, TransferProgress progress)? onProgress,
+  }) async {
+    if (!_isInitialized) await initialize();
+
+    final providerInterface = _connectedProviders[provider];
+    if (providerInterface == null) {
+      throw StateError('Provider ${provider.displayName} not connected');
+    }
+
+    try {
+      log(
+        'CloudSyncService: Starting batch incremental sync for ${filePaths.length} files',
+      );
+
+      // Determine sync direction
+      delta_sync.SyncDirection syncDirection;
+      if (direction == SyncDirection.upload) {
+        syncDirection = delta_sync.SyncDirection.upload;
+      } else if (direction == SyncDirection.download) {
+        syncDirection = delta_sync.SyncDirection.download;
+      } else {
+        // For bidirectional, default to upload for now
+        syncDirection = delta_sync.SyncDirection.upload;
+      }
+
+      final results = await _incrementalTransfer.syncFiles(
+        filePaths: filePaths,
+        provider: provider,
+        providerInterface: providerInterface,
+        direction: syncDirection,
+        forceFullSync: forceFullSync,
+        onProgress: onProgress,
+      );
+
+      log('CloudSyncService: Batch incremental sync completed');
+      return results;
+    } catch (e, stackTrace) {
+      log(
+        'CloudSyncService: Batch incremental sync failed: $e',
+        stackTrace: stackTrace,
+      );
+      rethrow;
+    }
+  }
+
+  /// Detect changes in a directory and optionally sync them
+  Future<List<file_change_models.FileChange>> detectDirectoryChanges({
+    required String directoryPath,
+    required CloudProvider provider,
+    List<String> fileExtensions = const [],
+    bool recursive = true,
+    bool autoSync = false,
+  }) async {
+    if (!_isInitialized) await initialize();
+
+    try {
+      log('CloudSyncService: Detecting changes in $directoryPath');
+
+      final changes = await _changeTracking.detectDirectoryChanges(
+        directoryPath: directoryPath,
+        provider: provider,
+        fileExtensions: fileExtensions,
+        recursive: recursive,
+      );
+
+      if (autoSync && changes.isNotEmpty) {
+        log(
+          'CloudSyncService: Auto-syncing ${changes.length} detected changes',
+        );
+
+        final filePaths = changes.map((change) => change.filePath).toList();
+        await syncFilesIncremental(
+          filePaths: filePaths,
+          provider: provider,
+          direction: SyncDirection.upload,
+        );
+      }
+
+      return changes;
+    } catch (e, stackTrace) {
+      log(
+        'CloudSyncService: Error detecting directory changes: $e',
+        stackTrace: stackTrace,
+      );
+      rethrow;
+    }
+  }
+
+  /// Get transfer statistics for incremental sync
+  TransferStats getIncrementalSyncStats() {
+    return _incrementalTransfer.getStats();
+  }
+
+  /// Set bandwidth limit for transfers
+  void setBandwidthLimit(int bytesPerSecond) {
+    _incrementalTransfer.setBandwidthLimit(bytesPerSecond);
+  }
+
+  /// Pause all incremental transfers
+  Future<void> pauseIncrementalSync() async {
+    await _incrementalTransfer.pauseAll();
+  }
+
+  /// Resume all incremental transfers
+  Future<void> resumeIncrementalSync() async {
+    await _incrementalTransfer.resumeAll();
+  }
+
+  /// Get progress stream for incremental transfers
+  Stream<TransferProgress> get incrementalSyncProgressStream =>
+      _incrementalTransfer.progressStream;
+
+  /// Get event stream for incremental transfers
+  Stream<TransferEvent> get incrementalSyncEventStream =>
+      _incrementalTransfer.eventStream;
+
   /// Dispose resources
   void dispose() {
     _stopAutoSyncTimer();
     _syncStatusController.close();
     _operationController.close();
     _conflictController.close();
+    _incrementalTransfer.dispose();
+    _changeTracking.dispose();
   }
 }
