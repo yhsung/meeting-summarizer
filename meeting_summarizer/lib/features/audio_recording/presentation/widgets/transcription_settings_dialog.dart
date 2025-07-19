@@ -2,6 +2,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import '../../../../core/services/transcription_service_factory.dart';
 import '../../../../core/models/transcription_request.dart';
 import '../../../../core/enums/transcription_language.dart';
@@ -89,13 +90,19 @@ class _TranscriptionSettingsDialogState
           await TranscriptionServiceFactory.checkServiceAvailability();
 
       // Get service capabilities
-      for (final provider in TranscriptionProvider.values) {
+      for (final provider in TranscriptionProvider.values.where(
+        (p) => !kIsWeb || p != TranscriptionProvider.localWhisper,
+      )) {
         _serviceCapabilities[provider] =
             TranscriptionServiceFactory.getServiceCapabilities(provider);
       }
 
       // Set default provider if none selected
       _selectedProvider ??= _providerAvailability.entries
+          .where(
+            (entry) =>
+                !kIsWeb || entry.key != TranscriptionProvider.localWhisper,
+          )
           .firstWhere(
             (entry) => entry.value,
             orElse: () => MapEntry(TranscriptionProvider.openaiWhisper, false),
@@ -287,62 +294,68 @@ class _TranscriptionSettingsDialogState
           ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 12),
-        ...TranscriptionProvider.values.map((provider) {
-          final isAvailable = _providerAvailability[provider] ?? false;
-          final capabilities = _serviceCapabilities[provider];
-          final requiresKey = _requiresApiKey(provider);
+        ...TranscriptionProvider.values
+            .where(
+              (provider) =>
+                  !kIsWeb || provider != TranscriptionProvider.localWhisper,
+            )
+            .map((provider) {
+              final isAvailable = _providerAvailability[provider] ?? false;
+              final capabilities = _serviceCapabilities[provider];
+              final requiresKey = _requiresApiKey(provider);
 
-          return Card(
-            margin: const EdgeInsets.only(bottom: 8),
-            child: RadioListTile<TranscriptionProvider>(
-              title: Row(
-                children: [
-                  Text(_getProviderDisplayName(provider)),
-                  const SizedBox(width: 8),
-                  if (isAvailable)
-                    Icon(Icons.check_circle, color: Colors.green, size: 16)
-                  else
-                    Icon(Icons.warning, color: Colors.orange, size: 16),
-                  const Spacer(),
-                  if (requiresKey)
-                    IconButton(
-                      icon: const Icon(Icons.key, size: 16),
-                      onPressed: () => _showApiKeyDialog(provider),
-                      tooltip: 'Configure API Key',
-                    ),
-                ],
-              ),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(_getProviderDescription(provider)),
-                  if (capabilities != null) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      'Languages: ${capabilities.supportedLanguages}, '
-                      'Max size: ${capabilities.maxFileSizeMB}MB, '
-                      'Cost: \$${capabilities.costPerMinute.toStringAsFixed(3)}/min',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.onSurface.withValues(alpha: 0.6),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-              value: provider,
-              groupValue: _selectedProvider,
-              onChanged: isAvailable
-                  ? (value) {
-                      setState(() {
-                        _selectedProvider = value;
-                      });
-                    }
-                  : null,
-            ),
-          );
-        }),
+              return Card(
+                margin: const EdgeInsets.only(bottom: 8),
+                child: RadioListTile<TranscriptionProvider>(
+                  title: Row(
+                    children: [
+                      Text(_getProviderDisplayName(provider)),
+                      const SizedBox(width: 8),
+                      if (isAvailable)
+                        Icon(Icons.check_circle, color: Colors.green, size: 16)
+                      else
+                        Icon(Icons.warning, color: Colors.orange, size: 16),
+                      const Spacer(),
+                      if (requiresKey)
+                        IconButton(
+                          icon: const Icon(Icons.key, size: 16),
+                          onPressed: () => _showApiKeyDialog(provider),
+                          tooltip: 'Configure API Key',
+                        ),
+                    ],
+                  ),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(_getProviderDescription(provider)),
+                      if (capabilities != null) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          'Languages: ${capabilities.supportedLanguages}, '
+                          'Max size: ${capabilities.maxFileSizeMB}MB, '
+                          'Cost: \$${capabilities.costPerMinute.toStringAsFixed(3)}/min',
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurface.withValues(alpha: 0.6),
+                              ),
+                        ),
+                      ],
+                    ],
+                  ),
+                  value: provider,
+                  groupValue: _selectedProvider,
+                  onChanged: isAvailable
+                      ? (value) {
+                          setState(() {
+                            _selectedProvider = value;
+                          });
+                        }
+                      : null,
+                ),
+              );
+            }),
       ],
     );
   }

@@ -18,6 +18,7 @@ library;
 
 import 'dart:io';
 import 'dart:developer';
+import 'package:flutter/foundation.dart';
 
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
@@ -88,6 +89,12 @@ class LocalWhisperService implements TranscriptionServiceInterface {
   Future<void> initialize({
     Function(double progress, String status)? onProgress,
   }) async {
+    if (kIsWeb) {
+      throw UnsupportedError(
+        'Local Whisper service is not supported on web platform',
+      );
+    }
+
     log('LocalWhisperService: Initializing local Whisper service');
     onProgress?.call(0.0, 'Initializing service...');
 
@@ -183,6 +190,11 @@ class LocalWhisperService implements TranscriptionServiceInterface {
 
   @override
   Future<bool> isServiceAvailable() async {
+    if (kIsWeb) {
+      log('LocalWhisperService: Not available on web platform');
+      return false;
+    }
+
     log('LocalWhisperService: Checking service availability');
     log('LocalWhisperService: _isInitialized = $_isInitialized');
 

@@ -4,12 +4,14 @@ library;
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import '../../../../core/services/api_key_service.dart';
 import '../../../../core/services/transcription_provider_service.dart';
 import '../../../../core/services/transcription_service_factory.dart';
-import '../../../../core/services/local_whisper_service.dart';
+import '../../../../core/services/local_whisper_service.dart'
+    if (dart.library.html) '../../../../core/services/local_whisper_service_stub.dart';
 import '../../../transcription/presentation/widgets/model_download_progress.dart';
 
 /// Screen for configuring API keys for transcription services
@@ -741,9 +743,12 @@ class _ApiConfigurationScreenState extends State<ApiConfigurationScreen> {
               style: theme.textTheme.bodyMedium,
             ),
             const SizedBox(height: 16),
-            ...TranscriptionProvider.values.map(
-              (provider) => _buildProviderOption(provider),
-            ),
+            ...TranscriptionProvider.values
+                .where(
+                  (provider) =>
+                      !kIsWeb || provider != TranscriptionProvider.localWhisper,
+                )
+                .map((provider) => _buildProviderOption(provider)),
           ],
         ),
       ),

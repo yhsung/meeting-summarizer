@@ -2,7 +2,8 @@
 library;
 
 import 'package:flutter/material.dart';
-import '../../../../core/services/local_whisper_service.dart';
+import '../../../../core/services/local_whisper_service.dart'
+    if (dart.library.html) '../../../../core/services/local_whisper_service_stub.dart';
 import 'model_download_progress.dart';
 
 /// Widget that handles LocalWhisperService initialization with progress display

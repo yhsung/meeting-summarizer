@@ -2,10 +2,12 @@
 library;
 
 import 'dart:developer';
+import 'package:flutter/foundation.dart';
 
 import 'transcription_service_interface.dart';
 import 'openai_whisper_service.dart';
-import 'local_whisper_service.dart';
+import 'local_whisper_service.dart'
+    if (dart.library.html) 'local_whisper_service_stub.dart';
 import 'google_speech_service.dart';
 import 'anthropic_transcription_service.dart';
 import 'api_key_service.dart';
@@ -64,13 +66,15 @@ class TranscriptionServiceFactory {
       return whisperService;
     }
 
-    // Fallback to local Whisper if API is unavailable
-    final localService = getService(TranscriptionProvider.localWhisper);
-    if (await localService.isServiceAvailable()) {
-      log(
-        'TranscriptionServiceFactory: Using Local Whisper service as fallback',
-      );
-      return localService;
+    // Fallback to local Whisper if API is unavailable (not available on web)
+    if (!kIsWeb) {
+      final localService = getService(TranscriptionProvider.localWhisper);
+      if (await localService.isServiceAvailable()) {
+        log(
+          'TranscriptionServiceFactory: Using Local Whisper service as fallback',
+        );
+        return localService;
+      }
     }
 
     throw StateError('No transcription services are available or configured');
@@ -114,6 +118,12 @@ class TranscriptionServiceFactory {
     final availability = <TranscriptionProvider, bool>{};
 
     for (final provider in TranscriptionProvider.values) {
+      // Skip local Whisper on web platform
+      if (kIsWeb && provider == TranscriptionProvider.localWhisper) {
+        availability[provider] = false;
+        continue;
+      }
+
       try {
         final service = getService(provider);
         availability[provider] = await service.isServiceAvailable();
@@ -221,6 +231,11 @@ class TranscriptionServiceFactory {
       case TranscriptionProvider.openaiWhisper:
         return OpenAIWhisperService(apiKeyService: _apiKeyService);
       case TranscriptionProvider.localWhisper:
+        if (kIsWeb) {
+          throw UnsupportedError(
+            'Local Whisper is not supported on web platform',
+          );
+        }
         return LocalWhisperService.getInstance();
       case TranscriptionProvider.googleSpeechToText:
         return GoogleSpeechService.getInstance();
@@ -251,7 +266,8 @@ class TranscriptionServiceFactory {
             'Supports 95+ languages with excellent accuracy.';
       case TranscriptionProvider.localWhisper:
         return 'Offline speech recognition using local Whisper models. '
-            'No internet required, free processing with configurable quality levels.';
+            'No internet required, free processing with configurable quality levels. '
+            '(Not available on web platform)';
       case TranscriptionProvider.googleSpeechToText:
         return 'Enterprise-grade speech recognition from Google Cloud. '
             'Supports 125+ languages with advanced features like speaker diarization.';
