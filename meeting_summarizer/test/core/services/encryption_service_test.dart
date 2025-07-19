@@ -453,33 +453,38 @@ void main() {
         expect(decrypted, equals(testData));
       });
 
-      test('should produce different results with same password and data', () async {
-        const testData = 'same data';
-        const password = 'same password';
+      test(
+        'should produce different results with same password and data',
+        () async {
+          const testData = 'same data';
+          const password = 'same password';
 
-        final encrypted1 = await EncryptionService.encryptWithPassword(
-          testData,
-          password,
-        );
-        final encrypted2 = await EncryptionService.encryptWithPassword(
-          testData,
-          password,
-        );
+          final encrypted1 = await EncryptionService.encryptWithPassword(
+            testData,
+            password,
+          );
+          final encrypted2 = await EncryptionService.encryptWithPassword(
+            testData,
+            password,
+          );
 
-        expect(encrypted1, isNotNull);
-        expect(encrypted2, isNotNull);
-        expect(encrypted1!['data'], isNot(equals(encrypted2!['data'])));
-        expect(encrypted1['salt'], isNot(equals(encrypted2['salt'])));
-        expect(encrypted1['iv'], isNot(equals(encrypted2['iv'])));
-      });
+          expect(encrypted1, isNotNull);
+          expect(encrypted2, isNotNull);
+          expect(encrypted1!['data'], isNot(equals(encrypted2!['data'])));
+          expect(encrypted1['salt'], isNot(equals(encrypted2['salt'])));
+          expect(encrypted1['iv'], isNot(equals(encrypted2['iv'])));
+        },
+      );
     });
   });
 
   group('SecureKeyManager Tests', () {
     group('Key Rotation', () {
       test('should rotate key successfully', () async {
-        final originalKeyId = await EncryptionService.createEncryptionKey('test_rotation');
-        
+        final originalKeyId = await EncryptionService.createEncryptionKey(
+          'test_rotation',
+        );
+
         final newKeyId = await SecureKeyManager.rotateKey(originalKeyId);
         expect(newKeyId, isNotNull);
         expect(newKeyId, isNot(equals(originalKeyId)));
@@ -493,7 +498,7 @@ void main() {
 
       test('should handle rotation of non-existent key', () async {
         const nonExistentKeyId = 'non_existent_key';
-        
+
         final newKeyId = await SecureKeyManager.rotateKey(nonExistentKeyId);
         expect(newKeyId, isNull);
       });
@@ -501,7 +506,9 @@ void main() {
 
     group('Key Backup and Recovery', () {
       test('should create and restore key backup', () async {
-        final originalKeyId = await EncryptionService.createEncryptionKey('test_backup');
+        final originalKeyId = await EncryptionService.createEncryptionKey(
+          'test_backup',
+        );
         const masterPassword = 'backup_password_123';
 
         // Create backup
@@ -528,7 +535,10 @@ void main() {
 
         // Test that restored key works
         const testData = 'test data for restored key';
-        final encrypted = await EncryptionService.encryptData(testData, restoredKeyId);
+        final encrypted = await EncryptionService.encryptData(
+          testData,
+          restoredKeyId,
+        );
         expect(encrypted, isNotNull);
 
         final decrypted = await EncryptionService.decryptData(encrypted!);
@@ -536,7 +546,9 @@ void main() {
       });
 
       test('should fail backup restoration with wrong password', () async {
-        final originalKeyId = await EncryptionService.createEncryptionKey('test_wrong_password');
+        final originalKeyId = await EncryptionService.createEncryptionKey(
+          'test_wrong_password',
+        );
         const masterPassword = 'correct_password';
         const wrongPassword = 'wrong_password';
 
@@ -570,8 +582,10 @@ void main() {
 
     group('Secure Key Deletion', () {
       test('should securely delete key', () async {
-        final keyId = await EncryptionService.createEncryptionKey('test_secure_delete');
-        
+        final keyId = await EncryptionService.createEncryptionKey(
+          'test_secure_delete',
+        );
+
         // Verify key exists
         final keysBefore = await EncryptionService.listEncryptionKeys();
         expect(keysBefore, contains(keyId));
@@ -588,7 +602,9 @@ void main() {
       test('should handle deletion of non-existent key', () async {
         const nonExistentKeyId = 'non_existent_key';
 
-        final deleteSuccess = await SecureKeyManager.secureDeleteKey(nonExistentKeyId);
+        final deleteSuccess = await SecureKeyManager.secureDeleteKey(
+          nonExistentKeyId,
+        );
         expect(deleteSuccess, isTrue); // Should not throw, just return true
       });
     });
@@ -596,9 +612,13 @@ void main() {
     group('Key Backup Listing', () {
       test('should list all key backups', () async {
         // Create multiple keys and backups
-        final keyId1 = await EncryptionService.createEncryptionKey('test_list_1');
-        final keyId2 = await EncryptionService.createEncryptionKey('test_list_2');
-        
+        final keyId1 = await EncryptionService.createEncryptionKey(
+          'test_list_1',
+        );
+        final keyId2 = await EncryptionService.createEncryptionKey(
+          'test_list_2',
+        );
+
         await SecureKeyManager.createKeyBackup(keyId1, 'password1');
         await SecureKeyManager.createKeyBackup(keyId2, 'password2');
 

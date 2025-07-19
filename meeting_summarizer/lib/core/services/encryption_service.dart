@@ -189,7 +189,7 @@ class EncryptionService {
     try {
       // Create AES-GCM cipher
       final cipher = GCMBlockCipher(AESEngine());
-      
+
       // Set up parameters
       final params = AEADParameters(
         KeyParameter(key),
@@ -197,13 +197,13 @@ class EncryptionService {
         iv,
         Uint8List(0), // Additional authenticated data (AAD) - empty
       );
-      
+
       // Initialize cipher for encryption
       cipher.init(true, params);
-      
+
       // Encrypt the data
       final ciphertext = cipher.process(plaintext);
-      
+
       // Extract the authentication tag from the end
       final encryptedData = Uint8List.view(
         ciphertext.buffer,
@@ -215,11 +215,8 @@ class EncryptionService {
         ciphertext.length - _tagSize,
         _tagSize,
       );
-      
-      return {
-        'ciphertext': encryptedData,
-        'tag': tag,
-      };
+
+      return {'ciphertext': encryptedData, 'tag': tag};
     } catch (e) {
       log('EncryptionService: AES-GCM encryption failed: $e');
       rethrow;
@@ -236,7 +233,7 @@ class EncryptionService {
     try {
       // Create AES-GCM cipher
       final cipher = GCMBlockCipher(AESEngine());
-      
+
       // Set up parameters
       final params = AEADParameters(
         KeyParameter(key),
@@ -244,25 +241,30 @@ class EncryptionService {
         iv,
         Uint8List(0), // Additional authenticated data (AAD) - empty
       );
-      
+
       // Initialize cipher for decryption
       cipher.init(false, params);
-      
+
       // Combine ciphertext and tag for decryption
       final encryptedDataWithTag = Uint8List(ciphertext.length + tag.length);
       encryptedDataWithTag.setRange(0, ciphertext.length, ciphertext);
-      encryptedDataWithTag.setRange(ciphertext.length, encryptedDataWithTag.length, tag);
-      
+      encryptedDataWithTag.setRange(
+        ciphertext.length,
+        encryptedDataWithTag.length,
+        tag,
+      );
+
       // Decrypt and verify
       final plaintext = cipher.process(encryptedDataWithTag);
-      
+
       return plaintext;
     } catch (e) {
       log('EncryptionService: AES-GCM decryption failed: $e');
-      throw Exception('Decryption failed: Authentication tag verification failed');
+      throw Exception(
+        'Decryption failed: Authentication tag verification failed',
+      );
     }
   }
-
 
   /// Delete encryption key
   static Future<bool> deleteEncryptionKey(String keyId) async {
@@ -334,7 +336,9 @@ class EncryptionService {
       final iv = base64.decode(encryptedData['iv']!);
       final salt = base64.decode(encryptedData['salt']!);
       final tag = base64.decode(encryptedData['tag']!);
-      final iterations = int.parse(encryptedData['iterations'] ?? _pbkdf2Iterations.toString());
+      final iterations = int.parse(
+        encryptedData['iterations'] ?? _pbkdf2Iterations.toString(),
+      );
 
       final key = _deriveKeyPBKDF2(password, salt, iterations: iterations);
       final plaintext = await _decryptAESGCM(ciphertext, key, iv, tag);
@@ -389,16 +393,18 @@ class SecureKeyManager {
       }
 
       // Create new key
-      final newKeyId = '${EncryptionService._keyPrefix}rotated_${DateTime.now().millisecondsSinceEpoch}';
+      final newKeyId =
+          '${EncryptionService._keyPrefix}rotated_${DateTime.now().millisecondsSinceEpoch}';
       final newKey = EncryptionService._generateKey();
-      
+
       // Store new key
       await _storage.write(key: newKeyId, value: base64.encode(newKey));
-      
+
       // Create backup of old key
-      final backupId = '$_keyBackupPrefix${oldKeyId}_${DateTime.now().millisecondsSinceEpoch}';
+      final backupId =
+          '$_keyBackupPrefix${oldKeyId}_${DateTime.now().millisecondsSinceEpoch}';
       await _storage.write(key: backupId, value: oldKeyData);
-      
+
       // Store rotation metadata
       final rotationMetadata = {
         'oldKeyId': oldKeyId,
@@ -420,7 +426,10 @@ class SecureKeyManager {
   }
 
   /// Create key backup with master password protection
-  static Future<bool> createKeyBackup(String keyId, String masterPassword) async {
+  static Future<bool> createKeyBackup(
+    String keyId,
+    String masterPassword,
+  ) async {
     try {
       final keyData = await _storage.read(key: keyId);
       if (keyData == null) {
@@ -429,13 +438,17 @@ class SecureKeyManager {
       }
 
       // Encrypt the key with master password
-      final backupData = await EncryptionService.encryptWithPassword(keyData, masterPassword);
+      final backupData = await EncryptionService.encryptWithPassword(
+        keyData,
+        masterPassword,
+      );
       if (backupData == null) {
         log('SecureKeyManager: Failed to encrypt key backup');
         return false;
       }
 
-      final backupId = '$_keyBackupPrefix${keyId}_${DateTime.now().millisecondsSinceEpoch}';
+      final backupId =
+          '$_keyBackupPrefix${keyId}_${DateTime.now().millisecondsSinceEpoch}';
       await _storage.write(key: backupId, value: json.encode(backupData));
 
       // Store backup metadata
@@ -482,7 +495,8 @@ class SecureKeyManager {
       }
 
       // Create new key ID for restored key
-      final restoredKeyId = '${EncryptionService._keyPrefix}restored_${DateTime.now().millisecondsSinceEpoch}';
+      final restoredKeyId =
+          '${EncryptionService._keyPrefix}restored_${DateTime.now().millisecondsSinceEpoch}';
       await _storage.write(key: restoredKeyId, value: decryptedKey);
 
       log('SecureKeyManager: Key restored from backup: $restoredKeyId');
@@ -505,7 +519,9 @@ class SecureKeyManager {
             final metadata = json.decode(entry.value) as Map<String, dynamic>;
             backups.add(metadata);
           } catch (e) {
-            log('SecureKeyManager: Failed to parse backup metadata: ${entry.key}');
+            log(
+              'SecureKeyManager: Failed to parse backup metadata: ${entry.key}',
+            );
           }
         }
       }
@@ -528,7 +544,7 @@ class SecureKeyManager {
         final overwriteData = String.fromCharCodes(
           List.generate(keyData.length, (_) => random.nextInt(256)),
         );
-        
+
         // Overwrite multiple times
         for (int i = 0; i < 3; i++) {
           await _storage.write(key: keyId, value: overwriteData);
@@ -537,7 +553,7 @@ class SecureKeyManager {
 
       // Finally delete the key
       await _storage.delete(key: keyId);
-      
+
       log('SecureKeyManager: Securely deleted key: $keyId');
       return true;
     } catch (e) {
