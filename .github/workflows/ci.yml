@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 jobs:
-  test:
+  analyze:
     runs-on: ubuntu-latest
     
     steps:
@@ -44,13 +44,9 @@ jobs:
     - name: Analyze project source
       working-directory: ./meeting_summarizer
       run: flutter analyze
-    
-    - name: Run tests
-      working-directory: ./meeting_summarizer
-      run: flutter test
 
   build-macos:
-    needs: test
+    needs: analyze
     runs-on: macos-latest
     
     steps:
@@ -96,7 +92,7 @@ jobs:
       run: flutter build macos --debug
 
   build-ios:
-    needs: test
+    needs: analyze
     runs-on: macos-latest
     
     steps:
@@ -130,7 +126,7 @@ jobs:
       run: flutter build ios --debug --simulator
 
   build-web:
-    needs: test
+    needs: analyze
     runs-on: ubuntu-latest
     
     steps:
@@ -164,7 +160,7 @@ jobs:
       run: flutter build web --debug
 
   build-windows:
-    needs: test
+    needs: analyze
     runs-on: windows-latest
     
     steps:
@@ -198,7 +194,7 @@ jobs:
       run: flutter build windows --debug
 
   build-android:
-    needs: test
+    needs: analyze
     runs-on: ubuntu-latest
     
     steps:
@@ -250,3 +246,37 @@ jobs:
     - name: Build APK
       working-directory: ./meeting_summarizer
       run: flutter build apk --debug
+
+  test:
+    needs: [build-macos, build-ios, build-web, build-windows, build-android]
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Cache Flutter dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.pub-cache
+          **/.dart_tool/package_config.json
+        key: ${{ runner.os }}-flutter-${{ hashFiles('**/pubspec.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-flutter-
+    
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.32.4'
+        channel: 'stable'
+        cache: true
+        cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
+        cache-path: '${{ runner.tool_cache }}/flutter/:channel:-:version:-:arch:'
+    
+    - name: Install dependencies
+      working-directory: ./meeting_summarizer
+      run: flutter pub get
+    
+    - name: Run tests
+      working-directory: ./meeting_summarizer
+      run: flutter test
