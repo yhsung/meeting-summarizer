@@ -11,6 +11,9 @@ import '../models/cloud_sync/sync_operation.dart';
 import 'encryption_service.dart';
 import 'cloud_providers/cloud_provider_factory.dart';
 import 'cloud_providers/cloud_provider_interface.dart';
+import 'conflict_detection_service.dart';
+import 'conflict_resolution_service.dart' as conflict_resolution_service;
+import 'version_management_service.dart';
 
 /// Main cloud synchronization service that coordinates multiple providers
 class CloudSyncService implements CloudSyncInterface {
@@ -19,6 +22,13 @@ class CloudSyncService implements CloudSyncInterface {
   CloudSyncService._();
 
   final CloudProviderFactory _providerFactory = CloudProviderFactory.instance;
+  final ConflictDetectionService _conflictDetection =
+      ConflictDetectionService.instance;
+  final conflict_resolution_service.ConflictResolutionService
+  _conflictResolution =
+      conflict_resolution_service.ConflictResolutionService.instance;
+  final VersionManagementService _versionManagement =
+      VersionManagementService.instance;
   final Map<CloudProvider, CloudProviderInterface> _connectedProviders = {};
   final Map<String, SyncOperation> _activeOperations = {};
   final Map<String, conflict_models.SyncConflict> _pendingConflicts = {};
@@ -58,6 +68,9 @@ class CloudSyncService implements CloudSyncInterface {
 
       // Initialize provider factory
       await _providerFactory.initialize();
+
+      // Initialize conflict resolution services
+      await _versionManagement.initialize();
 
       // Start auto-sync timer if enabled
       if (_autoSyncEnabled && !_syncPaused) {
@@ -266,19 +279,48 @@ class CloudSyncService implements CloudSyncInterface {
         'CloudSyncService: Resolving conflict ${conflict.id} with $resolution',
       );
 
-      // Implementation would handle different resolution strategies
-      final resolvedConflict = conflict.copyWith(
-        isResolved: true,
-        resolution: conflict_models.ConflictResolution.values.firstWhere(
-          (r) => r.name == resolution.name,
-        ),
-        resolvedAt: DateTime.now(),
+      final providerInterface = _connectedProviders[conflict.provider];
+      if (providerInterface == null) {
+        log(
+          'CloudSyncService: Provider ${conflict.provider.displayName} not connected',
+        );
+        return false;
+      }
+
+      // The conflict resolution service expects the same enum from sync_conflict model
+      final serviceResolution = _convertResolutionEnum(resolution);
+
+      // Use the conflict resolution service
+      final result = await _conflictResolution.resolveConflict(
+        conflict: conflict,
+        resolution: serviceResolution,
+        providerInterface: providerInterface,
       );
 
-      _pendingConflicts.remove(conflict.id);
-      _conflictController.add(resolvedConflict);
+      if (result.success) {
+        // Record version change if resolution involved file operations
+        if (result.actionTaken != null) {
+          await _recordVersionChange(conflict, result);
+        }
 
-      return true;
+        // Mark conflict as resolved
+        final resolvedConflict = conflict.copyWith(
+          isResolved: true,
+          resolution: conflict_models.ConflictResolution.values.firstWhere(
+            (r) => r.name == resolution.name,
+          ),
+          resolvedAt: DateTime.now(),
+        );
+
+        _pendingConflicts.remove(conflict.id);
+        _conflictController.add(resolvedConflict);
+
+        log('CloudSyncService: Successfully resolved conflict ${conflict.id}');
+        return true;
+      } else {
+        log('CloudSyncService: Failed to resolve conflict: ${result.message}');
+        return false;
+      }
     } catch (e, stackTrace) {
       log(
         'CloudSyncService: Error resolving conflict: $e',
@@ -339,8 +381,49 @@ class CloudSyncService implements CloudSyncInterface {
     CloudProvider? provider,
     String? filePath,
   }) async {
-    // Implementation would check for actual conflicts
-    return [];
+    try {
+      log('CloudSyncService: Checking for conflicts...');
+
+      final providers = provider != null
+          ? {provider: _connectedProviders[provider]!}
+          : Map<CloudProvider, CloudProviderInterface>.from(
+              _connectedProviders,
+            );
+
+      final conflicts = <conflict_models.SyncConflict>[];
+
+      if (filePath != null) {
+        // Check specific file
+        final fileConflicts = await _conflictDetection.detectFileConflicts(
+          filePath: filePath,
+          connectedProviders: providers,
+        );
+        conflicts.addAll(fileConflicts);
+      } else {
+        // Check all files
+        final allConflicts = await _conflictDetection.detectAllConflicts(
+          connectedProviders: Map<CloudProvider, CloudProviderInterface>.from(
+            providers,
+          ),
+        );
+        conflicts.addAll(allConflicts);
+      }
+
+      // Store pending conflicts
+      for (final conflict in conflicts) {
+        _pendingConflicts[conflict.id] = conflict;
+        _conflictController.add(conflict);
+      }
+
+      log('CloudSyncService: Found ${conflicts.length} conflicts');
+      return conflicts;
+    } catch (e, stackTrace) {
+      log(
+        'CloudSyncService: Error checking for conflicts: $e',
+        stackTrace: stackTrace,
+      );
+      return [];
+    }
   }
 
   @override
@@ -553,9 +636,115 @@ class CloudSyncService implements CloudSyncInterface {
     CloudProvider provider,
     SyncDirection direction,
   ) async {
-    // Implementation would sync files with the specific provider
-    // For now, return empty list
-    return [];
+    try {
+      log('CloudSyncService: Syncing with ${provider.displayName}...');
+
+      final operations = <SyncOperation>[];
+      final providerInterface = _connectedProviders[provider];
+
+      if (providerInterface == null) {
+        log('CloudSyncService: Provider not connected');
+        return operations;
+      }
+
+      // Check for conflicts before syncing
+      final conflicts = await checkForConflicts(provider: provider);
+
+      if (conflicts.isNotEmpty) {
+        log(
+          'CloudSyncService: Found ${conflicts.length} conflicts, attempting auto-resolution',
+        );
+
+        // Attempt auto-resolution of conflicts
+        final autoResolutions = await _conflictResolution.autoResolveConflicts(
+          conflicts: conflicts,
+          connectedProviders: {provider: providerInterface},
+          strategy:
+              conflict_resolution_service.AutoResolutionStrategy.conservative,
+        );
+
+        var resolvedCount = 0;
+        for (final result in autoResolutions) {
+          if (result.success) {
+            resolvedCount++;
+          }
+        }
+
+        log(
+          'CloudSyncService: Auto-resolved $resolvedCount of ${conflicts.length} conflicts',
+        );
+      }
+
+      // For now, return empty list as the actual sync implementation
+      // would require local file system integration
+      return operations;
+    } catch (e, stackTrace) {
+      log(
+        'CloudSyncService: Error syncing provider: $e',
+        stackTrace: stackTrace,
+      );
+      return [];
+    }
+  }
+
+  /// Convert interface ConflictResolution to service ConflictResolution
+  conflict_models.ConflictResolution _convertResolutionEnum(
+    ConflictResolution resolution,
+  ) {
+    switch (resolution) {
+      case ConflictResolution.keepLocal:
+        return conflict_models.ConflictResolution.keepLocal;
+      case ConflictResolution.keepRemote:
+        return conflict_models.ConflictResolution.keepRemote;
+      case ConflictResolution.keepBoth:
+        return conflict_models.ConflictResolution.keepBoth;
+      case ConflictResolution.merge:
+        return conflict_models.ConflictResolution.merge;
+      case ConflictResolution.manual:
+        return conflict_models.ConflictResolution.manual;
+    }
+  }
+
+  /// Record version change after conflict resolution
+  Future<void> _recordVersionChange(
+    conflict_models.SyncConflict conflict,
+    conflict_resolution_service.ConflictResolutionResult result,
+  ) async {
+    try {
+      VersionChangeType changeType;
+
+      switch (result.actionTaken!) {
+        case conflict_resolution_service.ConflictAction.uploadedLocal:
+          changeType = VersionChangeType.modified;
+          break;
+        case conflict_resolution_service.ConflictAction.downloadedRemote:
+          changeType = VersionChangeType.modified;
+          break;
+        case conflict_resolution_service.ConflictAction.deletedLocal:
+          changeType = VersionChangeType.deleted;
+          break;
+        case conflict_resolution_service.ConflictAction.deletedRemote:
+          changeType = VersionChangeType.deleted;
+          break;
+        case conflict_resolution_service.ConflictAction.keptBoth:
+          changeType = VersionChangeType.created;
+          break;
+        case conflict_resolution_service.ConflictAction.merged:
+          changeType = VersionChangeType.contentChanged;
+          break;
+      }
+
+      await _versionManagement.recordFileVersion(
+        filePath: conflict.filePath,
+        provider: conflict.provider,
+        version: conflict.localVersion.exists
+            ? conflict.localVersion
+            : conflict.remoteVersion,
+        changeType: changeType,
+      );
+    } catch (e) {
+      log('CloudSyncService: Error recording version change: $e');
+    }
   }
 
   /// Dispose resources
