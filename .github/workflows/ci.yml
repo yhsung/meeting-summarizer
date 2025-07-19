@@ -222,7 +222,10 @@ jobs:
         cache: true
         cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
         cache-path: '${{ runner.tool_cache }}/flutter/:channel:-:version:-:arch:'
-    
+
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+
     - name: Cache Gradle dependencies
       uses: actions/cache@v4
       with:
