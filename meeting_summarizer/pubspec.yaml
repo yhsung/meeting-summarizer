@@ -68,6 +68,9 @@ dependencies:
   file_icon: ^1.0.0
   photo_view: ^0.14.0
   file_picker: ^8.1.4
+  
+  # Cloud storage dependencies
+  icloud_storage: ^2.2.0
 
 dev_dependencies:
   flutter_test:
