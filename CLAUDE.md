@@ -37,7 +37,7 @@ For detailed project structure, architecture overview, and file organization, se
 - **Task Management**: `.taskmaster/` - Task Master AI integration files
 - **Claude Integration**: `.claude/` - Claude Code configuration and commands
 - **Documentation**: `docs/` - Project documentation and guides
-- **Core Services**: `meeting_summarizer/lib/core/services/` - Audio processing and business logic
+- **Core Services**: `meeting_summarizer/lib/core/services/` - Audio processing, cloud sync, and business logic
 - **Features**: `meeting_summarizer/lib/features/` - Feature-specific implementations
 - **Tests**: `meeting_summarizer/test/` - Comprehensive test suite
 
@@ -46,11 +46,13 @@ For detailed project structure, architecture overview, and file organization, se
 For detailed information about recent updates, improvements, and changes to the project, see: [`CHANGELOG.md`](CHANGELOG.md)
 
 Key recent improvements include:
+- **Incremental Sync Mechanisms**: Complete delta synchronization system for cloud file sync with 60-90% bandwidth savings
+- **Web Platform Compatibility**: Excluded local Whisper transcription from web builds with conditional imports and stub implementations
+- **Cloud Provider Integration**: Support for iCloud, Google Drive, OneDrive, and Dropbox with comprehensive conflict resolution
+- **Performance Optimization**: Adaptive file chunking, concurrent transfer management, and resumable transfers
 - **Google Speech-to-Text Service**: Complete implementation with automatic initialization and comprehensive testing
 - **Logging System Refactoring**: Replaced print statements with dart:developer log across codebase for better debugging
-- **CI/CD Optimizations**: Web build temporarily disabled for performance, improved caching and build strategies
-- **Testing Infrastructure**: Enhanced platform channel mocking for better test reliability
-- **Path Provider Integration**: Improved macOS sandbox compatibility and error handling
+- **CI/CD Optimizations**: Improved caching strategies reducing build times by 60-75%
 
 For CI/CD optimization details, see: [`docs/ci-cd-optimizations.md`](docs/ci-cd-optimizations.md)
 

@@ -52,7 +52,8 @@ project/                   # absolute path /Volumes/Samsung970EVOPlus/dev-projec
 │   │   │   │   └── README.md                      # Database architecture documentation
 │   │   │   ├── interfaces/
 │   │   │   │   ├── storage_organization_interface.dart # Storage organization service interface
-│   │   │   │   └── export_service_interface.dart      # Export service interface with multi-format support
+│   │   │   │   ├── export_service_interface.dart      # Export service interface with multi-format support
+│   │   │   │   └── cloud_sync_interface.dart          # Cloud synchronization service interface with incremental sync
 │   │   │   ├── enums/
 │   │   │   │   ├── audio_format.dart      # Audio format definitions with compression ratios
 │   │   │   │   ├── audio_quality.dart     # Quality levels with detailed properties
@@ -73,10 +74,17 @@ project/                   # absolute path /Volumes/Samsung970EVOPlus/dev-projec
 │   │   │   │   ├── export/
 │   │   │   │   │   ├── export_options.dart    # Export configuration with format-specific options
 │   │   │   │   │   └── export_result.dart     # Export operation results with metadata and progress
-│   │   │   │   └── storage/
-│   │   │   │       ├── file_category.dart     # File categorization system with 8 categories
-│   │   │   │       ├── file_metadata.dart     # Comprehensive file metadata with JSON serialization
-│   │   │   │       └── storage_stats.dart     # Storage analytics and statistics
+│   │   │   │   ├── storage/
+│   │   │   │   │   ├── file_category.dart     # File categorization system with 8 categories
+│   │   │   │   │   ├── file_metadata.dart     # Comprehensive file metadata with JSON serialization
+│   │   │   │   │   └── storage_stats.dart     # Storage analytics and statistics
+│   │   │   │   └── cloud_sync/
+│   │   │   │       ├── cloud_provider.dart    # Cloud provider enums and configuration
+│   │   │   │       ├── sync_status.dart       # Synchronization status tracking
+│   │   │   │       ├── sync_conflict.dart     # Conflict detection and resolution models
+│   │   │   │       ├── sync_operation.dart    # Sync operation tracking with progress
+│   │   │   │       ├── file_change.dart       # File change detection with delta sync support
+│   │   │   │       └── file_version.dart      # File versioning and history models
 │   │   │   └── services/
 │   │   │       ├── audio_service_interface.dart           # Service interface definition
 │   │   │       ├── audio_format_manager.dart              # Platform-aware format selection
@@ -100,7 +108,25 @@ project/                   # absolute path /Volumes/Samsung970EVOPlus/dev-projec
 │   │   │       ├── enhanced_storage_organization_service.dart # Advanced storage organization with SQLite integration
 │   │   │       ├── file_categorization_service.dart       # Smart file categorization and auto-tagging
 │   │   │       ├── advanced_search_service.dart           # Comprehensive search with ranking and suggestions
-│   │   │       └── export_service.dart                    # Multi-format export system with batch processing
+│   │   │       ├── export_service.dart                    # Multi-format export system with batch processing
+│   │   │       ├── cloud_sync_service.dart                # Main cloud synchronization service with incremental sync support
+│   │   │       ├── incremental_transfer_manager.dart      # Bandwidth-optimized transfer coordination with resumption
+│   │   │       ├── change_tracking_service.dart           # File modification detection with SHA-256 checksums
+│   │   │       ├── delta_sync_service.dart                # Delta synchronization for changed file portions only
+│   │   │       ├── file_chunking_service.dart             # Adaptive file chunking with integrity verification
+│   │   │       ├── conflict_detection_service.dart        # Multi-provider conflict detection and analysis
+│   │   │       ├── conflict_resolution_service.dart       # Automated and manual conflict resolution strategies
+│   │   │       ├── version_management_service.dart        # File versioning and history management
+│   │   │       ├── cloud_providers/
+│   │   │       │   ├── cloud_provider_factory.dart        # Provider factory with platform-specific implementations
+│   │   │       │   ├── cloud_provider_interface.dart      # Standard interface for all cloud providers
+│   │   │       │   ├── icloud_provider.dart               # iCloud Drive integration with macOS support
+│   │   │       │   ├── google_drive_provider.dart         # Google Drive API v3 integration
+│   │   │       │   ├── onedrive_provider.dart             # Microsoft OneDrive Graph API integration
+│   │   │       │   └── dropbox_provider.dart              # Dropbox API v2 integration
+│   │   │       ├── transcription_service_factory.dart     # Transcription service factory with web platform exclusions
+│   │   │       ├── local_whisper_service.dart             # Local Whisper transcription (mobile/desktop only)
+│   │   │       └── local_whisper_service_stub.dart        # Web platform stub for local Whisper
 │   │   ├── features/
 │   │   │   ├── audio_recording/
 │   │   │   │   ├── data/
@@ -137,6 +163,10 @@ project/                   # absolute path /Volumes/Samsung970EVOPlus/dev-projec
 │   │   │               ├── summary_controls.dart            # Summary interaction controls
 │   │   │               ├── summary_type_selector.dart       # Summary type selection
 │   │   │               └── action_items_list.dart           # Action items display
+│   │   │   └── sync/
+│   │   │       └── presentation/
+│   │   │           └── widgets/
+│   │   │               └── conflict_resolution_dialog.dart      # Conflict resolution UI for manual resolution
 │   │   └── main.dart                   # Flutter app entry point
 │   ├── test/
 │   │   ├── core/
