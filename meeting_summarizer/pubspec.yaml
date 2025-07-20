@@ -73,6 +73,9 @@ dependencies:
   
   # Cloud storage dependencies
   icloud_storage: ^2.2.0
+  
+  # Biometric authentication dependencies
+  local_auth: ^2.3.0
 
 dev_dependencies:
   flutter_test:
@@ -91,6 +94,9 @@ dev_dependencies:
   
   # Database testing dependencies
   sqflite_common_ffi: ^2.3.3
+  
+  # Mocking dependencies
+  mockito: ^5.4.4
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
