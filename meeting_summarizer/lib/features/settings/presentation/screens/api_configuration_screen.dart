@@ -417,13 +417,11 @@ class _ApiConfigurationScreenState extends State<ApiConfigurationScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
+                _buildGroupedProvidersCard(),
+                const SizedBox(height: 16),
                 _buildLocalWhisperInitializationCard(),
                 const SizedBox(height: 16),
                 _buildProviderSelectionCard(),
-                const SizedBox(height: 16),
-                ..._supportedProviders.map(
-                  (provider) => _buildProviderCard(provider),
-                ),
               ],
             ),
     );
@@ -800,15 +798,10 @@ class _ApiConfigurationScreenState extends State<ApiConfigurationScreen> {
     }
   }
 
-  Widget _buildProviderCard(String provider) {
+  Widget _buildGroupedProvidersCard() {
     final theme = Theme.of(context);
-    final controller = _controllers[provider]!;
-    final isObscured = _isObscured[provider]!;
-    final isLoading = _isLoading[provider]!;
-    final apiKeyInfo = _getApiKeyInfo(provider);
 
     return Card(
-      margin: const EdgeInsets.only(bottom: 16),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -816,151 +809,203 @@ class _ApiConfigurationScreenState extends State<ApiConfigurationScreen> {
           children: [
             Row(
               children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        _getProviderDisplayName(provider),
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        _getProviderDescription(provider),
-                        style: theme.textTheme.bodySmall,
-                      ),
-                    ],
+                Icon(Icons.api, color: theme.colorScheme.primary),
+                const SizedBox(width: 8),
+                Text(
+                  'API Providers',
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-                _buildStatusIndicator(apiKeyInfo),
               ],
             ),
+            const SizedBox(height: 12),
+            Text(
+              'Configure API keys for external transcription and summarization services.',
+              style: theme.textTheme.bodyMedium,
+            ),
             const SizedBox(height: 16),
-            if (apiKeyInfo.isConfigured) ...[
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.primaryContainer.withValues(
-                    alpha: 0.1,
-                  ),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.check_circle,
-                      color: theme.colorScheme.primary,
-                      size: 16,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Configured: ${apiKeyInfo.keyPrefix}',
-                      style: theme.textTheme.bodySmall,
-                    ),
-                    const Spacer(),
-                    TextButton(
-                      onPressed: () => _removeApiKey(provider),
-                      child: const Text('Remove'),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-            ],
-            ExpansionTile(
-              title: Text(
-                apiKeyInfo.isConfigured ? 'Update API Key' : 'Set API Key',
-                style: theme.textTheme.titleSmall,
-              ),
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        _getProviderInstructions(provider),
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurface.withValues(
-                            alpha: 0.7,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: controller,
-                        obscureText: isObscured,
-                        decoration: InputDecoration(
-                          labelText: 'API Key',
-                          hintText:
-                              'Enter your ${_getProviderDisplayName(provider)} API key',
-                          border: const OutlineInputBorder(),
-                          suffixIcon: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                icon: Icon(
-                                  isObscured
-                                      ? Icons.visibility
-                                      : Icons.visibility_off,
-                                ),
-                                onPressed: () {
-                                  setState(() {
-                                    _isObscured[provider] = !isObscured;
-                                  });
-                                },
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.content_paste),
-                                onPressed: () async {
-                                  final clipboardData = await Clipboard.getData(
-                                    Clipboard.kTextPlain,
-                                  );
-                                  if (clipboardData?.text != null) {
-                                    controller.text = clipboardData!.text!;
-                                  }
-                                },
-                              ),
-                            ],
-                          ),
-                        ),
-                        maxLines: 1,
-                      ),
-                      const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          const Spacer(),
-                          TextButton(
-                            onPressed: () => controller.clear(),
-                            child: const Text('Clear'),
-                          ),
-                          const SizedBox(width: 8),
-                          ElevatedButton(
-                            onPressed: isLoading
-                                ? null
-                                : () => _saveApiKey(provider),
-                            child: isLoading
-                                ? const SizedBox(
-                                    width: 16,
-                                    height: 16,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                    ),
-                                  )
-                                : const Text('Save'),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+            ..._supportedProviders.map(
+              (provider) => _buildProviderSection(provider),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildProviderSection(String provider) {
+    final theme = Theme.of(context);
+    final controller = _controllers[provider]!;
+    final isObscured = _isObscured[provider]!;
+    final isLoading = _isLoading[provider]!;
+    final apiKeyInfo = _getApiKeyInfo(provider);
+
+    return Column(
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: theme.colorScheme.outline.withValues(alpha: 0.2),
+            ),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            _getProviderDisplayName(provider),
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            _getProviderDescription(provider),
+                            style: theme.textTheme.bodySmall,
+                          ),
+                        ],
+                      ),
+                    ),
+                    _buildStatusIndicator(apiKeyInfo),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                if (apiKeyInfo.isConfigured) ...[
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.primaryContainer.withValues(
+                        alpha: 0.1,
+                      ),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.check_circle,
+                          color: theme.colorScheme.primary,
+                          size: 16,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Configured: ${apiKeyInfo.keyPrefix}',
+                          style: theme.textTheme.bodySmall,
+                        ),
+                        const Spacer(),
+                        TextButton(
+                          onPressed: () => _removeApiKey(provider),
+                          child: const Text('Remove'),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
+                ExpansionTile(
+                  title: Text(
+                    apiKeyInfo.isConfigured ? 'Update API Key' : 'Set API Key',
+                    style: theme.textTheme.titleSmall,
+                  ),
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            _getProviderInstructions(provider),
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurface.withValues(
+                                alpha: 0.7,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          TextFormField(
+                            controller: controller,
+                            obscureText: isObscured,
+                            decoration: InputDecoration(
+                              labelText: 'API Key',
+                              hintText:
+                                  'Enter your ${_getProviderDisplayName(provider)} API key',
+                              border: const OutlineInputBorder(),
+                              suffixIcon: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    icon: Icon(
+                                      isObscured
+                                          ? Icons.visibility
+                                          : Icons.visibility_off,
+                                    ),
+                                    onPressed: () {
+                                      setState(() {
+                                        _isObscured[provider] = !isObscured;
+                                      });
+                                    },
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.content_paste),
+                                    onPressed: () async {
+                                      final clipboardData =
+                                          await Clipboard.getData(
+                                            Clipboard.kTextPlain,
+                                          );
+                                      if (clipboardData?.text != null) {
+                                        controller.text = clipboardData!.text!;
+                                      }
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+                            maxLines: 1,
+                          ),
+                          const SizedBox(height: 16),
+                          Row(
+                            children: [
+                              const Spacer(),
+                              TextButton(
+                                onPressed: () => controller.clear(),
+                                child: const Text('Clear'),
+                              ),
+                              const SizedBox(width: 8),
+                              ElevatedButton(
+                                onPressed: isLoading
+                                    ? null
+                                    : () => _saveApiKey(provider),
+                                child: isLoading
+                                    ? const SizedBox(
+                                        width: 16,
+                                        height: 16,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                        ),
+                                      )
+                                    : const Text('Save'),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+        if (provider != _supportedProviders.last) const SizedBox(height: 16),
+      ],
     );
   }
 
