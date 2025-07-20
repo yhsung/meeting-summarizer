@@ -47,7 +47,7 @@ class _MainNavigationState extends State<MainNavigation> {
   final List<Widget> _screens = [
     const RecordingScreen(),
     const TranscriptionScreen(),
-    const SummaryScreen(transcriptionId: 'default'), // Default for navigation
+    const SummaryScreen(transcriptionId: ''), // Empty for navigation
     const SearchScreen(),
     const ApiConfigurationScreen(),
   ];

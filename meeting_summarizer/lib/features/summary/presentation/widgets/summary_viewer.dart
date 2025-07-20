@@ -196,7 +196,7 @@ class _SummaryViewerState extends State<SummaryViewer> {
           decoration: BoxDecoration(
             color: Colors.grey[50],
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Colors.grey[300]!),
+            border: Border.all(color: Colors.grey[300] ?? Colors.grey),
           ),
           child: SelectableText(
             widget.summary.content,
@@ -228,11 +228,11 @@ class _SummaryViewerState extends State<SummaryViewer> {
           decoration: BoxDecoration(
             color: Colors.blue[50],
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Colors.blue[200]!),
+            border: Border.all(color: Colors.blue[200] ?? Colors.blue),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: widget.summary.keyPoints!
+            children: (widget.summary.keyPoints ?? [])
                 .map(
                   (point) => Padding(
                     padding: const EdgeInsets.only(bottom: 4),

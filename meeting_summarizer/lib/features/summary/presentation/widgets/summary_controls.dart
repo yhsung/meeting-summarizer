@@ -168,7 +168,8 @@ class _SummaryControlsState extends State<SummaryControls>
         DropdownButtonFormField<SummaryType>(
           value: widget.selectedType,
           onChanged: widget.enabled && !widget.isGenerating
-              ? (value) => widget.onTypeChanged?.call(value!)
+              ? (value) =>
+                    value != null ? widget.onTypeChanged?.call(value) : null
               : null,
           decoration: InputDecoration(
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),

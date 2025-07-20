@@ -228,13 +228,13 @@ class _ActionItemsListState extends State<ActionItemsList> {
   Color _getPriorityColor(ActionItemPriority priority) {
     switch (priority) {
       case ActionItemPriority.urgent:
-        return Colors.red[100]!;
+        return Colors.red[100] ?? Colors.red;
       case ActionItemPriority.high:
-        return Colors.orange[100]!;
+        return Colors.orange[100] ?? Colors.orange;
       case ActionItemPriority.medium:
-        return Colors.yellow[100]!;
+        return Colors.yellow[100] ?? Colors.yellow;
       case ActionItemPriority.low:
-        return Colors.green[100]!;
+        return Colors.green[100] ?? Colors.green;
     }
   }
 

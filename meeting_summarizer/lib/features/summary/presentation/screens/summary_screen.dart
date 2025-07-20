@@ -2,6 +2,7 @@
 library;
 
 import 'dart:async';
+import 'dart:developer';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -39,8 +40,8 @@ class SummaryScreen extends StatefulWidget {
 class _SummaryScreenState extends State<SummaryScreen>
     with TickerProviderStateMixin {
   // Services
-  late final EncryptedDatabaseService _databaseService;
-  late final DatabaseHelper _databaseHelper;
+  EncryptedDatabaseService? _databaseService;
+  DatabaseHelper? _databaseHelper;
 
   // State management
   List<Summary> _summaries = [];
@@ -69,9 +70,8 @@ class _SummaryScreenState extends State<SummaryScreen>
   @override
   void initState() {
     super.initState();
-    _initializeServices();
     _setupAnimations();
-    _loadData();
+    _initializeAndLoadData();
   }
 
   @override
@@ -81,9 +81,16 @@ class _SummaryScreenState extends State<SummaryScreen>
     super.dispose();
   }
 
-  void _initializeServices() {
-    _databaseService = EncryptedDatabaseService();
-    _databaseHelper = _databaseService.databaseHelper;
+  Future<void> _initializeServices() async {
+    try {
+      await EncryptedDatabaseService.initialize();
+      _databaseService = EncryptedDatabaseService();
+      _databaseHelper = _databaseService?.databaseHelper;
+    } catch (e) {
+      log('Failed to initialize EncryptedDatabaseService: $e');
+      // Fallback to direct DatabaseHelper if encryption service fails
+      _databaseHelper = DatabaseHelper();
+    }
   }
 
   void _setupAnimations() {
@@ -106,7 +113,20 @@ class _SummaryScreenState extends State<SummaryScreen>
         );
   }
 
+  Future<void> _initializeAndLoadData() async {
+    await _initializeServices();
+    await _loadData();
+  }
+
   Future<void> _loadData() async {
+    if (_databaseHelper == null) {
+      setState(() {
+        _isLoading = false;
+        _statusMessage = 'Database service not available';
+      });
+      return;
+    }
+
     try {
       setState(() {
         _isLoading = true;
@@ -116,22 +136,24 @@ class _SummaryScreenState extends State<SummaryScreen>
       // Load transcription data
       if (widget.transcription != null) {
         _transcription = widget.transcription;
-      } else {
-        _transcription = await _databaseHelper.getTranscription(
+      } else if (widget.transcriptionId.isNotEmpty) {
+        _transcription = await _databaseHelper!.getTranscription(
           widget.transcriptionId,
         );
       }
 
       // Load existing summaries
-      _summaries = await _databaseHelper.getSummariesByTranscription(
-        widget.transcriptionId,
-      );
+      if (widget.transcriptionId.isNotEmpty) {
+        _summaries = await _databaseHelper!.getSummariesByTranscription(
+          widget.transcriptionId,
+        );
+      }
 
       // Set current summary
       if (widget.existingSummary != null) {
         _currentSummary = widget.existingSummary;
         _selectedSummaryIndex = _summaries.indexWhere(
-          (s) => s.id == _currentSummary!.id,
+          (s) => s.id == _currentSummary?.id,
         );
         if (_selectedSummaryIndex == -1) _selectedSummaryIndex = 0;
       } else if (_summaries.isNotEmpty) {
@@ -164,7 +186,7 @@ class _SummaryScreenState extends State<SummaryScreen>
       return;
     }
 
-    if (_transcription!.text.isEmpty) {
+    if (_transcription?.text.isEmpty ?? true) {
       _showErrorSnackBar('Transcription text is empty');
       return;
     }
@@ -221,7 +243,9 @@ class _SummaryScreenState extends State<SummaryScreen>
       );
 
       // Save to database
-      await _databaseHelper.insertSummary(newSummary);
+      if (_databaseHelper != null) {
+        await _databaseHelper!.insertSummary(newSummary);
+      }
 
       // Update UI state
       setState(() {
@@ -306,8 +330,10 @@ class _SummaryScreenState extends State<SummaryScreen>
   }
 
   Future<void> _deleteSummary(String summaryId) async {
+    if (_databaseHelper == null) return;
+
     try {
-      await _databaseHelper.deleteSummary(summaryId);
+      await _databaseHelper!.deleteSummary(summaryId);
 
       setState(() {
         _summaries.removeWhere((s) => s.id == summaryId);
@@ -534,17 +560,22 @@ class _SummaryScreenState extends State<SummaryScreen>
   }
 
   Widget _buildSummaryContent() {
+    final currentSummary = _currentSummary;
+    if (currentSummary == null) {
+      return _buildEmptyState();
+    }
+
     return SingleChildScrollView(
       child: Column(
         children: [
           SummaryViewer(
-            summary: _currentSummary!,
-            onDelete: () => _deleteSummary(_currentSummary!.id),
+            summary: currentSummary,
+            onDelete: () => _deleteSummary(currentSummary.id),
           ),
           const SizedBox(height: 16),
-          if (_currentSummary!.actionItems?.isNotEmpty ?? false)
+          if (currentSummary.actionItems?.isNotEmpty ?? false)
             ActionItemsList(
-              actionItems: _currentSummary!.actionItems!,
+              actionItems: currentSummary.actionItems ?? [],
               onActionItemUpdated: (actionItem) {
                 // TODO: Implement action item updates
               },

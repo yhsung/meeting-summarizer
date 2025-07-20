@@ -10,6 +10,7 @@ import 'ai_summarization_service_interface.dart';
 import 'ai_provider_factory.dart';
 import 'mock_ai_summarization_service.dart';
 import 'openai_summarization_service.dart';
+// import 'anthropic_summarization_service.dart'; // TODO: fix build errors
 import 'api_key_service.dart';
 import '../models/summarization_configuration.dart';
 import '../models/summarization_result.dart';
@@ -260,6 +261,12 @@ class AISummarizationService implements AISummarizationServiceInterface {
       AIProvider.openai,
       (config) => OpenAISummarizationService(config),
     );
+
+    // Register Anthropic provider (TODO: fix build errors)
+    // AIProviderFactory.registerProvider(
+    //   AIProvider.anthropic,
+    //   (config) => AnthropicSummarizationService(config),
+    // );
   }
 
   /// Try to initialize with a real provider using available API keys
