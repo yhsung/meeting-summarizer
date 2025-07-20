@@ -10,7 +10,6 @@ import 'transcription_service_factory.dart';
 /// Service for managing the selected transcription provider
 class TranscriptionProviderService {
   static const String _providerKey = 'selected_transcription_provider';
-  static const String _forceLocalWhisperKey = 'force_local_whisper_override';
   static const TranscriptionProvider _defaultProvider =
       TranscriptionProvider.openaiWhisper;
 
@@ -84,17 +83,6 @@ class TranscriptionProviderService {
 
   /// Get the best available provider based on user selection and availability
   Future<TranscriptionProvider> getBestAvailableProvider() async {
-    // Check if Local Whisper is forced via settings
-    final forceLocalWhisper = await getForceLocalWhisperOverride();
-
-    if (forceLocalWhisper) {
-      log(
-        'TranscriptionProviderService: Forcing Local Whisper provider (user setting)',
-      );
-      return TranscriptionProvider.localWhisper;
-    }
-
-    // Original implementation (used when forceLocalWhisper is false)
     final selectedProvider = await getSelectedProvider();
 
     // Check if selected provider is available
@@ -130,51 +118,6 @@ class TranscriptionProviderService {
       log('TranscriptionProviderService: Provider selection cleared');
     } catch (e) {
       log('TranscriptionProviderService: Error clearing provider: $e');
-      rethrow;
-    }
-  }
-
-  /// Get the force local whisper override setting
-  Future<bool> getForceLocalWhisperOverride() async {
-    try {
-      final value = await _secureStorage.read(key: _forceLocalWhisperKey);
-      // If no value is set, default to false for normal provider selection
-      return value == 'true';
-    } catch (e) {
-      log(
-        'TranscriptionProviderService: Error getting force local whisper setting: $e',
-      );
-      return false; // Default to false (normal provider selection)
-    }
-  }
-
-  /// Set the force local whisper override setting
-  Future<void> setForceLocalWhisperOverride(bool enabled) async {
-    try {
-      await _secureStorage.write(
-        key: _forceLocalWhisperKey,
-        value: enabled.toString(),
-      );
-      log(
-        'TranscriptionProviderService: Force local whisper override set to: $enabled',
-      );
-    } catch (e) {
-      log(
-        'TranscriptionProviderService: Error setting force local whisper override: $e',
-      );
-      rethrow;
-    }
-  }
-
-  /// Clear the force local whisper override setting
-  Future<void> clearForceLocalWhisperOverride() async {
-    try {
-      await _secureStorage.delete(key: _forceLocalWhisperKey);
-      log('TranscriptionProviderService: Force local whisper override cleared');
-    } catch (e) {
-      log(
-        'TranscriptionProviderService: Error clearing force local whisper override: $e',
-      );
       rethrow;
     }
   }

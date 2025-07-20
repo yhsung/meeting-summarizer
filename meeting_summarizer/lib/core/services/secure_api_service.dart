@@ -643,7 +643,7 @@ class SecureApiService {
           'API request failed and would be queued for retry: ${options.method} ${options.path}',
           name: 'SecureApiService',
         );
-        
+
         // TODO: Create appropriate SyncOperation objects based on the API endpoint
         // and integrate with CloudSyncService for proper offline handling
       }
