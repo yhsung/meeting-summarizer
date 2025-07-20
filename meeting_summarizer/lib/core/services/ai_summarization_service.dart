@@ -9,6 +9,8 @@ import 'package:flutter/foundation.dart';
 import 'ai_summarization_service_interface.dart';
 import 'ai_provider_factory.dart';
 import 'mock_ai_summarization_service.dart';
+import 'openai_summarization_service.dart';
+import 'api_key_service.dart';
 import '../models/summarization_configuration.dart';
 import '../models/summarization_result.dart';
 import '../exceptions/summarization_exceptions.dart';
@@ -34,17 +36,22 @@ class AISummarizationService implements AISummarizationServiceInterface {
     if (_isInitialized) return;
 
     try {
-      // Register mock provider for development and testing
-      _registerMockProvider();
+      // Register providers
+      _registerProviders();
 
-      // Use mock provider by default in development
-      if (kDebugMode) {
-        await _initializeWithMockProvider();
-      } else {
-        // In production, would load from configuration
-        throw SummarizationExceptions.initializationFailed(
-          'No production AI provider configured',
-        );
+      // Try to initialize with a real provider if API keys are available
+      final initialized = await _tryInitializeWithRealProvider();
+
+      if (!initialized) {
+        // Fall back to mock provider in development
+        if (kDebugMode) {
+          await _initializeWithMockProvider();
+        } else {
+          // In production, require real provider
+          throw SummarizationExceptions.initializationFailed(
+            'No AI provider configured with valid API key',
+          );
+        }
       }
 
       _isInitialized = true;
@@ -240,12 +247,67 @@ class AISummarizationService implements AISummarizationServiceInterface {
     return AIProviderFactory.getProviderCapabilities(provider);
   }
 
-  /// Register mock provider for development
-  void _registerMockProvider() {
+  /// Register providers
+  void _registerProviders() {
+    // Register mock provider for development
     AIProviderFactory.registerProvider(
       AIProvider.mock,
       (config) => MockAISummarizationService(config),
     );
+
+    // Register OpenAI provider
+    AIProviderFactory.registerProvider(
+      AIProvider.openai,
+      (config) => OpenAISummarizationService(config),
+    );
+  }
+
+  /// Try to initialize with a real provider using available API keys
+  Future<bool> _tryInitializeWithRealProvider() async {
+    final apiKeyService = ApiKeyService();
+
+    // Try OpenAI first
+    try {
+      final openaiKey = await apiKeyService.getApiKey('openai');
+      if (openaiKey != null && openaiKey.isNotEmpty) {
+        final config = AIProviderConfig.openai(apiKey: openaiKey);
+        await configureProvider(config);
+        log('AISummarizationService: Initialized with OpenAI provider');
+        return true;
+      }
+    } catch (e) {
+      log('AISummarizationService: Failed to initialize OpenAI provider: $e');
+    }
+
+    // Try Anthropic
+    try {
+      final anthropicKey = await apiKeyService.getApiKey('anthropic');
+      if (anthropicKey != null && anthropicKey.isNotEmpty) {
+        final config = AIProviderConfig.anthropic(apiKey: anthropicKey);
+        await configureProvider(config);
+        log('AISummarizationService: Initialized with Anthropic provider');
+        return true;
+      }
+    } catch (e) {
+      log(
+        'AISummarizationService: Failed to initialize Anthropic provider: $e',
+      );
+    }
+
+    // Try Google
+    try {
+      final googleKey = await apiKeyService.getApiKey('google');
+      if (googleKey != null && googleKey.isNotEmpty) {
+        final config = AIProviderConfig.google(apiKey: googleKey);
+        await configureProvider(config);
+        log('AISummarizationService: Initialized with Google provider');
+        return true;
+      }
+    } catch (e) {
+      log('AISummarizationService: Failed to initialize Google provider: $e');
+    }
+
+    return false;
   }
 
   /// Initialize with mock provider for development
