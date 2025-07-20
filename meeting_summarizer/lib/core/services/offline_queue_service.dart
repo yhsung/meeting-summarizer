@@ -18,7 +18,7 @@ class OfflineQueueService {
 
   Database? _database;
   bool _isInitialized = false;
-  final StreamController<QueueStatusUpdate> _statusController =
+  StreamController<QueueStatusUpdate> _statusController =
       StreamController<QueueStatusUpdate>.broadcast();
   Timer? _processingTimer;
 
@@ -31,6 +31,11 @@ class OfflineQueueService {
 
     try {
       log('OfflineQueueService: Initializing...');
+
+      // Recreate stream controller if it was closed
+      if (_statusController.isClosed) {
+        _statusController = StreamController<QueueStatusUpdate>.broadcast();
+      }
 
       await _initializeDatabase();
       await _cleanupExpiredOperations();
@@ -657,8 +662,17 @@ class OfflineQueueService {
     _processingTimer?.cancel();
     await _statusController.close();
     await _database?.close();
+    _database = null;
     _isInitialized = false;
     log('OfflineQueueService: Disposed');
+  }
+
+  /// Reset singleton instance (for testing)
+  static Future<void> resetInstance() async {
+    if (_instance != null) {
+      await _instance!.dispose();
+      _instance = null;
+    }
   }
 }
 

@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
@@ -8,14 +11,34 @@ import 'package:meeting_summarizer/core/models/cloud_sync/cloud_provider.dart';
 void main() {
   group('OfflineQueueService', () {
     late OfflineQueueService service;
+    late Directory temporaryDirectory;
 
     setUpAll(() async {
-      // Initialize Flutter test binding
-      TestWidgetsFlutterBinding.ensureInitialized();
-
       // Initialize FFI for SQLite in tests
       sqfliteFfiInit();
       databaseFactory = databaseFactoryFfi;
+
+      // Mock PathProvider for tests
+      TestWidgetsFlutterBinding.ensureInitialized();
+      temporaryDirectory = await Directory.systemTemp.createTemp();
+
+      const MethodChannel channel = MethodChannel(
+        'plugins.flutter.io/path_provider',
+      );
+
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
+            if (methodCall.method == 'getApplicationDocumentsDirectory') {
+              return temporaryDirectory.path;
+            }
+            return null;
+          });
+    });
+
+    tearDownAll(() async {
+      if (await temporaryDirectory.exists()) {
+        await temporaryDirectory.delete(recursive: true);
+      }
     });
 
     setUp(() async {
@@ -26,6 +49,7 @@ void main() {
     tearDown(() async {
       await service.clearQueue();
       await service.dispose();
+      await OfflineQueueService.resetInstance();
     });
 
     group('Initialization', () {
