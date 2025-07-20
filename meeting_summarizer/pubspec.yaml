@@ -76,6 +76,9 @@ dependencies:
   
   # Biometric authentication dependencies
   local_auth: ^2.3.0
+  
+  # Secure API communication dependencies
+  dio: ^5.7.0
 
 dev_dependencies:
   flutter_test:
