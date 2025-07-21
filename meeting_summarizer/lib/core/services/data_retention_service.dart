@@ -277,7 +277,7 @@ class DataRetentionService {
                 id: recording.id,
                 type: DataRetentionItemType.recording,
                 dataCategory: DataCategory.audioData,
-                filePath: recording.filePath,
+                filePath: null, // Mock implementation
                 createdAt: recording.createdAt,
                 policy: policy,
                 action: DataRetentionAction.archive,
@@ -337,7 +337,7 @@ class DataRetentionService {
                 id: recording.id,
                 type: DataRetentionItemType.recording,
                 dataCategory: DataCategory.audioData,
-                filePath: recording.filePath,
+                filePath: null, // Mock implementation
                 createdAt: recording.createdAt,
                 policy: policy,
                 action: DataRetentionAction.delete,
@@ -803,7 +803,6 @@ class DataRetentionService {
     }
   }
 
-
   /// Get recordings for retention processing (placeholder implementation)
   Future<List<_MockDataItem>> _getRecordingsForRetention() async {
     // This is a placeholder implementation
@@ -837,12 +836,10 @@ class DataRetentionService {
 class _MockDataItem {
   final String id;
   final DateTime createdAt;
-  final String? filePath;
 
   const _MockDataItem({
     required this.id,
     required this.createdAt,
-    this.filePath,
   });
 }
 
