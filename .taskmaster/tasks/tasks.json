@@ -693,7 +693,7 @@
             "description": "Create secure API communication layer with certificate pinning and request/response encryption",
             "dependencies": [],
             "details": "Implement SecureApiService with certificate pinning using dio_certificate_pinning ^6.0.0 and dio ^5.7.0. Add request/response encryption using established encryption keys, JWT token management with refresh mechanisms, and API rate limiting. Implement certificate validation, SSL/TLS configuration, and network security policies. Add secure headers management, request signing for integrity verification, and protection against man-in-the-middle attacks. Create offline request queue with encrypted storage.",
-            "status": "in-progress",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -702,7 +702,7 @@
             "description": "Create comprehensive GDPR compliance system with consent management and user rights",
             "dependencies": [],
             "details": "Implement GDPRComplianceService with consent management UI, privacy policy integration, and lawful basis tracking. Create user rights management: right to access (data export), right to rectification (data correction), right to erasure (data deletion), and right to portability. Implement consent withdrawal mechanisms, data processing audit logs, and privacy impact assessments. Add cookie consent management, third-party data sharing controls, and automated compliance reporting. Create privacy dashboard for user control.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -711,7 +711,7 @@
             "description": "Create automated data retention policies and secure data lifecycle management",
             "dependencies": [],
             "details": "Implement DataRetentionService with configurable retention periods, automatic data archival, and secure deletion workflows. Create data lifecycle policies: active data management, archival triggers, and purge schedules. Implement secure data wiping using cryptographic erasure and multi-pass overwriting. Add retention policy UI with user-configurable settings, retention notices, and data expiration warnings. Create audit trails for data lifecycle events and compliance reporting for retention policies.",
-            "status": "pending",
+            "status": "in-progress",
             "testStrategy": ""
           },
           {
@@ -767,7 +767,7 @@
     ],
     "metadata": {
       "created": "2025-07-06T01:29:26.245Z",
-      "updated": "2025-07-20T10:28:45.612Z",
+      "updated": "2025-07-21T11:59:22.881Z",
       "description": "Tasks for master context"
     }
   }
