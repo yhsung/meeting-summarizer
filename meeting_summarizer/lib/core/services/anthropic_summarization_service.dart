@@ -53,9 +53,9 @@ class AnthropicSummarizationService implements AISummarizationServiceInterface {
 
     try {
       if (_config.apiKey?.isEmpty ?? true) {
-        throw SummarizationExceptions.invalidConfiguration(
-          ['API key cannot be empty'],
-        );
+        throw SummarizationExceptions.invalidConfiguration([
+          'API key cannot be empty',
+        ]);
       }
 
       // Test connection with a simple request
@@ -112,9 +112,9 @@ class AnthropicSummarizationService implements AISummarizationServiceInterface {
     }
 
     if (transcriptionText.trim().isEmpty) {
-      throw SummarizationExceptions.invalidConfiguration(
-        ['Text is required for summarization'],
-      );
+      throw SummarizationExceptions.invalidConfiguration([
+        'Text is required for summarization',
+      ]);
     }
 
     try {
@@ -161,6 +161,12 @@ Please provide your analysis in a clear, well-structured format that focuses on 
         return 'Create structured meeting notes with topics, discussions, decisions, and action items.';
       case SummaryType.keyHighlights:
         return 'Extract and highlight the most important points and insights from the discussion.';
+      case SummaryType.topical:
+        return 'Create a topic-based summary organizing the content by main discussion themes and subjects.';
+      case SummaryType.speakerFocused:
+        return 'Create a summary organized by speaker contributions and individual perspectives.';
+      case SummaryType.custom:
+        return 'Create a custom-formatted summary according to specific requirements.';
     }
   }
 
@@ -208,10 +214,10 @@ Please provide your analysis in a clear, well-structured format that focuses on 
             const Duration(minutes: 1),
           );
         case 400:
-          throw SummarizationExceptions.invalidConfiguration(
+          throw SummarizationExceptions.invalidConfiguration([
             'Invalid request to Anthropic API',
-            ['Check configuration parameters'],
-          );
+            'Check configuration parameters',
+          ]);
         default:
           throw SummarizationExceptions.networkError(
             'Network error: ${e.message}',
@@ -264,16 +270,21 @@ Please provide your analysis in a clear, well-structured format that focuses on 
         confidenceScore: confidence,
         wordCount: wordCount,
         characterCount: summaryText.length,
+        processingTimeMs: 0,
         aiModel: 'claude-3-5-sonnet-20241022',
         language: 'en',
         createdAt: DateTime.now(),
         sourceTranscriptionId: '',
         actionItems: [],
         metadata: SummarizationMetadata(
-          provider: 'anthropic',
-          processingTime: 0,
+          totalTokens: 0,
+          promptTokens: 0,
+          completionTokens: 0,
           modelVersion: 'claude-3-5-sonnet-20241022',
-          requestId: sessionId ?? _generateId(),
+          additionalData: {
+            'provider': 'anthropic',
+            'requestId': sessionId ?? _generateId(),
+          },
         ),
       );
     } catch (e) {
@@ -393,6 +404,99 @@ Please provide your analysis in a clear, well-structured format that focuses on 
       results[config.summaryType.toString()] = result;
     }
     return results;
+  }
+
+  @override
+  Future<ConfigurationValidationResult> validateConfiguration(
+    SummarizationConfiguration configuration,
+  ) async {
+    final errors = <String>[];
+    final warnings = <String>[];
+
+    if (_config.apiKey?.isEmpty ?? true) {
+      errors.add('API key is required');
+    }
+
+    if (configuration.summaryType == SummaryType.custom) {
+      warnings.add('Custom summary types may have unpredictable results');
+    }
+
+    return ConfigurationValidationResult(
+      isValid: errors.isEmpty,
+      errors: errors,
+      warnings: warnings,
+    );
+  }
+
+  @override
+  ServiceCapabilities get capabilities {
+    return const ServiceCapabilities(
+      supportedLanguages: [
+        'en',
+        'es',
+        'fr',
+        'de',
+        'it',
+        'pt',
+        'nl',
+        'pl',
+        'ja',
+      ],
+      supportedSummaryTypes: [
+        'brief',
+        'detailed',
+        'bulletPoints',
+        'actionItems',
+        'executive',
+        'meetingNotes',
+        'keyHighlights',
+        'topical',
+        'speakerFocused',
+        'custom',
+      ],
+      maxInputTokens: 200000,
+      maxOutputTokens: 4096,
+      supportsStreaming: true,
+      supportsActionItems: true,
+      supportsDecisionExtraction: true,
+      supportsTopicExtraction: true,
+      supportsBatchProcessing: true,
+      modelLimitations: {
+        'rateLimit': '50 requests per minute',
+        'contextWindow': '200k tokens',
+        'outputLimit': '4096 tokens',
+      },
+    );
+  }
+
+  @override
+  Future<bool> isReady() async {
+    return _isInitialized;
+  }
+
+  @override
+  Future<ServiceHealthStatus> getHealthStatus() async {
+    try {
+      if (!_isInitialized) {
+        return ServiceHealthStatus.unhealthy(
+          status: 'not_initialized',
+          issues: ['Service has not been initialized'],
+        );
+      }
+
+      // Test connection
+      await _testConnection();
+      return ServiceHealthStatus.healthy();
+    } catch (e) {
+      return ServiceHealthStatus.unhealthy(
+        status: 'connection_failed',
+        issues: ['Failed to connect to Anthropic API: $e'],
+        metrics: {
+          'lastError': e.toString(),
+          'timestamp': DateTime.now().toIso8601String(),
+        },
+      );
+    }
   }
 
   @override
