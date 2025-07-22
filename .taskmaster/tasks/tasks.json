@@ -711,7 +711,7 @@
             "description": "Create automated data retention policies and secure data lifecycle management",
             "dependencies": [],
             "details": "Implement DataRetentionService with configurable retention periods, automatic data archival, and secure deletion workflows. Create data lifecycle policies: active data management, archival triggers, and purge schedules. Implement secure data wiping using cryptographic erasure and multi-pass overwriting. Add retention policy UI with user-configurable settings, retention notices, and data expiration warnings. Create audit trails for data lifecycle events and compliance reporting for retention policies.",
-            "status": "in-progress",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -720,7 +720,7 @@
             "description": "Create complete user rights management system with access controls and permission frameworks",
             "dependencies": [],
             "details": "Implement UserRightsService with role-based access control, permission inheritance, and fine-grained access management. Create user rights dashboard with data access history, permission modifications, and rights exercise tracking. Implement access request workflows, approval processes, and rights fulfillment automation. Add user identity verification, rights delegation mechanisms, and guardian/parental controls. Create comprehensive audit logging for all rights-related activities and automated compliance verification.",
-            "status": "pending",
+            "status": "in-progress",
             "testStrategy": ""
           }
         ]
@@ -767,7 +767,7 @@
     ],
     "metadata": {
       "created": "2025-07-06T01:29:26.245Z",
-      "updated": "2025-07-21T11:59:22.881Z",
+      "updated": "2025-07-21T15:14:37.599Z",
       "description": "Tasks for master context"
     }
   }

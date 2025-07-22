@@ -837,10 +837,7 @@ class _MockDataItem {
   final String id;
   final DateTime createdAt;
 
-  const _MockDataItem({
-    required this.id,
-    required this.createdAt,
-  });
+  const _MockDataItem({required this.id, required this.createdAt});
 }
 
 /// Data retention exception

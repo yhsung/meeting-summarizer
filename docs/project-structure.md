@@ -50,6 +50,8 @@ project/                   # absolute path /Volumes/Samsung970EVOPlus/dev-projec
 │   │   │   │   ├── database_migrations.dart       # Database migration system with backup/restore
 │   │   │   │   ├── file_metadata_dao.dart         # SQLite data access for file metadata with FTS5 search
 │   │   │   │   └── README.md                      # Database architecture documentation
+│   │   │   ├── dao/
+│   │   │   │   └── user_rights_dao.dart           # User rights database operations with comprehensive CRUD and query support
 │   │   │   ├── interfaces/
 │   │   │   │   ├── storage_organization_interface.dart # Storage organization service interface
 │   │   │   │   ├── export_service_interface.dart      # Export service interface with multi-format support
@@ -60,7 +62,8 @@ project/                   # absolute path /Volumes/Samsung970EVOPlus/dev-projec
 │   │   │   │   ├── recording_state.dart   # Recording state management
 │   │   │   │   ├── summary_type.dart      # AI summary type definitions (brief, detailed, executive, etc.)
 │   │   │   │   ├── export_format.dart     # Export format definitions (JSON, CSV, XML, PDF, HTML, ZIP, TAR)
-│   │   │   │   └── compression_level.dart # Compression level options for export operations
+│   │   │   │   ├── compression_level.dart # Compression level options for export operations
+│   │   │   │   └── user_rights_enums.dart # User rights system enums (status, actions, roles, permissions)
 │   │   │   ├── models/
 │   │   │   │   ├── audio_configuration.dart  # Enhanced audio config with serialization
 │   │   │   │   ├── recording_session.dart     # Recording session management
@@ -78,13 +81,20 @@ project/                   # absolute path /Volumes/Samsung970EVOPlus/dev-projec
 │   │   │   │   │   ├── file_category.dart     # File categorization system with 8 categories
 │   │   │   │   │   ├── file_metadata.dart     # Comprehensive file metadata with JSON serialization
 │   │   │   │   │   └── storage_stats.dart     # Storage analytics and statistics
-│   │   │   │   └── cloud_sync/
-│   │   │   │       ├── cloud_provider.dart    # Cloud provider enums and configuration
-│   │   │   │       ├── sync_status.dart       # Synchronization status tracking
-│   │   │   │       ├── sync_conflict.dart     # Conflict detection and resolution models
-│   │   │   │       ├── sync_operation.dart    # Sync operation tracking with progress
-│   │   │   │       ├── file_change.dart       # File change detection with delta sync support
-│   │   │   │       └── file_version.dart      # File versioning and history models
+│   │   │   │   ├── cloud_sync/
+│   │   │   │   │   ├── cloud_provider.dart    # Cloud provider enums and configuration
+│   │   │   │   │   ├── sync_status.dart       # Synchronization status tracking
+│   │   │   │   │   ├── sync_conflict.dart     # Conflict detection and resolution models
+│   │   │   │   │   ├── sync_operation.dart    # Sync operation tracking with progress
+│   │   │   │   │   ├── file_change.dart       # File change detection with delta sync support
+│   │   │   │   │   └── file_version.dart      # File versioning and history models
+│   │   │   │   └── user_rights/
+│   │   │   │       ├── user_profile.dart      # Comprehensive user profile with roles and guardian relationships
+│   │   │   │       ├── user_role.dart         # Hierarchical role system with permission inheritance
+│   │   │   │       ├── access_permission.dart # Fine-grained permission model with conditions and expiration
+│   │   │   │       ├── rights_delegation.dart # Rights delegation between users with approval workflows
+│   │   │   │       ├── access_audit_log.dart  # Comprehensive audit trail with risk assessment
+│   │   │   │       └── user_rights_service_event.dart # Event system for real-time user rights monitoring
 │   │   │   └── services/
 │   │   │       ├── audio_service_interface.dart           # Service interface definition
 │   │   │       ├── audio_format_manager.dart              # Platform-aware format selection
@@ -127,7 +137,10 @@ project/                   # absolute path /Volumes/Samsung970EVOPlus/dev-projec
 │   │   │       │   └── dropbox_provider.dart              # Dropbox API v2 integration
 │   │   │       ├── transcription_service_factory.dart     # Transcription service factory with web platform exclusions
 │   │   │       ├── local_whisper_service.dart             # Local Whisper transcription (mobile/desktop only)
-│   │   │       └── local_whisper_service_stub.dart        # Web platform stub for local Whisper
+│   │   │       ├── local_whisper_service_stub.dart        # Web platform stub for local Whisper
+│   │   │       ├── enhanced_user_rights_service.dart      # Comprehensive user rights management with RBAC and GDPR integration
+│   │   │       ├── permission_inheritance_manager.dart    # Hierarchical permission inheritance with role-based access control
+│   │   │       └── fine_grained_access_manager.dart       # Fine-grained access validation with conditions and audit logging
 │   │   ├── features/
 │   │   │   ├── audio_recording/
 │   │   │   │   ├── data/
@@ -154,6 +167,9 @@ project/                   # absolute path /Volumes/Samsung970EVOPlus/dev-projec
 │   │   │   │           ├── transcription_progress.dart     # Progress tracking widget
 │   │   │   │           ├── speaker_timeline.dart           # Speaker diarization timeline
 │   │   │   │           └── transcription_settings.dart     # Transcription configuration
+│   │   │   ├── user_rights/
+│   │   │   │   └── widgets/
+│   │   │   │       └── user_rights_dashboard.dart          # Comprehensive user rights dashboard with permissions, history, delegations
 │   │   │   └── summary/
 │   │   │       └── presentation/
 │   │   │           ├── screens/
