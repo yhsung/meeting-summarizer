@@ -44,7 +44,7 @@ dependencies:
   flutter_secure_storage: ^9.2.2
   shared_preferences: ^2.2.3
   record: ^6.0.0
-  uuid: ^4.5.1
+  uuid: ^3.0.7
   path: ^1.9.0
   connectivity_plus: ^6.0.5
   
@@ -79,6 +79,12 @@ dependencies:
   
   # Secure API communication dependencies
   dio: ^5.7.0
+  
+  # Platform-specific dependencies for Task 10
+  flutter_local_notifications: ^17.2.3 # Enhanced notifications
+  home_widget: ^0.6.0                 # Android home screen widgets
+  system_tray: ^2.0.3                 # Windows system tray integration
+  battery_plus: ^6.0.3                # Battery information and optimization
 
 dev_dependencies:
   flutter_test:
@@ -98,8 +104,13 @@ dev_dependencies:
   # Database testing dependencies
   sqflite_common_ffi: ^2.3.3
   
-  # Mocking dependencies
-  mockito: ^5.4.4
+  # Comprehensive testing dependencies
+  mockito: ^5.4.4                     # Mocking framework for unit tests
+  golden_toolkit: ^0.15.0             # Golden file regression testing
+  faker: ^2.1.0                       # Test data generation
+  very_good_analysis: ^6.0.0          # Enhanced static analysis
+  integration_test:                   # Integration testing framework
+    sdk: flutter
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
