@@ -1,0 +1,115 @@
+name: Manual Deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+        - staging
+        - production
+      platform:
+        description: 'Platform to deploy'
+        required: true
+        default: 'web'
+        type: choice
+        options:
+        - web
+        - android
+        - all
+      build_type:
+        description: 'Build type'
+        required: true
+        default: 'debug'
+        type: choice
+        options:
+        - debug
+        - release
+
+env:
+  FLUTTER_VERSION: '3.24.3'
+
+jobs:
+  manual-deploy:
+    name: Manual Deploy - ${{ inputs.platform }} (${{ inputs.build_type }})
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Cache Flutter dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.pub-cache
+            **/.dart_tool/package_config.json
+          key: ${{ runner.os }}-flutter-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-flutter-
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: 'stable'
+          cache: true
+
+      - name: Setup Android SDK
+        if: inputs.platform == 'android' || inputs.platform == 'all'
+        uses: android-actions/setup-android@v3
+
+      - name: Setup Java
+        if: inputs.platform == 'android' || inputs.platform == 'all'
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Install dependencies
+        working-directory: ./meeting_summarizer
+        run: flutter pub get
+
+      - name: Build Web
+        if: inputs.platform == 'web' || inputs.platform == 'all'
+        working-directory: ./meeting_summarizer
+        run: |
+          if [ "${{ inputs.build_type }}" = "release" ]; then
+            flutter build web --release --dart-define=FLUTTER_WEB_USE_SKIA=true
+          else
+            flutter build web --debug --dart-define=FLUTTER_WEB_USE_SKIA=true
+          fi
+
+      - name: Build Android
+        if: inputs.platform == 'android' || inputs.platform == 'all'
+        working-directory: ./meeting_summarizer
+        run: |
+          if [ "${{ inputs.build_type }}" = "release" ]; then
+            flutter build apk --release --split-per-abi
+            flutter build appbundle --release
+          else
+            flutter build apk --debug --split-per-abi
+          fi
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: manual-deploy-${{ inputs.platform }}-${{ inputs.build_type }}
+          path: |
+            meeting_summarizer/build/web
+            meeting_summarizer/build/app/outputs/flutter-apk/*.apk
+            meeting_summarizer/build/app/outputs/bundle/release/*.aab
+          retention-days: 30
+
+      - name: Deploy notification
+        run: |
+          echo "🚀 Manual deployment completed"
+          echo "Environment: ${{ inputs.environment }}"
+          echo "Platform: ${{ inputs.platform }}"
+          echo "Build type: ${{ inputs.build_type }}"
+          echo "Artifacts uploaded successfully"

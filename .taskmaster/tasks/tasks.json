@@ -852,7 +852,7 @@
               "11.1"
             ],
             "details": "Configure golden_toolkit ^0.15.0 for golden file testing. Create widget test structure and utilities. Implement golden file tests for key UI components and screens. Setup device configurations for different screen sizes. Create golden file generation and comparison workflows. Add visual regression testing for critical UI elements.",
-            "status": "in-progress",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -863,7 +863,7 @@
               "11.2"
             ],
             "details": "Configure integration_test package for end-to-end workflows. Create integration test structure and utilities. Implement tests for complete user journeys: recording -> transcription -> summarization. Setup test data and fixtures. Create integration tests for cloud sync and offline functionality. Configure test execution for different platforms.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -874,7 +874,7 @@
               "11.1"
             ],
             "details": "Create MockAudioRecordingService with simulated recording behavior. Implement MockWhisperApiService with predictable transcription responses. Build MockDatabaseHelper with in-memory database simulation. Develop MockCloudSyncService with simulated sync operations. Add mock data generators and test fixtures. Ensure mocks accurately simulate real service behavior and error conditions.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -886,7 +886,7 @@
               "11.4"
             ],
             "details": "Create .github/workflows/ci.yml with matrix strategy for multiple Flutter versions and platforms. Configure automated testing pipeline running unit, widget, and integration tests. Setup build verification for Android, iOS, macOS, Windows, and Web platforms. Add code quality checks with dart analyze and dart format. Configure artifact generation and deployment workflows. Setup environment variable management for API keys in testing.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -918,7 +918,7 @@
     ],
     "metadata": {
       "created": "2025-07-06T01:29:26.245Z",
-      "updated": "2025-07-23T11:42:26.132Z",
+      "updated": "2025-07-24T14:24:33.336Z",
       "description": "Tasks for master context"
     }
   }
