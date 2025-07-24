@@ -409,7 +409,7 @@ class MockAudioRecordingService implements AudioServiceInterface {
   double _calculateMockFileSize(Duration duration, AudioConfiguration config) {
     // Calculate approximate file size based on audio configuration
     final durationSeconds = duration.inMilliseconds / 1000.0;
-    final bitRate = config.bitRate ?? 128000; // Default to 128kbps
+    final bitRate = config.bitRate; // bitRate is non-null in AudioConfiguration
     final bytesPerSecond = bitRate / 8.0;
     return durationSeconds * bytesPerSecond;
   }

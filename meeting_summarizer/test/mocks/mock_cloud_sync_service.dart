@@ -6,8 +6,7 @@ import 'package:meeting_summarizer/core/interfaces/cloud_sync_interface.dart';
 import 'package:meeting_summarizer/core/models/cloud_sync/cloud_provider.dart';
 import 'package:meeting_summarizer/core/models/cloud_sync/sync_status.dart';
 import 'package:meeting_summarizer/core/models/cloud_sync/sync_operation.dart';
-import 'package:meeting_summarizer/core/models/cloud_sync/sync_conflict.dart'
-    as conflict_models;
+import 'package:meeting_summarizer/core/models/cloud_sync/sync_conflict.dart' as models;
 
 /// Comprehensive mock cloud sync service for testing
 ///
@@ -27,8 +26,11 @@ class MockCloudSyncService implements CloudSyncInterface {
   // Mock state
   final Set<CloudProvider> _enabledProviders = {};
   final Map<String, SyncOperation> _activeSyncOperations = {};
-  final List<conflict_models.SyncConflict> _pendingConflicts = [];
-  SyncStatus _globalSyncStatus = SyncStatus.idle;
+  final List<models.SyncConflict> _pendingConflicts = [];
+  final Map<CloudProvider, SyncStatus> _providerSyncStatus = {};
+  bool _isAutoSyncEnabled = true;
+  Duration _syncInterval = const Duration(minutes: 15);
+  bool _isSyncPaused = false;
   int _operationCounter = 0;
 
   // Mock statistics
@@ -37,24 +39,6 @@ class MockCloudSyncService implements CloudSyncInterface {
   int _successfulOperations = 0;
   int _failedOperations = 0;
   int _conflictsResolved = 0;
-
-  // Streams
-  final StreamController<SyncStatus> _syncStatusController =
-      StreamController<SyncStatus>.broadcast();
-  final StreamController<SyncOperation> _operationController =
-      StreamController<SyncOperation>.broadcast();
-  final StreamController<conflict_models.SyncConflict> _conflictController =
-      StreamController<conflict_models.SyncConflict>.broadcast();
-
-  @override
-  Stream<SyncStatus> get syncStatusStream => _syncStatusController.stream;
-
-  @override
-  Stream<SyncOperation> get operationStream => _operationController.stream;
-
-  @override
-  Stream<conflict_models.SyncConflict> get conflictStream =>
-      _conflictController.stream;
 
   // Mock configuration methods
 
@@ -85,10 +69,12 @@ class MockCloudSyncService implements CloudSyncInterface {
 
   /// Set mock progress values for testing progress tracking
   void setMockProgress({double? upload, double? download}) {
-    if (upload != null)
+    if (upload != null) {
       _mockUploadProgress = math.max(0.0, math.min(1.0, upload));
-    if (download != null)
+    }
+    if (download != null) {
       _mockDownloadProgress = math.max(0.0, math.min(1.0, download));
+    }
   }
 
   /// Reset all mock state to defaults
@@ -103,13 +89,16 @@ class MockCloudSyncService implements CloudSyncInterface {
     _enabledProviders.clear();
     _activeSyncOperations.clear();
     _pendingConflicts.clear();
-    _globalSyncStatus = SyncStatus.idle;
+    _providerSyncStatus.clear();
     _operationCounter = 0;
     _totalUploads = 0;
     _totalDownloads = 0;
     _successfulOperations = 0;
     _failedOperations = 0;
     _conflictsResolved = 0;
+    _isAutoSyncEnabled = true;
+    _syncInterval = const Duration(minutes: 15);
+    _isSyncPaused = false;
   }
 
   @override
@@ -120,39 +109,44 @@ class MockCloudSyncService implements CloudSyncInterface {
 
     await Future.delayed(_mockOperationDelay);
     _isInitialized = true;
-    _updateSyncStatus(SyncStatus.idle);
     log('MockCloudSyncService: Initialized successfully');
   }
 
-  @override
+  // Dispose method is not part of the interface
   Future<void> dispose() async {
     _isInitialized = false;
-    await _syncStatusController.close();
-    await _operationController.close();
-    await _conflictController.close();
     log('MockCloudSyncService: Disposed');
   }
 
   @override
-  Future<void> enableProvider(CloudProvider provider) async {
+  Future<List<CloudProvider>> getAvailableProviders() async {
     await _simulateOperation();
+    return CloudProvider.values;
+  }
 
+  @override
+  Future<bool> connectProvider(
+    CloudProvider provider,
+    Map<String, String> credentials,
+  ) async {
+    await _simulateOperation();
     _enabledProviders.add(provider);
-    log('MockCloudSyncService: Enabled provider $provider');
+    _providerSyncStatus[provider] = SyncStatus(
+      id: 'status_${provider.id}',
+      state: SyncState.idle,
+      provider: provider,
+      lastSync: DateTime.now(),
+    );
+    log('MockCloudSyncService: Connected to provider $provider');
+    return true;
   }
 
   @override
-  Future<void> disableProvider(CloudProvider provider) async {
+  Future<void> disconnectProvider(CloudProvider provider) async {
     await _simulateOperation();
-
     _enabledProviders.remove(provider);
-    log('MockCloudSyncService: Disabled provider $provider');
-  }
-
-  @override
-  Future<List<CloudProvider>> getEnabledProviders() async {
-    await _simulateOperation();
-    return _enabledProviders.toList();
+    _providerSyncStatus.remove(provider);
+    log('MockCloudSyncService: Disconnected from provider $provider');
   }
 
   @override
@@ -164,9 +158,11 @@ class MockCloudSyncService implements CloudSyncInterface {
 
   @override
   Future<SyncOperation> uploadFile({
-    required String localPath,
-    required String remotePath,
-    CloudProvider? preferredProvider,
+    required String localFilePath,
+    required String remoteFilePath,
+    required CloudProvider provider,
+    bool encryptBeforeUpload = true,
+    Map<String, dynamic> metadata = const {},
   }) async {
     await _simulateOperation();
 
@@ -176,32 +172,33 @@ class MockCloudSyncService implements CloudSyncInterface {
     final operation = SyncOperation(
       id: operationId,
       type: SyncOperationType.upload,
-      localPath: localPath,
-      remotePath: remotePath,
-      provider: preferredProvider ?? _enabledProviders.first,
-      status: SyncOperationStatus.inProgress,
-      progress: 0.0,
-      startTime: DateTime.now(),
+      localFilePath: localFilePath,
+      remoteFilePath: remoteFilePath,
+      provider: provider,
+      status: SyncOperationStatus.running,
+      createdAt: DateTime.now(),
+      progressPercentage: 0.0,
+      metadata: metadata,
     );
 
     _activeSyncOperations[operationId] = operation;
-    _operationController.add(operation);
-    _updateSyncStatus(SyncStatus.syncing);
+    _updateProviderSyncStatus(provider, SyncState.syncing);
 
     // Simulate upload progress
     _simulateProgressUpdate(operation, _mockUploadProgress);
 
     log(
-      'MockCloudSyncService: Started upload $operationId: $localPath -> $remotePath',
+      'MockCloudSyncService: Started upload $operationId: $localFilePath -> $remoteFilePath',
     );
     return operation;
   }
 
   @override
   Future<SyncOperation> downloadFile({
-    required String remotePath,
-    required String localPath,
-    CloudProvider? provider,
+    required String remoteFilePath,
+    required String localFilePath,
+    required CloudProvider provider,
+    bool decryptAfterDownload = true,
   }) async {
     await _simulateOperation();
 
@@ -211,85 +208,110 @@ class MockCloudSyncService implements CloudSyncInterface {
     final operation = SyncOperation(
       id: operationId,
       type: SyncOperationType.download,
-      localPath: localPath,
-      remotePath: remotePath,
-      provider: provider ?? _enabledProviders.first,
-      status: SyncOperationStatus.inProgress,
-      progress: 0.0,
-      startTime: DateTime.now(),
+      localFilePath: localFilePath,
+      remoteFilePath: remoteFilePath,
+      provider: provider,
+      status: SyncOperationStatus.running,
+      createdAt: DateTime.now(),
+      progressPercentage: 0.0,
     );
 
     _activeSyncOperations[operationId] = operation;
-    _operationController.add(operation);
-    _updateSyncStatus(SyncStatus.syncing);
+    _updateProviderSyncStatus(provider, SyncState.syncing);
 
     // Simulate download progress
     _simulateProgressUpdate(operation, _mockDownloadProgress);
 
     log(
-      'MockCloudSyncService: Started download $operationId: $remotePath -> $localPath',
+      'MockCloudSyncService: Started download $operationId: $remoteFilePath -> $localFilePath',
     );
     return operation;
   }
 
   @override
-  Future<void> syncAll() async {
+  Future<List<SyncOperation>> syncAll({
+    CloudProvider? provider,
+    SyncDirection direction = SyncDirection.bidirectional,
+  }) async {
     await _simulateOperation();
 
-    _updateSyncStatus(SyncStatus.syncing);
+    final List<SyncOperation> operations = [];
+    final providersToSync = provider != null ? [provider] : _enabledProviders.toList();
 
-    // Simulate syncing multiple files
-    for (int i = 0; i < 3; i++) {
-      await uploadFile(
-        localPath: '/mock/local/file_$i.txt',
-        remotePath: '/mock/remote/file_$i.txt',
-      );
+    for (final syncProvider in providersToSync) {
+      _updateProviderSyncStatus(syncProvider, SyncState.syncing);
 
-      await Future.delayed(Duration(milliseconds: 100));
+      // Simulate syncing multiple files
+      for (int i = 0; i < 3; i++) {
+        final operation = await uploadFile(
+          localFilePath: '/mock/local/file_$i.txt',
+          remoteFilePath: '/mock/remote/file_$i.txt',
+          provider: syncProvider,
+        );
+        operations.add(operation);
+
+        await Future.delayed(Duration(milliseconds: 100));
+      }
+
+      _updateProviderSyncStatus(syncProvider, SyncState.completed);
     }
 
-    _updateSyncStatus(SyncStatus.completed);
     log('MockCloudSyncService: Completed sync all');
+    return operations;
   }
 
   @override
-  Future<void> pauseSync() async {
+  Future<SyncStatus?> getFileSyncStatus(String filePath) async {
     await _simulateOperation();
-
-    _updateSyncStatus(SyncStatus.paused);
-
-    // Pause all active operations
-    for (final operation in _activeSyncOperations.values) {
-      if (operation.status == SyncOperationStatus.inProgress) {
-        final pausedOperation = operation.copyWith(
-          status: SyncOperationStatus.paused,
-        );
-        _activeSyncOperations[operation.id] = pausedOperation;
-        _operationController.add(pausedOperation);
-      }
+    // Mock implementation - return a status for the file if it exists in operations
+    final operation = _activeSyncOperations.values
+        .where((op) => op.localFilePath == filePath || op.remoteFilePath == filePath)
+        .firstOrNull;
+    
+    if (operation != null) {
+      return SyncStatus(
+        id: 'file_${filePath.hashCode}',
+        state: _mapOperationStatusToSyncState(operation.status),
+        provider: operation.provider,
+        lastSync: operation.startedAt ?? operation.createdAt,
+        progressPercentage: operation.progressPercentage,
+      );
     }
-
-    log('MockCloudSyncService: Paused sync');
+    return null;
   }
 
   @override
-  Future<void> resumeSync() async {
+  Future<Map<CloudProvider, SyncStatus>> getSyncStatus() async {
+    await _simulateOperation();
+    return Map.from(_providerSyncStatus);
+  }
+
+  @override
+  Future<bool> resolveConflict(
+    models.SyncConflict conflict,
+    ConflictResolution resolution,
+  ) async {
     await _simulateOperation();
 
-    _updateSyncStatus(SyncStatus.syncing);
-
-    // Resume all paused operations
-    for (final operation in _activeSyncOperations.values) {
-      if (operation.status == SyncOperationStatus.paused) {
-        final resumedOperation = operation.copyWith(
-          status: SyncOperationStatus.inProgress,
-        );
-        _activeSyncOperations[operation.id] = resumedOperation;
-        _operationController.add(resumedOperation);
-      }
+    final index = _pendingConflicts.indexWhere((c) => c.id == conflict.id);
+    if (index != -1) {
+      final resolvedConflict = _pendingConflicts[index].copyWith(
+        isResolved: true,
+        resolution: models.ConflictResolution.values.firstWhere((r) => r.name == resolution.name),
+        resolvedAt: DateTime.now(),
+      );
+      _pendingConflicts[index] = resolvedConflict;
+      _conflictsResolved++;
+      log('MockCloudSyncService: Resolved conflict ${conflict.id} with $resolution');
+      return true;
     }
+    return false;
+  }
 
-    log('MockCloudSyncService: Resumed sync');
+  @override
+  Future<List<models.SyncConflict>> getPendingConflicts() async {
+    await _simulateOperation();
+    return _pendingConflicts.where((conflict) => !conflict.isResolved).toList();
   }
 
   @override
@@ -300,70 +322,161 @@ class MockCloudSyncService implements CloudSyncInterface {
     if (operation != null) {
       final cancelledOperation = operation.copyWith(
         status: SyncOperationStatus.cancelled,
-        endTime: DateTime.now(),
+        completedAt: DateTime.now(),
       );
       _activeSyncOperations[operationId] = cancelledOperation;
-      _operationController.add(cancelledOperation);
 
       log('MockCloudSyncService: Cancelled operation $operationId');
     }
   }
 
   @override
-  Future<SyncStatus> getSyncStatus() async {
+  Future<List<SyncOperation>> getSyncHistory({
+    CloudProvider? provider,
+    DateTime? since,
+    int limit = 100,
+  }) async {
     await _simulateOperation();
-    return _globalSyncStatus;
+    var operations = _activeSyncOperations.values.toList();
+    
+    if (provider != null) {
+      operations = operations.where((op) => op.provider == provider).toList();
+    }
+    
+    if (since != null) {
+      operations = operations.where((op) => op.createdAt.isAfter(since)).toList();
+    }
+    
+    operations.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    
+    return operations.take(limit).toList();
   }
 
   @override
-  Future<List<SyncOperation>> getActiveSyncOperations() async {
+  Future<List<models.SyncConflict>> checkForConflicts({
+    CloudProvider? provider,
+    String? filePath,
+  }) async {
     await _simulateOperation();
-    return _activeSyncOperations.values
-        .where((op) => op.status == SyncOperationStatus.inProgress)
-        .toList();
+    var conflicts = _pendingConflicts.where((conflict) => !conflict.isResolved);
+    
+    if (provider != null) {
+      conflicts = conflicts.where((conflict) => conflict.provider == provider);
+    }
+    
+    if (filePath != null) {
+      conflicts = conflicts.where((conflict) => conflict.filePath == filePath);
+    }
+    
+    return conflicts.toList();
   }
 
   @override
-  Future<List<conflict_models.SyncConflict>> getPendingConflicts() async {
+  Future<CloudStorageQuota> getStorageQuota(CloudProvider provider) async {
     await _simulateOperation();
-    return _pendingConflicts.toList();
+    
+    // Mock storage quota data
+    final limits = provider.getStorageLimits();
+    final random = math.Random();
+    final totalBytes = limits.freeStorageGB * 1024 * 1024 * 1024;
+    final usedBytes = (totalBytes * (0.3 + random.nextDouble() * 0.4)).round(); // 30-70% used
+    
+    return CloudStorageQuota(
+      totalBytes: totalBytes,
+      usedBytes: usedBytes,
+      availableBytes: totalBytes - usedBytes,
+      provider: provider,
+    );
   }
 
   @override
-  Future<void> resolveConflict(
-    String conflictId,
-    conflict_models.ConflictResolution resolution,
-  ) async {
+  Future<void> cleanupCache() async {
     await _simulateOperation();
-
-    _pendingConflicts.removeWhere((conflict) => conflict.id == conflictId);
-    _conflictsResolved++;
-
-    log('MockCloudSyncService: Resolved conflict $conflictId with $resolution');
+    log('MockCloudSyncService: Cache cleaned up');
   }
 
   @override
-  Future<bool> checkConnectivity() async {
+  Future<void> setAutoSyncEnabled(bool enabled) async {
     await _simulateOperation();
-    // Mock connectivity - fails if network issues are simulated
-    return !_shouldSimulateNetworkIssues;
+    _isAutoSyncEnabled = enabled;
+    log('MockCloudSyncService: Auto-sync ${enabled ? "enabled" : "disabled"}');
   }
 
   @override
-  Future<Map<String, dynamic>> getSyncStatistics() async {
+  Future<bool> isAutoSyncEnabled() async {
     await _simulateOperation();
+    return _isAutoSyncEnabled;
+  }
 
-    return {
-      'totalUploads': _totalUploads,
-      'totalDownloads': _totalDownloads,
-      'successfulOperations': _successfulOperations,
-      'failedOperations': _failedOperations,
-      'conflictsResolved': _conflictsResolved,
-      'enabledProviders': _enabledProviders.length,
-      'activeOperations': _activeSyncOperations.length,
-      'pendingConflicts': _pendingConflicts.length,
-      'currentStatus': _globalSyncStatus.toString(),
-    };
+  @override
+  Future<void> setSyncInterval(Duration interval) async {
+    await _simulateOperation();
+    _syncInterval = interval;
+    log('MockCloudSyncService: Sync interval set to ${interval.inMinutes} minutes');
+  }
+
+  @override
+  Future<Duration> getSyncInterval() async {
+    await _simulateOperation();
+    return _syncInterval;
+  }
+
+  @override
+  Future<void> pauseSync() async {
+    await _simulateOperation();
+    _isSyncPaused = true;
+
+    // Update all provider statuses to paused
+    for (final provider in _enabledProviders) {
+      _updateProviderSyncStatus(provider, SyncState.paused);
+    }
+
+    // Pause all active operations
+    for (final operation in _activeSyncOperations.values) {
+      if (operation.status == SyncOperationStatus.running) {
+        final pausedOperation = operation.copyWith(
+          status: SyncOperationStatus.paused,
+        );
+        _activeSyncOperations[operation.id] = pausedOperation;
+      }
+    }
+
+    log('MockCloudSyncService: Paused sync');
+  }
+
+  @override
+  Future<void> resumeSync() async {
+    await _simulateOperation();
+    _isSyncPaused = false;
+
+    // Update all provider statuses to syncing if they have active operations
+    for (final provider in _enabledProviders) {
+      final hasActiveOperations = _activeSyncOperations.values
+          .any((op) => op.provider == provider && op.status == SyncOperationStatus.paused);
+      if (hasActiveOperations) {
+        _updateProviderSyncStatus(provider, SyncState.syncing);
+      } else {
+        _updateProviderSyncStatus(provider, SyncState.idle);
+      }
+    }
+
+    // Resume all paused operations
+    for (final operation in _activeSyncOperations.values) {
+      if (operation.status == SyncOperationStatus.paused) {
+        final resumedOperation = operation.copyWith(
+          status: SyncOperationStatus.running,
+        );
+        _activeSyncOperations[operation.id] = resumedOperation;
+      }
+    }
+
+    log('MockCloudSyncService: Resumed sync');
+  }
+
+  @override
+  Future<bool> isSyncPaused() async {
+    await _simulateOperation();
+    return _isSyncPaused;
   }
 
   // Private helper methods
@@ -386,27 +499,52 @@ class MockCloudSyncService implements CloudSyncInterface {
     _successfulOperations++;
   }
 
-  void _updateSyncStatus(SyncStatus status) {
-    _globalSyncStatus = status;
-    _syncStatusController.add(status);
+  void _updateProviderSyncStatus(CloudProvider provider, SyncState state) {
+    final currentStatus = _providerSyncStatus[provider];
+    final updatedStatus = currentStatus?.copyWith(
+      state: state,
+      lastSync: state == SyncState.completed ? DateTime.now() : currentStatus.lastSync,
+    ) ?? SyncStatus(
+      id: 'status_${provider.id}',
+      state: state,
+      provider: provider,
+      lastSync: DateTime.now(),
+    );
+    
+    _providerSyncStatus[provider] = updatedStatus;
+  }
+
+  SyncState _mapOperationStatusToSyncState(SyncOperationStatus status) {
+    switch (status) {
+      case SyncOperationStatus.queued:
+        return SyncState.preparing;
+      case SyncOperationStatus.running:
+        return SyncState.syncing;
+      case SyncOperationStatus.completed:
+        return SyncState.completed;
+      case SyncOperationStatus.failed:
+        return SyncState.error;
+      case SyncOperationStatus.cancelled:
+        return SyncState.cancelled;
+      case SyncOperationStatus.paused:
+        return SyncState.paused;
+    }
   }
 
   void _simulateProgressUpdate(SyncOperation operation, double targetProgress) {
     // Simulate gradual progress updates
     Timer.periodic(Duration(milliseconds: 100), (timer) {
-      if (_activeSyncOperations[operation.id]?.status !=
-          SyncOperationStatus.inProgress) {
+      final currentOp = _activeSyncOperations[operation.id];
+      if (currentOp?.status != SyncOperationStatus.running) {
         timer.cancel();
         return;
       }
 
-      final currentProgress =
-          _activeSyncOperations[operation.id]?.progress ?? 0.0;
+      final currentProgress = currentOp?.progressPercentage ?? 0.0;
       final newProgress = math.min(targetProgress, currentProgress + 0.1);
 
-      final updatedOperation = operation.copyWith(progress: newProgress);
+      final updatedOperation = currentOp!.copyWith(progressPercentage: newProgress);
       _activeSyncOperations[operation.id] = updatedOperation;
-      _operationController.add(updatedOperation);
 
       // Complete operation when progress reaches target
       if (newProgress >= targetProgress) {
@@ -421,19 +559,18 @@ class MockCloudSyncService implements CloudSyncInterface {
     if (operation != null) {
       final completedOperation = operation.copyWith(
         status: SyncOperationStatus.completed,
-        progress: 1.0,
-        endTime: DateTime.now(),
+        progressPercentage: 1.0,
+        completedAt: DateTime.now(),
       );
       _activeSyncOperations[operationId] = completedOperation;
-      _operationController.add(completedOperation);
 
-      // Check if this was the last active operation
+      // Check if this was the last active operation for this provider
       final hasActiveOperations = _activeSyncOperations.values.any(
-        (op) => op.status == SyncOperationStatus.inProgress,
+        (op) => op.provider == operation.provider && op.status == SyncOperationStatus.running,
       );
 
       if (!hasActiveOperations) {
-        _updateSyncStatus(SyncStatus.completed);
+        _updateProviderSyncStatus(operation.provider, SyncState.completed);
       }
 
       // Simulate conflict generation if enabled
@@ -444,22 +581,33 @@ class MockCloudSyncService implements CloudSyncInterface {
   }
 
   void _generateMockConflict(SyncOperation operation) {
-    final conflict = conflict_models.SyncConflict(
+    final localVersion = models.FileVersion(
+      path: operation.localFilePath,
+      size: 1024,
+      modifiedAt: DateTime.now().subtract(Duration(hours: 1)),
+      checksum: 'mock_local_checksum',
+    );
+    
+    final remoteVersion = models.FileVersion(
+      path: operation.remoteFilePath,
+      size: 1150,
+      modifiedAt: DateTime.now(),
+      checksum: 'mock_remote_checksum',
+    );
+
+    final conflict = models.SyncConflict(
       id: 'conflict_${DateTime.now().millisecondsSinceEpoch}',
-      localPath: operation.localPath,
-      remotePath: operation.remotePath,
+      filePath: operation.localFilePath,
       provider: operation.provider,
-      conflictType: conflict_models.ConflictType.modificationConflict,
-      description: 'Mock conflict: File modified on both local and remote',
-      localModified: DateTime.now().subtract(Duration(hours: 1)),
-      remoteModified: DateTime.now(),
-      localFileSize: 1024,
-      remoteFileSize: 1150,
+      type: models.ConflictType.modifiedBoth,
+      localVersion: localVersion,
+      remoteVersion: remoteVersion,
       detectedAt: DateTime.now(),
+      severity: models.ConflictSeverity.medium,
+      description: 'Mock conflict: File modified on both local and remote',
     );
 
     _pendingConflicts.add(conflict);
-    _conflictController.add(conflict);
 
     log('MockCloudSyncService: Generated mock conflict ${conflict.id}');
   }
@@ -468,56 +616,65 @@ class MockCloudSyncService implements CloudSyncInterface {
   SyncOperation generateMockSyncOperation({
     String? id,
     SyncOperationType? type,
-    String? localPath,
-    String? remotePath,
+    String? localFilePath,
+    String? remoteFilePath,
     CloudProvider? provider,
     SyncOperationStatus? status,
-    double? progress,
+    double? progressPercentage,
   }) {
     final random = math.Random();
+    final now = DateTime.now();
 
     return SyncOperation(
       id: id ?? 'mock_op_${random.nextInt(10000)}',
       type: type ?? SyncOperationType.upload,
-      localPath: localPath ?? '/mock/local/file.txt',
-      remotePath: remotePath ?? '/mock/remote/file.txt',
+      localFilePath: localFilePath ?? '/mock/local/file.txt',
+      remoteFilePath: remoteFilePath ?? '/mock/remote/file.txt',
       provider: provider ?? CloudProvider.googleDrive,
       status: status ?? SyncOperationStatus.completed,
-      progress: progress ?? 1.0,
-      startTime: DateTime.now().subtract(Duration(minutes: random.nextInt(60))),
-      endTime: status == SyncOperationStatus.completed
-          ? DateTime.now().subtract(Duration(minutes: random.nextInt(30)))
+      createdAt: now.subtract(Duration(minutes: random.nextInt(60))),
+      progressPercentage: progressPercentage ?? 1.0,
+      startedAt: now.subtract(Duration(minutes: random.nextInt(45))),
+      completedAt: status == SyncOperationStatus.completed
+          ? now.subtract(Duration(minutes: random.nextInt(30)))
           : null,
     );
   }
 
   /// Generate mock conflict for testing
-  conflict_models.SyncConflict generateMockConflict({
+  models.SyncConflict generateMockConflict({
     String? id,
-    String? localPath,
-    String? remotePath,
+    String? filePath,
     CloudProvider? provider,
-    conflict_models.ConflictType? conflictType,
+    models.ConflictType? conflictType,
   }) {
     final random = math.Random();
+    final now = DateTime.now();
+    
+    final localVersion = models.FileVersion(
+      path: filePath ?? '/mock/local/conflict_file.txt',
+      size: random.nextInt(10000) + 1000,
+      modifiedAt: now.subtract(Duration(hours: random.nextInt(24))),
+      checksum: 'local_checksum_${random.nextInt(1000)}',
+    );
+    
+    final remoteVersion = models.FileVersion(
+      path: filePath ?? '/mock/remote/conflict_file.txt',
+      size: random.nextInt(10000) + 1000,
+      modifiedAt: now.subtract(Duration(hours: random.nextInt(24))),
+      checksum: 'remote_checksum_${random.nextInt(1000)}',
+    );
 
-    return conflict_models.SyncConflict(
+    return models.SyncConflict(
       id: id ?? 'mock_conflict_${random.nextInt(10000)}',
-      localPath: localPath ?? '/mock/local/conflict_file.txt',
-      remotePath: remotePath ?? '/mock/remote/conflict_file.txt',
-      provider: provider ?? CloudProvider.iCloud,
-      conflictType:
-          conflictType ?? conflict_models.ConflictType.modificationConflict,
+      filePath: filePath ?? '/mock/conflict_file.txt',
+      provider: provider ?? CloudProvider.googleDrive,
+      type: conflictType ?? models.ConflictType.modifiedBoth,
+      localVersion: localVersion,
+      remoteVersion: remoteVersion,
+      detectedAt: now,
+      severity: models.ConflictSeverity.medium,
       description: 'Mock conflict for testing',
-      localModified: DateTime.now().subtract(
-        Duration(hours: random.nextInt(24)),
-      ),
-      remoteModified: DateTime.now().subtract(
-        Duration(hours: random.nextInt(24)),
-      ),
-      localFileSize: random.nextInt(10000) + 1000,
-      remoteFileSize: random.nextInt(10000) + 1000,
-      detectedAt: DateTime.now(),
     );
   }
 
@@ -551,7 +708,9 @@ class MockCloudSyncService implements CloudSyncInterface {
       'enabledProviders': _enabledProviders.map((p) => p.toString()).toList(),
       'activeSyncOperations': _activeSyncOperations.length,
       'pendingConflicts': _pendingConflicts.length,
-      'globalSyncStatus': _globalSyncStatus.toString(),
+      'isAutoSyncEnabled': _isAutoSyncEnabled,
+      'syncInterval': _syncInterval.inMinutes,
+      'isSyncPaused': _isSyncPaused,
       'operationCounter': _operationCounter,
       'totalUploads': _totalUploads,
       'totalDownloads': _totalDownloads,

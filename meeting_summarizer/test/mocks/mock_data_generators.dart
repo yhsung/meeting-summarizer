@@ -18,7 +18,7 @@ import 'package:meeting_summarizer/core/models/cloud_sync/sync_conflict.dart'
 /// Provides realistic test data generation for all major models and scenarios
 /// used throughout the meeting summarizer application.
 class MockDataGenerators {
-  static final math.Random _random = math.Random();
+  static math.Random _random = math.Random();
 
   // Sample data collections for realistic generation
   static const List<String> _meetingTitles = [
@@ -94,7 +94,6 @@ class MockDataGenerators {
   /// Generate realistic audio configuration for testing
   static AudioConfiguration generateAudioConfiguration({
     AudioFormat? format,
-    int? bitRate,
     int? sampleRate,
     bool? enableNoiseReduction,
     bool? enableAutoGainControl,
@@ -103,7 +102,6 @@ class MockDataGenerators {
       format:
           format ??
           AudioFormat.values[_random.nextInt(AudioFormat.values.length)],
-      bitRate: bitRate ?? [128000, 192000, 256000, 320000][_random.nextInt(4)],
       sampleRate: sampleRate ?? [44100, 48000][_random.nextInt(2)],
       channels: _random.nextBool() ? 1 : 2, // mono or stereo
       enableNoiseReduction: enableNoiseReduction ?? _random.nextBool(),
@@ -147,7 +145,7 @@ class MockDataGenerators {
           sessionDuration.inMinutes * 1024 * 1024 * 0.5, // ~0.5MB per minute
       currentAmplitude: _random.nextDouble(),
       waveformData: generateWaveformData(points: 50),
-      endTime: state?.isCompleted == true ? now : null,
+      endTime: (state == RecordingState.stopped || state == RecordingState.error) ? now : null,
       errorMessage: errorMessage,
     );
   }
@@ -181,7 +179,7 @@ class MockDataGenerators {
       TranscriptionLanguage.spanish,
       TranscriptionLanguage.french,
       TranscriptionLanguage.german,
-      TranscriptionLanguage.chinese,
+      TranscriptionLanguage.chineseSimplified,
     ];
 
     return TranscriptionRequest(
@@ -336,27 +334,27 @@ class MockDataGenerators {
     return SyncOperation(
       id: id ?? 'sync_${now.millisecondsSinceEpoch}_${_random.nextInt(1000)}',
       type: operationType,
-      localPath: localPath ?? _filePaths[_random.nextInt(_filePaths.length)],
-      remotePath:
+      localFilePath: localPath ?? _filePaths[_random.nextInt(_filePaths.length)],
+      remoteFilePath:
           remotePath ??
           '/cloud${_filePaths[_random.nextInt(_filePaths.length)]}',
       provider:
           provider ??
           CloudProvider.values[_random.nextInt(CloudProvider.values.length)],
       status: operationStatus,
-      progress:
+      progressPercentage:
           progress ??
           (operationStatus == SyncOperationStatus.completed
               ? 1.0
               : _random.nextDouble()),
-      startTime: startTime,
-      endTime: operationStatus.isCompleted
+      createdAt: now,
+      startedAt: startTime,
+      completedAt: operationStatus.isCompleted
           ? startTime.add(Duration(minutes: _random.nextInt(10) + 1))
           : null,
-      bytesTransferred: (_random.nextInt(1000000) + 100000)
-          .toDouble(), // 100KB-1MB
-      totalBytes: (_random.nextInt(2000000) + 1000000).toDouble(), // 1-2MB
-      errorMessage: operationStatus == SyncOperationStatus.failed
+      bytesTransferred: _random.nextInt(1000000) + 100000, // 100KB-1MB
+      totalBytes: _random.nextInt(2000000) + 1000000, // 1-2MB
+      error: operationStatus == SyncOperationStatus.failed
           ? 'Mock sync error'
           : null,
     );
@@ -382,25 +380,30 @@ class MockDataGenerators {
       id:
           id ??
           'conflict_${now.millisecondsSinceEpoch}_${_random.nextInt(1000)}',
-      localPath: localPath ?? _filePaths[_random.nextInt(_filePaths.length)],
-      remotePath:
-          remotePath ??
-          '/cloud${_filePaths[_random.nextInt(_filePaths.length)]}',
+      filePath: localPath ?? _filePaths[_random.nextInt(_filePaths.length)],
       provider:
           provider ??
           CloudProvider.values[_random.nextInt(CloudProvider.values.length)],
-      conflictType:
+      type:
           conflictType ??
           conflict_models.ConflictType.values[_random.nextInt(
             conflict_models.ConflictType.values.length,
           )],
-      description:
-          'Mock conflict: File modified on both local and remote storage',
-      localModified: localModified,
-      remoteModified: remoteModified,
-      localFileSize: _random.nextInt(2000000) + 500000, // 500KB-2MB
-      remoteFileSize: _random.nextInt(2000000) + 500000,
+      localVersion: conflict_models.FileVersion(
+        path: localPath ?? _filePaths[_random.nextInt(_filePaths.length)],
+        size: _random.nextInt(2000000) + 500000,
+        modifiedAt: localModified,
+      ),
+      remoteVersion: conflict_models.FileVersion(
+        path: remotePath ?? '/cloud${_filePaths[_random.nextInt(_filePaths.length)]}',
+        size: _random.nextInt(2000000) + 500000,
+        modifiedAt: remoteModified,
+      ),
       detectedAt: now,
+      severity: conflict_models.ConflictSeverity.values[_random.nextInt(
+        conflict_models.ConflictSeverity.values.length,
+      )],
+      description: 'Mock conflict: File modified on both local and remote storage',
     );
   }
 

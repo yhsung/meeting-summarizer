@@ -4,7 +4,6 @@ import 'package:meeting_summarizer/core/enums/transcription_language.dart';
 import 'package:meeting_summarizer/core/models/audio_configuration.dart';
 import 'package:meeting_summarizer/core/models/recording_session.dart';
 import 'package:meeting_summarizer/core/models/transcription_request.dart';
-import 'package:meeting_summarizer/core/models/transcription_result.dart';
 
 import 'mock_audio_recording_service.dart';
 import 'mock_whisper_api_service.dart';
@@ -19,7 +18,6 @@ class TestFixtures {
   // Common audio configurations for testing
   static final AudioConfiguration highQualityAudio = AudioConfiguration(
     format: AudioFormat.wav,
-    bitRate: 320000,
     sampleRate: 48000,
     channels: 2,
     enableNoiseReduction: true,
@@ -29,7 +27,6 @@ class TestFixtures {
 
   static final AudioConfiguration mediumQualityAudio = AudioConfiguration(
     format: AudioFormat.aac,
-    bitRate: 192000,
     sampleRate: 44100,
     channels: 1,
     enableNoiseReduction: true,
@@ -39,7 +36,6 @@ class TestFixtures {
 
   static final AudioConfiguration lowQualityAudio = AudioConfiguration(
     format: AudioFormat.mp3,
-    bitRate: 128000,
     sampleRate: 22050,
     channels: 1,
     enableNoiseReduction: false,

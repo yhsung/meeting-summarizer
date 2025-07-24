@@ -100,7 +100,7 @@ class MockDatabaseHelper {
     final id = _recordingIdCounter.toString();
     final recordingWithId = recording.copyWith(
       id: id,
-      createdAt: recording.createdAt ?? DateTime.now(),
+      createdAt: recording.createdAt,
       updatedAt: DateTime.now(),
     );
 
@@ -115,12 +115,12 @@ class MockDatabaseHelper {
   Future<void> updateRecording(Recording recording) async {
     await _simulateOperation();
 
-    if (recording.id == null || !_recordings.containsKey(recording.id)) {
+    if (!_recordings.containsKey(recording.id)) {
       throw Exception('Recording not found: ${recording.id}');
     }
 
     final updatedRecording = recording.copyWith(updatedAt: DateTime.now());
-    _recordings[recording.id!] = updatedRecording;
+    _recordings[recording.id] = updatedRecording;
 
     log('MockDatabaseHelper: Updated recording ${recording.id}');
   }
@@ -190,7 +190,12 @@ class MockDatabaseHelper {
     _transcriptions.removeWhere(
       (_, transcription) => transcription.recordingId == id,
     );
-    _summaries.removeWhere((_, summary) => summary.recordingId == id);
+    // Remove summaries related to transcriptions of this recording
+    final relatedTranscriptionIds = _transcriptions.values
+        .where((t) => t.recordingId == id)
+        .map((t) => t.id)
+        .toSet();
+    _summaries.removeWhere((_, summary) => relatedTranscriptionIds.contains(summary.transcriptionId));
 
     log('MockDatabaseHelper: Deleted recording $id and related data');
   }
@@ -204,7 +209,7 @@ class MockDatabaseHelper {
     final id = _transcriptionIdCounter.toString();
     final transcriptionWithId = transcription.copyWith(
       id: id,
-      createdAt: transcription.createdAt ?? DateTime.now(),
+      createdAt: transcription.createdAt,
       updatedAt: DateTime.now(),
     );
 
@@ -219,15 +224,14 @@ class MockDatabaseHelper {
   Future<void> updateTranscription(Transcription transcription) async {
     await _simulateOperation();
 
-    if (transcription.id == null ||
-        !_transcriptions.containsKey(transcription.id)) {
+    if (!_transcriptions.containsKey(transcription.id)) {
       throw Exception('Transcription not found: ${transcription.id}');
     }
 
     final updatedTranscription = transcription.copyWith(
       updatedAt: DateTime.now(),
     );
-    _transcriptions[transcription.id!] = updatedTranscription;
+    _transcriptions[transcription.id] = updatedTranscription;
 
     log('MockDatabaseHelper: Updated transcription ${transcription.id}');
   }
@@ -283,7 +287,7 @@ class MockDatabaseHelper {
     final id = _summaryIdCounter.toString();
     final summaryWithId = summary.copyWith(
       id: id,
-      createdAt: summary.createdAt ?? DateTime.now(),
+      createdAt: summary.createdAt,
       updatedAt: DateTime.now(),
     );
 
@@ -298,12 +302,12 @@ class MockDatabaseHelper {
   Future<void> updateSummary(models.Summary summary) async {
     await _simulateOperation();
 
-    if (summary.id == null || !_summaries.containsKey(summary.id)) {
+    if (!_summaries.containsKey(summary.id)) {
       throw Exception('Summary not found: ${summary.id}');
     }
 
     final updatedSummary = summary.copyWith(updatedAt: DateTime.now());
-    _summaries[summary.id!] = updatedSummary;
+    _summaries[summary.id] = updatedSummary;
 
     log('MockDatabaseHelper: Updated summary ${summary.id}');
   }
@@ -325,8 +329,14 @@ class MockDatabaseHelper {
   ) async {
     await _simulateOperation();
 
+    // Get transcription IDs for this recording
+    final transcriptionIds = _transcriptions.values
+        .where((t) => t.recordingId == recordingId)
+        .map((t) => t.id)
+        .toSet();
+
     final summaries = _summaries.values
-        .where((summary) => summary.recordingId == recordingId)
+        .where((summary) => transcriptionIds.contains(summary.transcriptionId))
         .toList();
 
     log(
@@ -353,10 +363,14 @@ class MockDatabaseHelper {
   Future<AppSettings?> getSetting(String key) async {
     await _simulateOperation();
 
-    final setting = _settings.values.firstWhere(
-      (setting) => setting.key == key,
-      orElse: () => throw StateError('Setting not found'),
-    );
+    AppSettings? setting;
+    try {
+      setting = _settings.values.firstWhere(
+        (setting) => setting.key == key,
+      );
+    } catch (e) {
+      setting = null;
+    }
 
     log('MockDatabaseHelper: Retrieved setting $key');
     return setting;
@@ -369,13 +383,16 @@ class MockDatabaseHelper {
     final existingSettingId = _settings.entries
         .where((entry) => entry.value.key == key)
         .map((entry) => entry.key)
-        .firstOrNull;
+        .cast<String?>()
+        .firstWhere((id) => true, orElse: () => null);
 
     final now = DateTime.now();
     final setting = AppSettings(
-      id: existingSettingId ?? _settingsIdCounter.toString(),
       key: key,
       value: value.toString(),
+      type: SettingType.string,
+      category: SettingCategory.general,
+      isSensitive: false,
       createdAt: existingSettingId != null
           ? _settings[existingSettingId]!.createdAt
           : now,
@@ -472,9 +489,11 @@ class MockDatabaseHelper {
     for (final setting in defaultSettings) {
       final id = _settingsIdCounter.toString();
       _settings[id] = AppSettings(
-        id: id,
         key: setting['key']!,
         value: setting['value']!,
+        type: SettingType.string,
+        category: SettingCategory.general,
+        isSensitive: false,
         createdAt: now,
         updatedAt: now,
       );
@@ -522,13 +541,17 @@ class MockDatabaseHelper {
     final now = DateTime.now();
 
     return Recording(
-      id: id,
-      title: title ?? 'Mock Recording ${_recordingIdCounter}',
-      filePath: filePath ?? '/mock/path/recording_${_recordingIdCounter}.m4a',
-      duration: duration ?? Duration(minutes: random.nextInt(60) + 1),
+      id: id ?? '',
+      filename: 'recording_$_recordingIdCounter.m4a',
+      filePath: filePath ?? '/mock/path/recording_$_recordingIdCounter.m4a',
+      duration: (duration ?? Duration(minutes: random.nextInt(60) + 1)).inMilliseconds,
       fileSize: random.nextInt(10000000) + 1000000, // 1-10MB
       format: 'm4a',
       quality: 'medium',
+      sampleRate: 44100,
+      bitDepth: 16,
+      channels: 2,
+      title: title ?? 'Mock Recording $_recordingIdCounter',
       createdAt: now.subtract(Duration(days: random.nextInt(30))),
       updatedAt: now,
     );
@@ -552,13 +575,14 @@ class MockDatabaseHelper {
     ];
 
     return Transcription(
-      id: id,
+      id: id ?? '',
       recordingId: recordingId ?? '1',
       text: text ?? mockTexts[random.nextInt(mockTexts.length)],
       confidence: 0.8 + random.nextDouble() * 0.2, // 0.8-1.0
       language: 'en',
       provider: 'mock-provider',
-      processingTime: Duration(milliseconds: random.nextInt(5000) + 1000),
+      status: TranscriptionStatus.completed,
+      processingTime: random.nextInt(5000) + 1000,
       wordCount: (text?.split(' ').length ?? 50) + random.nextInt(50),
       createdAt: now.subtract(Duration(days: random.nextInt(30))),
       updatedAt: now,
@@ -584,17 +608,15 @@ class MockDatabaseHelper {
     ];
 
     return models.Summary(
-      id: id,
-      recordingId: recordingId ?? '1',
-      transcriptionId: transcriptionId,
+      id: id ?? '',
+      transcriptionId: transcriptionId ?? '1',
       content: content ?? mockSummaries[random.nextInt(mockSummaries.length)],
-      type: models
-          .SummaryType
-          .values[random.nextInt(models.SummaryType.values.length)],
-      confidence: 0.8 + random.nextDouble() * 0.2, // 0.8-1.0
+      type: models.SummaryType.values[random.nextInt(models.SummaryType.values.length)],
       provider: 'mock-provider',
-      processingTime: Duration(milliseconds: random.nextInt(3000) + 500),
+      confidence: 0.8 + random.nextDouble() * 0.2, // 0.8-1.0
       wordCount: (content?.split(' ').length ?? 30) + random.nextInt(20),
+      characterCount: (content?.length ?? 150) + random.nextInt(100),
+      sentiment: models.SentimentType.values[random.nextInt(models.SentimentType.values.length)],
       createdAt: now.subtract(Duration(days: random.nextInt(30))),
       updatedAt: now,
     );

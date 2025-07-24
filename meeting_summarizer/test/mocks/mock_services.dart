@@ -27,11 +27,12 @@ import 'package:meeting_summarizer/core/services/platform_services/android_auto_
 import 'package:meeting_summarizer/core/services/platform_services/performance_optimization_service.dart';
 
 // Import comprehensive mock implementations
-import 'mock_audio_recording_service.dart';
-import 'mock_whisper_api_service.dart';
-import 'mock_database_helper.dart';
-import 'mock_data_generators.dart';
-import 'test_fixtures.dart';
+// Note: These are commented out as they're not directly used in this file
+// import 'mock_audio_recording_service.dart';
+// import 'mock_whisper_api_service.dart';
+// import 'mock_database_helper.dart';
+// import 'mock_data_generators.dart';
+// import 'test_fixtures.dart';
 
 // Generate mocks for core services
 @GenerateMocks([
