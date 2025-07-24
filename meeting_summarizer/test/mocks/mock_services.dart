@@ -1,6 +1,9 @@
 /// Mock service generators for unit testing
 /// This file contains mock annotations that will be used by build_runner
 /// to generate mock implementations of core services.
+///
+/// Additionally, it provides access to comprehensive mock implementations
+/// for testing without requiring mockito code generation.
 library;
 
 import 'package:mockito/annotations.dart';
@@ -22,6 +25,13 @@ import 'package:meeting_summarizer/core/services/platform_services/enhanced_noti
 import 'package:meeting_summarizer/core/services/platform_services/siri_shortcuts_service.dart';
 import 'package:meeting_summarizer/core/services/platform_services/android_auto_service.dart';
 import 'package:meeting_summarizer/core/services/platform_services/performance_optimization_service.dart';
+
+// Import comprehensive mock implementations
+import 'mock_audio_recording_service.dart';
+import 'mock_whisper_api_service.dart';
+import 'mock_database_helper.dart';
+import 'mock_data_generators.dart';
+import 'test_fixtures.dart';
 
 // Generate mocks for core services
 @GenerateMocks([
