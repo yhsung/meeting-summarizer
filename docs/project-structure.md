@@ -150,6 +150,17 @@ project/                   # absolute path /Volumes/Samsung970EVOPlus/dev-projec
 │   │   │   │   │       └── record_platform_adapter.dart    # Record package adapter
 │   │   │   │   ├── domain/             # Domain layer (to be implemented)
 │   │   │   │   └── presentation/       # UI layer (to be implemented)
+│   │   │   ├── onboarding/
+│   │   │   │   ├── data/
+│   │   │   │   │   └── services/
+│   │   │   │   │       └── onboarding_service.dart          # User onboarding state management using SharedPreferences
+│   │   │   │   └── presentation/
+│   │   │   │       ├── screens/
+│   │   │   │       │   └── onboarding_screen.dart           # Interactive tutorial system with introduction_screen
+│   │   │   │       └── widgets/
+│   │   │   │           ├── permission_setup_widget.dart     # Permission request handling with real-time status tracking
+│   │   │   │           ├── cloud_setup_widget.dart          # Cloud storage provider selection (iCloud, Google Drive, OneDrive, Dropbox)
+│   │   │   │           └── audio_test_widget.dart           # Audio quality testing with volume visualization and recording simulation
 │   │   │   ├── search/
 │   │   │   │   └── presentation/
 │   │   │   │       ├── screens/
