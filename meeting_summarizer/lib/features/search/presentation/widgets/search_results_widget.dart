@@ -145,27 +145,42 @@ class SearchResultsWidget extends StatelessWidget {
               Text(metadata.description!),
               const SizedBox(height: 4),
             ],
-            Row(
+            Wrap(
+              spacing: 16,
+              runSpacing: 4,
               children: [
-                Icon(Icons.folder, size: 16, color: Colors.grey[600]),
-                const SizedBox(width: 4),
-                Text(
-                  metadata.category.displayName,
-                  style: TextStyle(color: Colors.grey[600]),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.folder, size: 16, color: Colors.grey[600]),
+                    const SizedBox(width: 4),
+                    Text(
+                      metadata.category.displayName,
+                      style: TextStyle(color: Colors.grey[600]),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 16),
-                Icon(Icons.access_time, size: 16, color: Colors.grey[600]),
-                const SizedBox(width: 4),
-                Text(
-                  _formatDate(metadata.createdAt),
-                  style: TextStyle(color: Colors.grey[600]),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.access_time, size: 16, color: Colors.grey[600]),
+                    const SizedBox(width: 4),
+                    Text(
+                      _formatDate(metadata.createdAt),
+                      style: TextStyle(color: Colors.grey[600]),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 16),
-                Icon(Icons.storage, size: 16, color: Colors.grey[600]),
-                const SizedBox(width: 4),
-                Text(
-                  _formatFileSize(metadata.fileSize),
-                  style: TextStyle(color: Colors.grey[600]),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.storage, size: 16, color: Colors.grey[600]),
+                    const SizedBox(width: 4),
+                    Text(
+                      _formatFileSize(metadata.fileSize),
+                      style: TextStyle(color: Colors.grey[600]),
+                    ),
+                  ],
                 ),
               ],
             ),

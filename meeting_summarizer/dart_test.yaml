@@ -1,0 +1,16 @@
+tags:
+  golden:
+    skip: false
+
+# Test file patterns
+test_on: "linux || mac-os || windows"
+
+# Override settings for golden tests
+override:
+  golden:
+    platforms: [vm]
+    skip: false
+    timeout: "2x"
+
+# Concurrency - run one golden test at a time
+concurrency: 1
