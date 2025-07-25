@@ -86,6 +86,11 @@ dependencies:
   system_tray: ^2.0.3                 # Windows system tray integration
   battery_plus: ^6.0.3                # Battery information and optimization
 
+  # User onboarding and settings dependencies for Task 12
+  introduction_screen: ^3.1.12        # Interactive onboarding tutorials
+  video_player: ^2.9.1                # Video tutorials in help system
+  in_app_review: ^2.0.9               # User feedback and rating prompts
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

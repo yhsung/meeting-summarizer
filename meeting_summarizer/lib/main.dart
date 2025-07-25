@@ -6,6 +6,8 @@ import 'features/transcription/presentation/screens/transcription_screen.dart';
 import 'features/summary/presentation/screens/summary_screen.dart';
 import 'features/search/presentation/screens/search_screen.dart';
 import 'features/settings/presentation/screens/api_configuration_screen.dart';
+import 'features/onboarding/presentation/screens/onboarding_screen.dart';
+import 'features/onboarding/data/services/onboarding_service.dart';
 
 void main() {
   runApp(const MeetingSummarizerApp());
@@ -26,11 +28,58 @@ class MeetingSummarizerApp extends StatelessWidget {
           theme: themeService.lightTheme,
           darkTheme: themeService.darkTheme,
           themeMode: themeService.themeMode,
-          home: const MainNavigation(),
+          home: const AppWrapper(),
           debugShowCheckedModeBanner: false,
         );
       },
     );
+  }
+}
+
+class AppWrapper extends StatefulWidget {
+  const AppWrapper({super.key});
+
+  @override
+  State<AppWrapper> createState() => _AppWrapperState();
+}
+
+class _AppWrapperState extends State<AppWrapper> {
+  final OnboardingService _onboardingService = OnboardingService.instance;
+  bool? _isOnboardingComplete;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkOnboardingStatus();
+  }
+
+  Future<void> _checkOnboardingStatus() async {
+    final isComplete = await _onboardingService.isOnboardingComplete();
+    setState(() {
+      _isOnboardingComplete = isComplete;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isOnboardingComplete == null) {
+      // Show loading screen
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    if (!_isOnboardingComplete!) {
+      // Show onboarding
+      return OnboardingScreen(
+        onComplete: () {
+          setState(() {
+            _isOnboardingComplete = true;
+          });
+        },
+      );
+    }
+
+    // Show main app
+    return const MainNavigation();
   }
 }
 

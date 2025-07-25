@@ -1,0 +1,190 @@
+# Code Coverage Configuration for Meeting Summarizer
+
+# Coverage thresholds
+coverage:
+  minimum_threshold: 80.0
+  warning_threshold: 85.0
+  target_threshold: 90.0
+  
+  # Quality gates
+  quality_gates:
+    line_coverage: 80
+    function_coverage: 85
+    branch_coverage: 75
+    
+  # Fail build if below minimum threshold
+  enforce_minimum: true
+  
+  # Report formats to generate
+  formats:
+    - lcov
+    - html
+    - json
+    - text-summary
+    
+# Exclusion patterns for files that should not be included in coverage
+exclusions:
+  # Generated files
+  - "**/*.g.dart"
+  - "**/*.freezed.dart"
+  - "**/*.chopper.dart"
+  - "**/*.gr.dart"
+  - "**/*.config.dart"
+  - "**/*.mocks.dart"
+  
+  # Platform-specific conditional imports and stubs
+  - "**/stub_implementations/**"
+  - "**/platform_specific/**"
+  - "**/*_stub.dart"
+  - "**/*_web.dart" # Web-specific implementations
+  - "**/*_io.dart"  # Native-specific implementations
+  
+  # Test files
+  - "test/**"
+  - "integration_test/**"
+  - "**/test/**"
+  - "**/*_test.dart"
+  - "**/mock_*.dart"
+  - "**/test_*.dart"
+  
+  # Example and demo code
+  - "example/**"
+  - "**/examples/**"
+  - "**/demo/**"
+  
+  # Build and tool-generated files
+  - "build/**"
+  - ".dart_tool/**"
+  - "coverage/**"
+  - "android/**"
+  - "ios/**"
+  - "macos/**"
+  - "windows/**"
+  - "web/**"
+  
+  # Main entry points (optional, as they're usually simple)
+  - "**/main.dart"
+  
+  # Platform channel implementations
+  - "**/platform_channels/**"
+  - "**/method_channel_*.dart"
+  
+  # External package wrappers that just forward calls
+  - "**/external_wrappers/**"
+  
+# Specific files to exclude from coverage analysis
+exclude_files:
+  # Local whisper service stub for web builds
+  - "lib/core/services/local_whisper_service_stub.dart"
+  
+  # Platform-specific service stubs
+  - "lib/core/services/platform_services/*_stub.dart"
+  
+  # Generated model files
+  - "lib/core/models/database/*.g.dart"
+  
+# Include patterns (files that should always be included)
+inclusions:
+  - "lib/**/*.dart"
+
+# Reporting configuration
+reporting:
+  # Output directories
+  output_dir: "coverage"
+  html_dir: "coverage/html"
+  lcov_file: "coverage/lcov.info"
+  json_file: "coverage/coverage.json"
+  
+  # HTML report customization
+  html_report:
+    title: "Meeting Summarizer Code Coverage"
+    show_function_coverage: true
+    show_branch_coverage: true
+    sort_by: "coverage_desc"
+    
+  # Badge generation
+  badge:
+    enabled: true
+    output_file: "coverage/coverage-badge.svg"
+    style: "flat-square"
+    
+# Analysis settings
+analysis:
+  # Track coverage trends over time
+  track_trends: true
+  trends_file: "coverage/trends.json"
+  
+  # Performance impact analysis
+  analyze_performance_impact: true
+  
+  # Identify untested critical paths
+  critical_path_analysis: true
+  
+  # Generate detailed reports for low-coverage areas
+  detailed_low_coverage_report: true
+  low_coverage_threshold: 60
+  
+# Integration settings
+integration:
+  # CI/CD integration
+  ci_mode: true
+  fail_on_decrease: true
+  decrease_threshold: 5.0  # Fail if coverage decreases by more than 5%
+  
+  # Git integration
+  git_integration:
+    enabled: true
+    track_per_commit: true
+    generate_diff_coverage: true
+    
+  # Notification settings
+  notifications:
+    slack_webhook: null  # Set in CI environment
+    email_notifications: false
+    
+# Advanced settings
+advanced:
+  # Parallel processing
+  parallel_processing: true
+  max_workers: 4
+  
+  # Caching
+  enable_caching: true
+  cache_dir: ".coverage_cache"
+  
+  # Verbose logging for debugging
+  verbose_logging: false
+  
+  # Custom coverage processors
+  custom_processors: []
+  
+# Tool-specific configurations
+tools:
+  lcov:
+    # LCOV-specific settings
+    branch_coverage: true
+    function_coverage: true
+    output_summaries: true
+    
+  genhtml:
+    # HTML generation settings
+    show_details: true
+    num_spaces: 2
+    sort: true
+    function_coverage: true
+    branch_coverage: true
+    
+# Environment-specific overrides
+environments:
+  development:
+    minimum_threshold: 75.0
+    enforce_minimum: false
+    
+  staging:
+    minimum_threshold: 80.0
+    enforce_minimum: true
+    
+  production:
+    minimum_threshold: 85.0
+    enforce_minimum: true
+    fail_on_decrease: true
