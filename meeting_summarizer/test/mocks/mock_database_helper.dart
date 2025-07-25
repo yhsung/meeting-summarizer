@@ -195,7 +195,9 @@ class MockDatabaseHelper {
         .where((t) => t.recordingId == id)
         .map((t) => t.id)
         .toSet();
-    _summaries.removeWhere((_, summary) => relatedTranscriptionIds.contains(summary.transcriptionId));
+    _summaries.removeWhere(
+      (_, summary) => relatedTranscriptionIds.contains(summary.transcriptionId),
+    );
 
     log('MockDatabaseHelper: Deleted recording $id and related data');
   }
@@ -365,9 +367,7 @@ class MockDatabaseHelper {
 
     AppSettings? setting;
     try {
-      setting = _settings.values.firstWhere(
-        (setting) => setting.key == key,
-      );
+      setting = _settings.values.firstWhere((setting) => setting.key == key);
     } catch (e) {
       setting = null;
     }
@@ -544,7 +544,8 @@ class MockDatabaseHelper {
       id: id ?? '',
       filename: 'recording_$_recordingIdCounter.m4a',
       filePath: filePath ?? '/mock/path/recording_$_recordingIdCounter.m4a',
-      duration: (duration ?? Duration(minutes: random.nextInt(60) + 1)).inMilliseconds,
+      duration: (duration ?? Duration(minutes: random.nextInt(60) + 1))
+          .inMilliseconds,
       fileSize: random.nextInt(10000000) + 1000000, // 1-10MB
       format: 'm4a',
       quality: 'medium',
@@ -611,12 +612,16 @@ class MockDatabaseHelper {
       id: id ?? '',
       transcriptionId: transcriptionId ?? '1',
       content: content ?? mockSummaries[random.nextInt(mockSummaries.length)],
-      type: models.SummaryType.values[random.nextInt(models.SummaryType.values.length)],
+      type: models
+          .SummaryType
+          .values[random.nextInt(models.SummaryType.values.length)],
       provider: 'mock-provider',
       confidence: 0.8 + random.nextDouble() * 0.2, // 0.8-1.0
       wordCount: (content?.split(' ').length ?? 30) + random.nextInt(20),
       characterCount: (content?.length ?? 150) + random.nextInt(100),
-      sentiment: models.SentimentType.values[random.nextInt(models.SentimentType.values.length)],
+      sentiment: models
+          .SentimentType
+          .values[random.nextInt(models.SentimentType.values.length)],
       createdAt: now.subtract(Duration(days: random.nextInt(30))),
       updatedAt: now,
     );

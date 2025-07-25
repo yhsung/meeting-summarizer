@@ -6,7 +6,8 @@ import 'package:meeting_summarizer/core/interfaces/cloud_sync_interface.dart';
 import 'package:meeting_summarizer/core/models/cloud_sync/cloud_provider.dart';
 import 'package:meeting_summarizer/core/models/cloud_sync/sync_status.dart';
 import 'package:meeting_summarizer/core/models/cloud_sync/sync_operation.dart';
-import 'package:meeting_summarizer/core/models/cloud_sync/sync_conflict.dart' as models;
+import 'package:meeting_summarizer/core/models/cloud_sync/sync_conflict.dart'
+    as models;
 
 /// Comprehensive mock cloud sync service for testing
 ///
@@ -236,7 +237,9 @@ class MockCloudSyncService implements CloudSyncInterface {
     await _simulateOperation();
 
     final List<SyncOperation> operations = [];
-    final providersToSync = provider != null ? [provider] : _enabledProviders.toList();
+    final providersToSync = provider != null
+        ? [provider]
+        : _enabledProviders.toList();
 
     for (final syncProvider in providersToSync) {
       _updateProviderSyncStatus(syncProvider, SyncState.syncing);
@@ -265,9 +268,11 @@ class MockCloudSyncService implements CloudSyncInterface {
     await _simulateOperation();
     // Mock implementation - return a status for the file if it exists in operations
     final operation = _activeSyncOperations.values
-        .where((op) => op.localFilePath == filePath || op.remoteFilePath == filePath)
+        .where(
+          (op) => op.localFilePath == filePath || op.remoteFilePath == filePath,
+        )
         .firstOrNull;
-    
+
     if (operation != null) {
       return SyncStatus(
         id: 'file_${filePath.hashCode}',
@@ -297,12 +302,16 @@ class MockCloudSyncService implements CloudSyncInterface {
     if (index != -1) {
       final resolvedConflict = _pendingConflicts[index].copyWith(
         isResolved: true,
-        resolution: models.ConflictResolution.values.firstWhere((r) => r.name == resolution.name),
+        resolution: models.ConflictResolution.values.firstWhere(
+          (r) => r.name == resolution.name,
+        ),
         resolvedAt: DateTime.now(),
       );
       _pendingConflicts[index] = resolvedConflict;
       _conflictsResolved++;
-      log('MockCloudSyncService: Resolved conflict ${conflict.id} with $resolution');
+      log(
+        'MockCloudSyncService: Resolved conflict ${conflict.id} with $resolution',
+      );
       return true;
     }
     return false;
@@ -338,17 +347,19 @@ class MockCloudSyncService implements CloudSyncInterface {
   }) async {
     await _simulateOperation();
     var operations = _activeSyncOperations.values.toList();
-    
+
     if (provider != null) {
       operations = operations.where((op) => op.provider == provider).toList();
     }
-    
+
     if (since != null) {
-      operations = operations.where((op) => op.createdAt.isAfter(since)).toList();
+      operations = operations
+          .where((op) => op.createdAt.isAfter(since))
+          .toList();
     }
-    
+
     operations.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-    
+
     return operations.take(limit).toList();
   }
 
@@ -359,28 +370,29 @@ class MockCloudSyncService implements CloudSyncInterface {
   }) async {
     await _simulateOperation();
     var conflicts = _pendingConflicts.where((conflict) => !conflict.isResolved);
-    
+
     if (provider != null) {
       conflicts = conflicts.where((conflict) => conflict.provider == provider);
     }
-    
+
     if (filePath != null) {
       conflicts = conflicts.where((conflict) => conflict.filePath == filePath);
     }
-    
+
     return conflicts.toList();
   }
 
   @override
   Future<CloudStorageQuota> getStorageQuota(CloudProvider provider) async {
     await _simulateOperation();
-    
+
     // Mock storage quota data
     final limits = provider.getStorageLimits();
     final random = math.Random();
     final totalBytes = limits.freeStorageGB * 1024 * 1024 * 1024;
-    final usedBytes = (totalBytes * (0.3 + random.nextDouble() * 0.4)).round(); // 30-70% used
-    
+    final usedBytes = (totalBytes * (0.3 + random.nextDouble() * 0.4))
+        .round(); // 30-70% used
+
     return CloudStorageQuota(
       totalBytes: totalBytes,
       usedBytes: usedBytes,
@@ -412,7 +424,9 @@ class MockCloudSyncService implements CloudSyncInterface {
   Future<void> setSyncInterval(Duration interval) async {
     await _simulateOperation();
     _syncInterval = interval;
-    log('MockCloudSyncService: Sync interval set to ${interval.inMinutes} minutes');
+    log(
+      'MockCloudSyncService: Sync interval set to ${interval.inMinutes} minutes',
+    );
   }
 
   @override
@@ -451,8 +465,10 @@ class MockCloudSyncService implements CloudSyncInterface {
 
     // Update all provider statuses to syncing if they have active operations
     for (final provider in _enabledProviders) {
-      final hasActiveOperations = _activeSyncOperations.values
-          .any((op) => op.provider == provider && op.status == SyncOperationStatus.paused);
+      final hasActiveOperations = _activeSyncOperations.values.any(
+        (op) =>
+            op.provider == provider && op.status == SyncOperationStatus.paused,
+      );
       if (hasActiveOperations) {
         _updateProviderSyncStatus(provider, SyncState.syncing);
       } else {
@@ -501,16 +517,20 @@ class MockCloudSyncService implements CloudSyncInterface {
 
   void _updateProviderSyncStatus(CloudProvider provider, SyncState state) {
     final currentStatus = _providerSyncStatus[provider];
-    final updatedStatus = currentStatus?.copyWith(
-      state: state,
-      lastSync: state == SyncState.completed ? DateTime.now() : currentStatus.lastSync,
-    ) ?? SyncStatus(
-      id: 'status_${provider.id}',
-      state: state,
-      provider: provider,
-      lastSync: DateTime.now(),
-    );
-    
+    final updatedStatus =
+        currentStatus?.copyWith(
+          state: state,
+          lastSync: state == SyncState.completed
+              ? DateTime.now()
+              : currentStatus.lastSync,
+        ) ??
+        SyncStatus(
+          id: 'status_${provider.id}',
+          state: state,
+          provider: provider,
+          lastSync: DateTime.now(),
+        );
+
     _providerSyncStatus[provider] = updatedStatus;
   }
 
@@ -543,7 +563,9 @@ class MockCloudSyncService implements CloudSyncInterface {
       final currentProgress = currentOp?.progressPercentage ?? 0.0;
       final newProgress = math.min(targetProgress, currentProgress + 0.1);
 
-      final updatedOperation = currentOp!.copyWith(progressPercentage: newProgress);
+      final updatedOperation = currentOp!.copyWith(
+        progressPercentage: newProgress,
+      );
       _activeSyncOperations[operation.id] = updatedOperation;
 
       // Complete operation when progress reaches target
@@ -566,7 +588,9 @@ class MockCloudSyncService implements CloudSyncInterface {
 
       // Check if this was the last active operation for this provider
       final hasActiveOperations = _activeSyncOperations.values.any(
-        (op) => op.provider == operation.provider && op.status == SyncOperationStatus.running,
+        (op) =>
+            op.provider == operation.provider &&
+            op.status == SyncOperationStatus.running,
       );
 
       if (!hasActiveOperations) {
@@ -587,7 +611,7 @@ class MockCloudSyncService implements CloudSyncInterface {
       modifiedAt: DateTime.now().subtract(Duration(hours: 1)),
       checksum: 'mock_local_checksum',
     );
-    
+
     final remoteVersion = models.FileVersion(
       path: operation.remoteFilePath,
       size: 1150,
@@ -650,14 +674,14 @@ class MockCloudSyncService implements CloudSyncInterface {
   }) {
     final random = math.Random();
     final now = DateTime.now();
-    
+
     final localVersion = models.FileVersion(
       path: filePath ?? '/mock/local/conflict_file.txt',
       size: random.nextInt(10000) + 1000,
       modifiedAt: now.subtract(Duration(hours: random.nextInt(24))),
       checksum: 'local_checksum_${random.nextInt(1000)}',
     );
-    
+
     final remoteVersion = models.FileVersion(
       path: filePath ?? '/mock/remote/conflict_file.txt',
       size: random.nextInt(10000) + 1000,

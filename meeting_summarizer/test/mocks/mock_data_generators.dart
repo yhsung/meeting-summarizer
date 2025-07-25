@@ -145,7 +145,10 @@ class MockDataGenerators {
           sessionDuration.inMinutes * 1024 * 1024 * 0.5, // ~0.5MB per minute
       currentAmplitude: _random.nextDouble(),
       waveformData: generateWaveformData(points: 50),
-      endTime: (state == RecordingState.stopped || state == RecordingState.error) ? now : null,
+      endTime:
+          (state == RecordingState.stopped || state == RecordingState.error)
+          ? now
+          : null,
       errorMessage: errorMessage,
     );
   }
@@ -334,7 +337,8 @@ class MockDataGenerators {
     return SyncOperation(
       id: id ?? 'sync_${now.millisecondsSinceEpoch}_${_random.nextInt(1000)}',
       type: operationType,
-      localFilePath: localPath ?? _filePaths[_random.nextInt(_filePaths.length)],
+      localFilePath:
+          localPath ?? _filePaths[_random.nextInt(_filePaths.length)],
       remoteFilePath:
           remotePath ??
           '/cloud${_filePaths[_random.nextInt(_filePaths.length)]}',
@@ -395,15 +399,19 @@ class MockDataGenerators {
         modifiedAt: localModified,
       ),
       remoteVersion: conflict_models.FileVersion(
-        path: remotePath ?? '/cloud${_filePaths[_random.nextInt(_filePaths.length)]}',
+        path:
+            remotePath ??
+            '/cloud${_filePaths[_random.nextInt(_filePaths.length)]}',
         size: _random.nextInt(2000000) + 500000,
         modifiedAt: remoteModified,
       ),
       detectedAt: now,
-      severity: conflict_models.ConflictSeverity.values[_random.nextInt(
-        conflict_models.ConflictSeverity.values.length,
-      )],
-      description: 'Mock conflict: File modified on both local and remote storage',
+      severity:
+          conflict_models.ConflictSeverity.values[_random.nextInt(
+            conflict_models.ConflictSeverity.values.length,
+          )],
+      description:
+          'Mock conflict: File modified on both local and remote storage',
     );
   }
 
