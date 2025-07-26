@@ -34,7 +34,7 @@ class CloudSyncService implements CloudSyncInterface {
   final ConflictDetectionService _conflictDetection =
       ConflictDetectionService.instance;
   final conflict_resolution_service.ConflictResolutionService
-  _conflictResolution =
+      _conflictResolution =
       conflict_resolution_service.ConflictResolutionService.instance;
   final VersionManagementService _versionManagement =
       VersionManagementService.instance;
@@ -311,9 +311,8 @@ class CloudSyncService implements CloudSyncInterface {
     try {
       log('CloudSyncService: Starting full sync...');
 
-      final providers = provider != null
-          ? [provider]
-          : _connectedProviders.keys.toList();
+      final providers =
+          provider != null ? [provider] : _connectedProviders.keys.toList();
 
       for (final cloudProvider in providers) {
         final providerOps = await _syncProvider(cloudProvider, direction);
@@ -454,9 +453,8 @@ class CloudSyncService implements CloudSyncInterface {
     }
 
     if (since != null) {
-      operations = operations
-          .where((op) => op.createdAt.isAfter(since))
-          .toList();
+      operations =
+          operations.where((op) => op.createdAt.isAfter(since)).toList();
     }
 
     operations.sort((a, b) => b.createdAt.compareTo(a.createdAt));
@@ -1537,8 +1535,8 @@ class CloudSyncService implements CloudSyncInterface {
         return;
       }
 
-      final pendingOps = await _offlineQueue
-          .getPendingOperationsByPriorityOrder();
+      final pendingOps =
+          await _offlineQueue.getPendingOperationsByPriorityOrder();
       log(
         'CloudSyncService: Processing ${pendingOps.length} queued operations',
       );

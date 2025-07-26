@@ -14,22 +14,22 @@ void main() {
   setUpAll(() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
-          const MethodChannel('plugins.flutter.io/path_provider'),
-          (methodCall) async {
-            if (methodCall.method == 'getApplicationDocumentsDirectory') {
-              return Directory.systemTemp.createTempSync('test_docs').path;
-            }
-            return null;
-          },
-        );
+      const MethodChannel('plugins.flutter.io/path_provider'),
+      (methodCall) async {
+        if (methodCall.method == 'getApplicationDocumentsDirectory') {
+          return Directory.systemTemp.createTempSync('test_docs').path;
+        }
+        return null;
+      },
+    );
   });
 
   tearDownAll(() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
-          const MethodChannel('plugins.flutter.io/path_provider'),
-          null,
-        );
+      const MethodChannel('plugins.flutter.io/path_provider'),
+      null,
+    );
   });
 
   group('GoogleSpeechService Initialization', () {

@@ -369,17 +369,17 @@ class DatabaseSchema {
 
   /// Get all table creation statements
   static List<String> get createTables => [
-    createRecordingsTable,
-    createTranscriptionsTable,
-    createSummariesTable,
-    createSettingsTable,
-    createSearchIndexTable,
-  ];
+        createRecordingsTable,
+        createTranscriptionsTable,
+        createSummariesTable,
+        createSettingsTable,
+        createSearchIndexTable,
+      ];
 
   /// Get all schema statements in the correct order
   static List<String> get allStatements => [
-    ...createTables,
-    ...createIndexes,
-    ...createTriggers,
-  ];
+        ...createTables,
+        ...createIndexes,
+        ...createTriggers,
+      ];
 }

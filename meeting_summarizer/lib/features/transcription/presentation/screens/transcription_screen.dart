@@ -93,8 +93,8 @@ class _TranscriptionScreenState extends State<TranscriptionScreen>
   Future<void> _initializeServicesAsync() async {
     try {
       // Get the selected provider
-      final selectedProvider = await _providerService
-          .getBestAvailableProvider();
+      final selectedProvider =
+          await _providerService.getBestAvailableProvider();
 
       // Provider selected and ready to use
 
@@ -473,8 +473,7 @@ class _TranscriptionScreenState extends State<TranscriptionScreen>
         ],
       ),
       body: SafeArea(child: _buildResponsiveLayout(theme, screenSize)),
-      floatingActionButton:
-          _currentResult == null &&
+      floatingActionButton: _currentResult == null &&
               !_isTranscribing &&
               _currentAudioFile != null
           ? FloatingActionButton(
@@ -588,7 +587,6 @@ class _TranscriptionScreenState extends State<TranscriptionScreen>
                   ),
                   SizedBox(height: majorSpacing),
                 ],
-
                 TranscriptionControls(
                   isTranscribing: _isTranscribing,
                   isServiceAvailable: _isServiceAvailable,
@@ -603,9 +601,7 @@ class _TranscriptionScreenState extends State<TranscriptionScreen>
                   onCopyToClipboard: _copyToClipboard,
                   onExportTranscription: _exportTranscription,
                 ),
-
                 SizedBox(height: majorSpacing),
-
                 if (_isTranscribing) ...[
                   TranscriptionProgress(
                     progress: _transcriptionProgress,
@@ -719,7 +715,6 @@ class _TranscriptionScreenState extends State<TranscriptionScreen>
             if (_currentResult != null) ...[
               _buildTabBar(theme),
               SizedBox(height: verticalSpacing),
-
               SizedBox(
                 height: screenSize.height * 0.6,
                 child: _buildTabContent(theme, screenSize),

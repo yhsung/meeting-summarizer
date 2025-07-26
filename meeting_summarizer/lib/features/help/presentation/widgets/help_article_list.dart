@@ -141,9 +141,9 @@ class _ArticleListItem extends StatelessWidget {
               Text(
                 article.category.name,
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: article.category.color,
-                  fontWeight: FontWeight.w500,
-                ),
+                      color: article.category.color,
+                      fontWeight: FontWeight.w500,
+                    ),
               ),
             ],
           ),
@@ -163,10 +163,10 @@ class _ArticleListItem extends StatelessWidget {
           Text(
             article.excerpt,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(
-                context,
-              ).colorScheme.onSurface.withValues(alpha: 0.7),
-            ),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.7),
+                ),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
@@ -187,10 +187,10 @@ class _ArticleListItem extends StatelessWidget {
                 Text(
                   '${article.viewCount} views',
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.onSurface.withValues(alpha: 0.5),
-                  ),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: 0.5),
+                      ),
                 ),
                 const SizedBox(width: 12),
               ],
@@ -205,10 +205,10 @@ class _ArticleListItem extends StatelessWidget {
               Text(
                 _formatDate(article.updatedAt),
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.onSurface.withValues(alpha: 0.5),
-                ),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.5),
+                    ),
               ),
             ],
           ),
@@ -228,8 +228,9 @@ class _ArticleListItem extends StatelessWidget {
                 child: Text(
                   tag,
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSecondaryContainer,
-                  ),
+                        color:
+                            Theme.of(context).colorScheme.onSecondaryContainer,
+                      ),
                 ),
               );
             }).toList(),

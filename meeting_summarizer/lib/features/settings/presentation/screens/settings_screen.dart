@@ -92,9 +92,10 @@ class _SettingsScreenState extends State<SettingsScreen>
     final grouped = <SettingCategory, List<AppSettings>>{};
 
     for (final category in _categories) {
-      grouped[category] =
-          settings.where((setting) => setting.category == category).toList()
-            ..sort((a, b) => a.key.compareTo(b.key));
+      grouped[category] = settings
+          .where((setting) => setting.category == category)
+          .toList()
+        ..sort((a, b) => a.key.compareTo(b.key));
     }
 
     return grouped;
@@ -286,14 +287,15 @@ class _SettingsScreenState extends State<SettingsScreen>
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _error != null
-          ? _buildErrorWidget()
-          : TabBarView(
-              controller: _tabController,
-              children: [
-                _buildSearchTab(),
-                ..._categories.map((category) => _buildCategoryTab(category)),
-              ],
-            ),
+              ? _buildErrorWidget()
+              : TabBarView(
+                  controller: _tabController,
+                  children: [
+                    _buildSearchTab(),
+                    ..._categories
+                        .map((category) => _buildCategoryTab(category)),
+                  ],
+                ),
     );
   }
 
@@ -339,8 +341,8 @@ class _SettingsScreenState extends State<SettingsScreen>
           child: _searchQuery.isEmpty
               ? _buildWelcomeWidget()
               : _filteredSettings.isEmpty
-              ? _buildNoResultsWidget()
-              : _buildSettingsList(_filteredSettings),
+                  ? _buildNoResultsWidget()
+                  : _buildSettingsList(_filteredSettings),
         ),
       ],
     );

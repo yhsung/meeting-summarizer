@@ -190,10 +190,10 @@ class _TranscriptionSettingsDialogState
             Text(
               'This key will be stored securely on your device.',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(
-                  context,
-                ).colorScheme.onSurface.withValues(alpha: 0.6),
-              ),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.6),
+                  ),
             ),
           ],
         ),
@@ -296,66 +296,65 @@ class _TranscriptionSettingsDialogState
         const SizedBox(height: 12),
         ...TranscriptionProvider.values
             .where(
-              (provider) =>
-                  !kIsWeb || provider != TranscriptionProvider.localWhisper,
-            )
+          (provider) =>
+              !kIsWeb || provider != TranscriptionProvider.localWhisper,
+        )
             .map((provider) {
-              final isAvailable = _providerAvailability[provider] ?? false;
-              final capabilities = _serviceCapabilities[provider];
-              final requiresKey = _requiresApiKey(provider);
+          final isAvailable = _providerAvailability[provider] ?? false;
+          final capabilities = _serviceCapabilities[provider];
+          final requiresKey = _requiresApiKey(provider);
 
-              return Card(
-                margin: const EdgeInsets.only(bottom: 8),
-                child: RadioListTile<TranscriptionProvider>(
-                  title: Row(
-                    children: [
-                      Text(_getProviderDisplayName(provider)),
-                      const SizedBox(width: 8),
-                      if (isAvailable)
-                        Icon(Icons.check_circle, color: Colors.green, size: 16)
-                      else
-                        Icon(Icons.warning, color: Colors.orange, size: 16),
-                      const Spacer(),
-                      if (requiresKey)
-                        IconButton(
-                          icon: const Icon(Icons.key, size: 16),
-                          onPressed: () => _showApiKeyDialog(provider),
-                          tooltip: 'Configure API Key',
-                        ),
-                    ],
-                  ),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(_getProviderDescription(provider)),
-                      if (capabilities != null) ...[
-                        const SizedBox(height: 4),
-                        Text(
-                          'Languages: ${capabilities.supportedLanguages}, '
-                          'Max size: ${capabilities.maxFileSizeMB}MB, '
-                          'Cost: \$${capabilities.costPerMinute.toStringAsFixed(3)}/min',
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurface.withValues(alpha: 0.6),
-                              ),
-                        ),
-                      ],
-                    ],
-                  ),
-                  value: provider,
-                  groupValue: _selectedProvider,
-                  onChanged: isAvailable
-                      ? (value) {
-                          setState(() {
-                            _selectedProvider = value;
-                          });
-                        }
-                      : null,
-                ),
-              );
-            }),
+          return Card(
+            margin: const EdgeInsets.only(bottom: 8),
+            child: RadioListTile<TranscriptionProvider>(
+              title: Row(
+                children: [
+                  Text(_getProviderDisplayName(provider)),
+                  const SizedBox(width: 8),
+                  if (isAvailable)
+                    Icon(Icons.check_circle, color: Colors.green, size: 16)
+                  else
+                    Icon(Icons.warning, color: Colors.orange, size: 16),
+                  const Spacer(),
+                  if (requiresKey)
+                    IconButton(
+                      icon: const Icon(Icons.key, size: 16),
+                      onPressed: () => _showApiKeyDialog(provider),
+                      tooltip: 'Configure API Key',
+                    ),
+                ],
+              ),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(_getProviderDescription(provider)),
+                  if (capabilities != null) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      'Languages: ${capabilities.supportedLanguages}, '
+                      'Max size: ${capabilities.maxFileSizeMB}MB, '
+                      'Cost: \$${capabilities.costPerMinute.toStringAsFixed(3)}/min',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurface.withValues(alpha: 0.6),
+                          ),
+                    ),
+                  ],
+                ],
+              ),
+              value: provider,
+              groupValue: _selectedProvider,
+              onChanged: isAvailable
+                  ? (value) {
+                      setState(() {
+                        _selectedProvider = value;
+                      });
+                    }
+                  : null,
+            ),
+          );
+        }),
       ],
     );
   }
@@ -415,11 +414,11 @@ class _TranscriptionSettingsDialogState
             ...TranscriptionLanguage.values
                 .where((lang) => lang != TranscriptionLanguage.auto)
                 .map((language) {
-                  return DropdownMenuItem<TranscriptionLanguage?>(
-                    value: language,
-                    child: Text(language.displayName),
-                  );
-                }),
+              return DropdownMenuItem<TranscriptionLanguage?>(
+                value: language,
+                child: Text(language.displayName),
+              );
+            }),
           ],
           onChanged: (value) {
             setState(() {
@@ -512,8 +511,8 @@ class _TranscriptionSettingsDialogState
                   Text(
                     'Transcription Settings',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+                          fontWeight: FontWeight.w600,
+                        ),
                   ),
                   const Spacer(),
                   IconButton(

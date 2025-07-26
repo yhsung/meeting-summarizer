@@ -156,9 +156,8 @@ class AccessAuditLog {
       userId: userId,
       action: AccessAuditAction.login,
       resource: 'authentication',
-      description: success
-          ? 'User logged in successfully'
-          : 'Login attempt failed',
+      description:
+          success ? 'User logged in successfully' : 'Login attempt failed',
       ipAddress: ipAddress,
       userAgent: userAgent,
       location: location,

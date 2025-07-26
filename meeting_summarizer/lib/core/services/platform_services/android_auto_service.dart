@@ -53,7 +53,7 @@ class AndroidAutoService {
 
   /// Callbacks for widget actions
   void Function(WidgetAction action, Map<String, dynamic>? parameters)?
-  onWidgetAction;
+      onWidgetAction;
   void Function(AndroidAutoState state)? onAutoStateChanged;
 
   /// Initialize Android Auto and Widget service

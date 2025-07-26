@@ -56,8 +56,8 @@ class _FeedbackIntegrationWidgetState extends State<FeedbackIntegrationWidget>
     final provider = FeedbackServiceProvider.instance;
     if (provider.isInitialized && provider.feedbackService != null && mounted) {
       // Check if we should show the rating prompt
-      final shouldShow = await provider.feedbackService!
-          .shouldShowRatingPrompt();
+      final shouldShow =
+          await provider.feedbackService!.shouldShowRatingPrompt();
 
       if (shouldShow && mounted) {
         await RatingDialog.showIfAppropriate(

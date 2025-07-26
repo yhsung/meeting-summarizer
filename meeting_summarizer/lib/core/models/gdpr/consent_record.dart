@@ -268,9 +268,8 @@ class ConsentSummary {
     if (records.isEmpty) return 0.0;
 
     final requiredConsents = GDPRConsentType.requiredTypes;
-    final grantedRequired = requiredConsents
-        .where((type) => hasConsent(type))
-        .length;
+    final grantedRequired =
+        requiredConsents.where((type) => hasConsent(type)).length;
 
     return grantedRequired / requiredConsents.length;
   }

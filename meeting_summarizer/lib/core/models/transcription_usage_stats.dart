@@ -150,9 +150,8 @@ class TranscriptionUsageStats {
     String? errorType,
   }) {
     final newTotalRequests = totalRequests + 1;
-    final newSuccessfulRequests = success
-        ? successfulRequests + 1
-        : successfulRequests;
+    final newSuccessfulRequests =
+        success ? successfulRequests + 1 : successfulRequests;
     final newFailedRequests = success ? failedRequests : failedRequests + 1;
     final newTotalProcessingTime = totalProcessingTime + processingTime;
     final newAverageProcessingTime =
@@ -370,10 +369,10 @@ class PeakUsageMetrics {
     DateTime? peakDailyRequestsDate,
     this.peakHourlyRequests = 0,
     DateTime? peakHourlyRequestsTime,
-  }) : peakDailyRequestsDate =
-           peakDailyRequestsDate ?? DateTime.fromMillisecondsSinceEpoch(0),
-       peakHourlyRequestsTime =
-           peakHourlyRequestsTime ?? DateTime.fromMillisecondsSinceEpoch(0);
+  })  : peakDailyRequestsDate =
+            peakDailyRequestsDate ?? DateTime.fromMillisecondsSinceEpoch(0),
+        peakHourlyRequestsTime =
+            peakHourlyRequestsTime ?? DateTime.fromMillisecondsSinceEpoch(0);
 
   PeakUsageMetrics updateWithNewRequest({
     required Duration processingTime,

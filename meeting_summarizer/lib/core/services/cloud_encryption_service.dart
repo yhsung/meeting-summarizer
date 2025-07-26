@@ -204,8 +204,7 @@ class CloudEncryptionService {
       log('CloudEncryptionService: Encrypting ${chunks.length} file chunks');
 
       // Create or use existing encryption key
-      final chunkKeyId =
-          keyId ??
+      final chunkKeyId = keyId ??
           await createFileEncryptionKey(
             'chunks_${DateTime.now().millisecondsSinceEpoch}',
             provider,
@@ -481,11 +480,8 @@ class CloudEncryptionService {
     }
 
     // Generate authentication tag
-    final tag = sha256
-        .convert(ciphertext + key + iv)
-        .bytes
-        .take(_tagSize)
-        .toList();
+    final tag =
+        sha256.convert(ciphertext + key + iv).bytes.take(_tagSize).toList();
 
     return {'ciphertext': ciphertext, 'tag': Uint8List.fromList(tag)};
   }
@@ -498,11 +494,8 @@ class CloudEncryptionService {
     Uint8List tag,
   ) async {
     // Verify authentication tag first
-    final expectedTag = sha256
-        .convert(ciphertext + key + iv)
-        .bytes
-        .take(_tagSize)
-        .toList();
+    final expectedTag =
+        sha256.convert(ciphertext + key + iv).bytes.take(_tagSize).toList();
 
     if (!_constantTimeEquals(tag, expectedTag)) {
       throw StateError('Authentication tag verification failed');
@@ -604,16 +597,16 @@ class EncryptedFileMetadata {
   });
 
   Map<String, dynamic> toJson() => {
-    'originalSize': originalSize,
-    'encryptedSize': encryptedSize,
-    'keyId': keyId,
-    'iv': iv,
-    'salt': salt,
-    'tag': tag,
-    'algorithm': algorithm,
-    'created': created.toIso8601String(),
-    'checksum': checksum,
-  };
+        'originalSize': originalSize,
+        'encryptedSize': encryptedSize,
+        'keyId': keyId,
+        'iv': iv,
+        'salt': salt,
+        'tag': tag,
+        'algorithm': algorithm,
+        'created': created.toIso8601String(),
+        'checksum': checksum,
+      };
 
   factory EncryptedFileMetadata.fromJson(Map<String, dynamic> json) =>
       EncryptedFileMetadata(
@@ -656,16 +649,16 @@ class EncryptedFileChunk {
   });
 
   Map<String, dynamic> toJson() => {
-    'index': index,
-    'offset': offset,
-    'originalSize': originalSize,
-    'encryptedSize': encryptedSize,
-    'iv': iv,
-    'salt': salt,
-    'tag': tag,
-    'originalChecksum': originalChecksum,
-    'keyId': keyId,
-  };
+        'index': index,
+        'offset': offset,
+        'originalSize': originalSize,
+        'encryptedSize': encryptedSize,
+        'iv': iv,
+        'salt': salt,
+        'tag': tag,
+        'originalChecksum': originalChecksum,
+        'keyId': keyId,
+      };
 
   factory EncryptedFileChunk.fromJson(Map<String, dynamic> json) =>
       EncryptedFileChunk(

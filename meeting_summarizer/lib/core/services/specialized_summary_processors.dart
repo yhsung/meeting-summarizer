@@ -88,8 +88,7 @@ Provide a comprehensive list of all actionable items:''';
         createdAt: DateTime.now(),
         sourceTranscriptionId: sessionId ?? _uuid.v4(),
         metadata: SummarizationMetadata(
-          totalTokens:
-              (transcriptionText.length / 4).ceil() +
+          totalTokens: (transcriptionText.length / 4).ceil() +
               (summaryContent.length / 4).ceil(),
           promptTokens: (transcriptionText.length / 4).ceil(),
           completionTokens: (summaryContent.length / 4).ceil(),
@@ -291,12 +290,10 @@ Provide a comprehensive list of all actionable items:''';
     double score = 0.7;
 
     // Higher confidence for more detailed items
-    final itemsWithAssignees = items
-        .where((item) => item.assignee != null)
-        .length;
-    final itemsWithDueDates = items
-        .where((item) => item.dueDate != null)
-        .length;
+    final itemsWithAssignees =
+        items.where((item) => item.assignee != null).length;
+    final itemsWithDueDates =
+        items.where((item) => item.dueDate != null).length;
 
     score += (itemsWithAssignees / items.length) * 0.15;
     score += (itemsWithDueDates / items.length) * 0.15;
@@ -370,8 +367,7 @@ Provide a concise, strategic executive summary:''';
         keyDecisions: configuration.identifyDecisions
             ? await _extractStrategicDecisions(summaryContent, aiCall)
             : [],
-        topics:
-            [], // Executive summaries focus on strategic points, not detailed topics
+        topics: [], // Executive summaries focus on strategic points, not detailed topics
         keyHighlights: _extractExecutiveHighlights(processedContent),
         confidenceScore: _calculateExecutiveConfidence(
           processedContent,
@@ -385,8 +381,7 @@ Provide a concise, strategic executive summary:''';
         createdAt: DateTime.now(),
         sourceTranscriptionId: sessionId ?? _uuid.v4(),
         metadata: SummarizationMetadata(
-          totalTokens:
-              (transcriptionText.length / 4).ceil() +
+          totalTokens: (transcriptionText.length / 4).ceil() +
               (processedContent.length / 4).ceil(),
           promptTokens: (transcriptionText.length / 4).ceil(),
           completionTokens: (processedContent.length / 4).ceil(),

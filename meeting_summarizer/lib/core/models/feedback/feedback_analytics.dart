@@ -90,15 +90,12 @@ class FeedbackAnalytics {
       averageRating: ratings.isEmpty
           ? 0.0
           : ratings.reduce((a, b) => a + b) / ratings.length,
-      bugReports: feedback
-          .where((f) => f.type == FeedbackType.bugReport)
-          .length,
-      featureRequests: feedback
-          .where((f) => f.type == FeedbackType.featureRequest)
-          .length,
-      generalFeedback: feedback
-          .where((f) => f.type == FeedbackType.general)
-          .length,
+      bugReports:
+          feedback.where((f) => f.type == FeedbackType.bugReport).length,
+      featureRequests:
+          feedback.where((f) => f.type == FeedbackType.featureRequest).length,
+      generalFeedback:
+          feedback.where((f) => f.type == FeedbackType.general).length,
       lastFeedbackDate: feedback
           .map((f) => f.createdAt)
           .reduce((a, b) => a.isAfter(b) ? a : b),

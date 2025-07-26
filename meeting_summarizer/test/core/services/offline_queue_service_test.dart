@@ -28,11 +28,11 @@ void main() {
 
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-            if (methodCall.method == 'getApplicationDocumentsDirectory') {
-              return temporaryDirectory.path;
-            }
-            return null;
-          });
+        if (methodCall.method == 'getApplicationDocumentsDirectory') {
+          return temporaryDirectory.path;
+        }
+        return null;
+      });
     });
 
     tearDownAll(() async {

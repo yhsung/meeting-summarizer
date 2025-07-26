@@ -48,45 +48,45 @@ class AppComponentThemes {
   /// Light theme elevated button
   static final ElevatedButtonThemeData lightElevatedButtonTheme =
       ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
-          foregroundColor: Color(0xFFFFFFFF),
-          backgroundColor: Color(0xFF1976D2),
-          disabledForegroundColor: Color(0xFF1C1B1F).withValues(alpha: 0.38),
-          disabledBackgroundColor: Color(0xFF1C1B1F).withValues(alpha: 0.12),
-          shadowColor: Color(0xFF000000),
-          elevation: 3,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          textStyle: TextStyle(
-            fontFamily: 'Roboto',
-            fontSize: 14.0,
-            fontWeight: FontWeight.w500,
-            letterSpacing: 0.1,
-          ),
-        ),
-      );
+    style: ElevatedButton.styleFrom(
+      foregroundColor: Color(0xFFFFFFFF),
+      backgroundColor: Color(0xFF1976D2),
+      disabledForegroundColor: Color(0xFF1C1B1F).withValues(alpha: 0.38),
+      disabledBackgroundColor: Color(0xFF1C1B1F).withValues(alpha: 0.12),
+      shadowColor: Color(0xFF000000),
+      elevation: 3,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+      textStyle: TextStyle(
+        fontFamily: 'Roboto',
+        fontSize: 14.0,
+        fontWeight: FontWeight.w500,
+        letterSpacing: 0.1,
+      ),
+    ),
+  );
 
   /// Light theme outlined button
   static final OutlinedButtonThemeData lightOutlinedButtonTheme =
       OutlinedButtonThemeData(
-        style: OutlinedButton.styleFrom(
-          foregroundColor: Color(0xFF1976D2),
-          disabledForegroundColor: Color(0xFF1C1B1F).withValues(alpha: 0.38),
-          side: BorderSide(color: Color(0xFF79747E), width: 1),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          textStyle: TextStyle(
-            fontFamily: 'Roboto',
-            fontSize: 14.0,
-            fontWeight: FontWeight.w500,
-            letterSpacing: 0.1,
-          ),
-        ),
-      );
+    style: OutlinedButton.styleFrom(
+      foregroundColor: Color(0xFF1976D2),
+      disabledForegroundColor: Color(0xFF1C1B1F).withValues(alpha: 0.38),
+      side: BorderSide(color: Color(0xFF79747E), width: 1),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+      textStyle: TextStyle(
+        fontFamily: 'Roboto',
+        fontSize: 14.0,
+        fontWeight: FontWeight.w500,
+        letterSpacing: 0.1,
+      ),
+    ),
+  );
 
   /// Light theme text button
   static final TextButtonThemeData lightTextButtonTheme = TextButtonThemeData(
@@ -107,35 +107,35 @@ class AppComponentThemes {
   /// Light theme floating action button
   static const FloatingActionButtonThemeData lightFloatingActionButtonTheme =
       FloatingActionButtonThemeData(
-        foregroundColor: Color(0xFFFFFFFF),
-        backgroundColor: Color(0xFF1976D2),
-        elevation: 6,
-        focusElevation: 8,
-        hoverElevation: 8,
-        highlightElevation: 12,
-        disabledElevation: 0,
-        shape: CircleBorder(),
-      );
+    foregroundColor: Color(0xFFFFFFFF),
+    backgroundColor: Color(0xFF1976D2),
+    elevation: 6,
+    focusElevation: 8,
+    hoverElevation: 8,
+    highlightElevation: 12,
+    disabledElevation: 0,
+    shape: CircleBorder(),
+  );
 
   /// Light theme bottom navigation bar
   static const BottomNavigationBarThemeData lightBottomNavigationBarTheme =
       BottomNavigationBarThemeData(
-        backgroundColor: Color(0xFFFFFBFE),
-        selectedItemColor: Color(0xFF1976D2),
-        unselectedItemColor: Color(0xFF49454F),
-        type: BottomNavigationBarType.fixed,
-        elevation: 3,
-        selectedLabelStyle: TextStyle(
-          fontFamily: 'Roboto',
-          fontSize: 12.0,
-          fontWeight: FontWeight.w500,
-        ),
-        unselectedLabelStyle: TextStyle(
-          fontFamily: 'Roboto',
-          fontSize: 12.0,
-          fontWeight: FontWeight.w500,
-        ),
-      );
+    backgroundColor: Color(0xFFFFFBFE),
+    selectedItemColor: Color(0xFF1976D2),
+    unselectedItemColor: Color(0xFF49454F),
+    type: BottomNavigationBarType.fixed,
+    elevation: 3,
+    selectedLabelStyle: TextStyle(
+      fontFamily: 'Roboto',
+      fontSize: 12.0,
+      fontWeight: FontWeight.w500,
+    ),
+    unselectedLabelStyle: TextStyle(
+      fontFamily: 'Roboto',
+      fontSize: 12.0,
+      fontWeight: FontWeight.w500,
+    ),
+  );
 
   /// Light theme switch
   static final SwitchThemeData lightSwitchTheme = SwitchThemeData(
@@ -160,31 +160,31 @@ class AppComponentThemes {
   /// Light theme segmented button
   static final SegmentedButtonThemeData lightSegmentedButtonTheme =
       SegmentedButtonThemeData(
-        style: ButtonStyle(
-          foregroundColor: WidgetStateProperty.resolveWith<Color>((
-            Set<WidgetState> states,
-          ) {
-            if (states.contains(WidgetState.selected)) {
-              return Color(0xFF1976D2);
-            }
-            return Color(0xFF49454F);
-          }),
-          backgroundColor: WidgetStateProperty.resolveWith<Color>((
-            Set<WidgetState> states,
-          ) {
-            if (states.contains(WidgetState.selected)) {
-              return Color(0xFFBBDEFB);
-            }
-            return Color(0xFFFFFBFE);
-          }),
-          shape: WidgetStateProperty.all(
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          ),
-          side: WidgetStateProperty.all(
-            BorderSide(color: Color(0xFF79747E), width: 1),
-          ),
-        ),
-      );
+    style: ButtonStyle(
+      foregroundColor: WidgetStateProperty.resolveWith<Color>((
+        Set<WidgetState> states,
+      ) {
+        if (states.contains(WidgetState.selected)) {
+          return Color(0xFF1976D2);
+        }
+        return Color(0xFF49454F);
+      }),
+      backgroundColor: WidgetStateProperty.resolveWith<Color>((
+        Set<WidgetState> states,
+      ) {
+        if (states.contains(WidgetState.selected)) {
+          return Color(0xFFBBDEFB);
+        }
+        return Color(0xFFFFFBFE);
+      }),
+      shape: WidgetStateProperty.all(
+        RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      ),
+      side: WidgetStateProperty.all(
+        BorderSide(color: Color(0xFF79747E), width: 1),
+      ),
+    ),
+  );
 
   /// Light theme slider
   static final SliderThemeData lightSliderTheme = SliderThemeData(
@@ -204,11 +204,11 @@ class AppComponentThemes {
   /// Light theme progress indicator
   static const ProgressIndicatorThemeData lightProgressIndicatorTheme =
       ProgressIndicatorThemeData(
-        color: Color(0xFF1976D2),
-        linearTrackColor: Color(0xFF79747E),
-        circularTrackColor: Color(0xFF79747E),
-        refreshBackgroundColor: Color(0xFFFFFBFE),
-      );
+    color: Color(0xFF1976D2),
+    linearTrackColor: Color(0xFF79747E),
+    circularTrackColor: Color(0xFF79747E),
+    refreshBackgroundColor: Color(0xFFFFFBFE),
+  );
 
   /// Light theme divider
   static const DividerThemeData lightDividerTheme = DividerThemeData(
@@ -312,45 +312,45 @@ class AppComponentThemes {
   /// Dark theme elevated button
   static final ElevatedButtonThemeData darkElevatedButtonTheme =
       ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
-          foregroundColor: Color(0xFF0D47A1),
-          backgroundColor: Color(0xFF90CAF9),
-          disabledForegroundColor: Color(0xFFE6E1E5).withValues(alpha: 0.38),
-          disabledBackgroundColor: Color(0xFFE6E1E5).withValues(alpha: 0.12),
-          shadowColor: Color(0xFF000000),
-          elevation: 3,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          textStyle: TextStyle(
-            fontFamily: 'Roboto',
-            fontSize: 14.0,
-            fontWeight: FontWeight.w500,
-            letterSpacing: 0.1,
-          ),
-        ),
-      );
+    style: ElevatedButton.styleFrom(
+      foregroundColor: Color(0xFF0D47A1),
+      backgroundColor: Color(0xFF90CAF9),
+      disabledForegroundColor: Color(0xFFE6E1E5).withValues(alpha: 0.38),
+      disabledBackgroundColor: Color(0xFFE6E1E5).withValues(alpha: 0.12),
+      shadowColor: Color(0xFF000000),
+      elevation: 3,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+      textStyle: TextStyle(
+        fontFamily: 'Roboto',
+        fontSize: 14.0,
+        fontWeight: FontWeight.w500,
+        letterSpacing: 0.1,
+      ),
+    ),
+  );
 
   /// Dark theme outlined button
   static final OutlinedButtonThemeData darkOutlinedButtonTheme =
       OutlinedButtonThemeData(
-        style: OutlinedButton.styleFrom(
-          foregroundColor: Color(0xFF90CAF9),
-          disabledForegroundColor: Color(0xFFE6E1E5).withValues(alpha: 0.38),
-          side: BorderSide(color: Color(0xFF938F99), width: 1),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          textStyle: TextStyle(
-            fontFamily: 'Roboto',
-            fontSize: 14.0,
-            fontWeight: FontWeight.w500,
-            letterSpacing: 0.1,
-          ),
-        ),
-      );
+    style: OutlinedButton.styleFrom(
+      foregroundColor: Color(0xFF90CAF9),
+      disabledForegroundColor: Color(0xFFE6E1E5).withValues(alpha: 0.38),
+      side: BorderSide(color: Color(0xFF938F99), width: 1),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+      textStyle: TextStyle(
+        fontFamily: 'Roboto',
+        fontSize: 14.0,
+        fontWeight: FontWeight.w500,
+        letterSpacing: 0.1,
+      ),
+    ),
+  );
 
   /// Dark theme text button
   static final TextButtonThemeData darkTextButtonTheme = TextButtonThemeData(
@@ -371,35 +371,35 @@ class AppComponentThemes {
   /// Dark theme floating action button
   static const FloatingActionButtonThemeData darkFloatingActionButtonTheme =
       FloatingActionButtonThemeData(
-        foregroundColor: Color(0xFF0D47A1),
-        backgroundColor: Color(0xFF90CAF9),
-        elevation: 6,
-        focusElevation: 8,
-        hoverElevation: 8,
-        highlightElevation: 12,
-        disabledElevation: 0,
-        shape: CircleBorder(),
-      );
+    foregroundColor: Color(0xFF0D47A1),
+    backgroundColor: Color(0xFF90CAF9),
+    elevation: 6,
+    focusElevation: 8,
+    hoverElevation: 8,
+    highlightElevation: 12,
+    disabledElevation: 0,
+    shape: CircleBorder(),
+  );
 
   /// Dark theme bottom navigation bar
   static const BottomNavigationBarThemeData darkBottomNavigationBarTheme =
       BottomNavigationBarThemeData(
-        backgroundColor: Color(0xFF1C1B1F),
-        selectedItemColor: Color(0xFF90CAF9),
-        unselectedItemColor: Color(0xFFCAC4D0),
-        type: BottomNavigationBarType.fixed,
-        elevation: 3,
-        selectedLabelStyle: TextStyle(
-          fontFamily: 'Roboto',
-          fontSize: 12.0,
-          fontWeight: FontWeight.w500,
-        ),
-        unselectedLabelStyle: TextStyle(
-          fontFamily: 'Roboto',
-          fontSize: 12.0,
-          fontWeight: FontWeight.w500,
-        ),
-      );
+    backgroundColor: Color(0xFF1C1B1F),
+    selectedItemColor: Color(0xFF90CAF9),
+    unselectedItemColor: Color(0xFFCAC4D0),
+    type: BottomNavigationBarType.fixed,
+    elevation: 3,
+    selectedLabelStyle: TextStyle(
+      fontFamily: 'Roboto',
+      fontSize: 12.0,
+      fontWeight: FontWeight.w500,
+    ),
+    unselectedLabelStyle: TextStyle(
+      fontFamily: 'Roboto',
+      fontSize: 12.0,
+      fontWeight: FontWeight.w500,
+    ),
+  );
 
   /// Dark theme switch
   static final SwitchThemeData darkSwitchTheme = SwitchThemeData(
@@ -424,31 +424,31 @@ class AppComponentThemes {
   /// Dark theme segmented button
   static final SegmentedButtonThemeData darkSegmentedButtonTheme =
       SegmentedButtonThemeData(
-        style: ButtonStyle(
-          foregroundColor: WidgetStateProperty.resolveWith<Color>((
-            Set<WidgetState> states,
-          ) {
-            if (states.contains(WidgetState.selected)) {
-              return Color(0xFF90CAF9);
-            }
-            return Color(0xFFCAC4D0);
-          }),
-          backgroundColor: WidgetStateProperty.resolveWith<Color>((
-            Set<WidgetState> states,
-          ) {
-            if (states.contains(WidgetState.selected)) {
-              return Color(0xFF1565C0);
-            }
-            return Color(0xFF1C1B1F);
-          }),
-          shape: WidgetStateProperty.all(
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          ),
-          side: WidgetStateProperty.all(
-            BorderSide(color: Color(0xFF938F99), width: 1),
-          ),
-        ),
-      );
+    style: ButtonStyle(
+      foregroundColor: WidgetStateProperty.resolveWith<Color>((
+        Set<WidgetState> states,
+      ) {
+        if (states.contains(WidgetState.selected)) {
+          return Color(0xFF90CAF9);
+        }
+        return Color(0xFFCAC4D0);
+      }),
+      backgroundColor: WidgetStateProperty.resolveWith<Color>((
+        Set<WidgetState> states,
+      ) {
+        if (states.contains(WidgetState.selected)) {
+          return Color(0xFF1565C0);
+        }
+        return Color(0xFF1C1B1F);
+      }),
+      shape: WidgetStateProperty.all(
+        RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      ),
+      side: WidgetStateProperty.all(
+        BorderSide(color: Color(0xFF938F99), width: 1),
+      ),
+    ),
+  );
 
   /// Dark theme slider
   static final SliderThemeData darkSliderTheme = SliderThemeData(
@@ -468,11 +468,11 @@ class AppComponentThemes {
   /// Dark theme progress indicator
   static const ProgressIndicatorThemeData darkProgressIndicatorTheme =
       ProgressIndicatorThemeData(
-        color: Color(0xFF90CAF9),
-        linearTrackColor: Color(0xFF938F99),
-        circularTrackColor: Color(0xFF938F99),
-        refreshBackgroundColor: Color(0xFF1C1B1F),
-      );
+    color: Color(0xFF90CAF9),
+    linearTrackColor: Color(0xFF938F99),
+    circularTrackColor: Color(0xFF938F99),
+    refreshBackgroundColor: Color(0xFF1C1B1F),
+  );
 
   /// Dark theme divider
   static const DividerThemeData darkDividerTheme = DividerThemeData(

@@ -93,8 +93,7 @@ class MeetingNotesProcessor extends SummaryTypeProcessor {
         createdAt: DateTime.now(),
         sourceTranscriptionId: sessionId ?? _uuid.v4(),
         metadata: SummarizationMetadata(
-          totalTokens:
-              (transcriptionText.length / 4).ceil() +
+          totalTokens: (transcriptionText.length / 4).ceil() +
               (formattedNotes.length / 4).ceil(),
           promptTokens: (transcriptionText.length / 4).ceil(),
           completionTokens: (formattedNotes.length / 4).ceil(),
@@ -255,12 +254,11 @@ class MeetingNotesProcessor extends SummaryTypeProcessor {
         // Increment time based on content length
         final wordCount = content.split(' ').length;
         final estimatedDuration = Duration(
-          milliseconds: (wordCount * 0.5 * 1000)
-              .round(), // ~0.5 seconds per word
+          milliseconds:
+              (wordCount * 0.5 * 1000).round(), // ~0.5 seconds per word
         );
         currentTime = Duration(
-          milliseconds:
-              currentTime.inMilliseconds +
+          milliseconds: currentTime.inMilliseconds +
               estimatedDuration.inMilliseconds.clamp(
                 avgSpeakingDuration.inMilliseconds ~/ 2,
                 avgSpeakingDuration.inMilliseconds * 2,
@@ -711,11 +709,11 @@ Return topics with timeline context.''';
       Duration? associatedTimestamp;
       for (final timestamp in timestampData) {
         if (description.toLowerCase().contains(
-              timestamp.speaker.toLowerCase(),
-            ) ||
+                  timestamp.speaker.toLowerCase(),
+                ) ||
             timestamp.content.toLowerCase().contains(
-              description.toLowerCase().split(' ').first,
-            )) {
+                  description.toLowerCase().split(' ').first,
+                )) {
           associatedTimestamp = timestamp.timestamp;
           break;
         }
@@ -752,11 +750,11 @@ Return topics with timeline context.''';
       Duration? associatedTimestamp;
       for (final timestamp in timestampData) {
         if (description.toLowerCase().contains(
-              timestamp.speaker.toLowerCase(),
-            ) ||
+                  timestamp.speaker.toLowerCase(),
+                ) ||
             timestamp.content.toLowerCase().contains(
-              description.toLowerCase().split(' ').first,
-            )) {
+                  description.toLowerCase().split(' ').first,
+                )) {
           associatedTimestamp = timestamp.timestamp;
           break;
         }
@@ -802,8 +800,7 @@ Return topics with timeline context.''';
           .toList();
 
       if (relevantTimestamps.length > 1) {
-        discussionDuration =
-            relevantTimestamps.last.timestamp -
+        discussionDuration = relevantTimestamps.last.timestamp -
             relevantTimestamps.first.timestamp;
       }
 

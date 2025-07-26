@@ -84,9 +84,8 @@ class Summary {
       'word_count': wordCount,
       'character_count': characterCount,
       'key_points': keyPoints != null ? _encodeKeyPoints(keyPoints!) : null,
-      'action_items': actionItems != null
-          ? _encodeActionItems(actionItems!)
-          : null,
+      'action_items':
+          actionItems != null ? _encodeActionItems(actionItems!) : null,
       'sentiment': sentiment.value,
       'created_at': createdAt.millisecondsSinceEpoch,
       'updated_at': updatedAt.millisecondsSinceEpoch,

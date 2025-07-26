@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Meeting Summarizer</string>
+    <string name="quick_settings_label">Meeting Recorder</string>
+    <string name="quick_settings_label_recording">Recording...</string>
+    <string name="widget_recording_control_label">Recording Control</string>
+    <string name="widget_quick_status_label">Quick Status</string>
+    <string name="recording_service_title">Recording Meeting</string>
+    <string name="recording_service_description">Tap to stop recording</string>
+    <string name="device_admin_description">Meeting Summarizer Work Profile</string>
+</resources>

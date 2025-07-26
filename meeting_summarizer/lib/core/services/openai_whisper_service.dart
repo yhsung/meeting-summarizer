@@ -42,24 +42,22 @@ class OpenAIWhisperService implements TranscriptionServiceInterface {
     http.Client? httpClient,
     RetryPolicy? retryPolicy,
     CircuitBreaker? circuitBreaker,
-  }) : _apiKeyService = apiKeyService,
-       _httpClient = httpClient ?? http.Client(),
-       _retryExecutor = RetryExecutor(
-         retryPolicy:
-             retryPolicy ??
-             const RetryPolicy(
-               maxAttempts: 3,
-               initialDelay: Duration(seconds: 1),
-               backoffMultiplier: 2.0,
-               maxDelay: Duration(seconds: 30),
-             ),
-         circuitBreaker:
-             circuitBreaker ??
-             CircuitBreaker(
-               failureThreshold: 5,
-               recoveryTimeout: const Duration(minutes: 2),
-             ),
-       ) {
+  })  : _apiKeyService = apiKeyService,
+        _httpClient = httpClient ?? http.Client(),
+        _retryExecutor = RetryExecutor(
+          retryPolicy: retryPolicy ??
+              const RetryPolicy(
+                maxAttempts: 3,
+                initialDelay: Duration(seconds: 1),
+                backoffMultiplier: 2.0,
+                maxDelay: Duration(seconds: 30),
+              ),
+          circuitBreaker: circuitBreaker ??
+              CircuitBreaker(
+                failureThreshold: 5,
+                recoveryTimeout: const Duration(minutes: 2),
+              ),
+        ) {
     _isClientClosed = false;
   }
 
@@ -457,8 +455,7 @@ class OpenAIWhisperService implements TranscriptionServiceInterface {
         // Ignore JSON parsing error
       }
 
-      final errorMessage =
-          errorData?['error']?['message'] as String? ??
+      final errorMessage = errorData?['error']?['message'] as String? ??
           'HTTP ${response.statusCode}: ${response.reasonPhrase}';
 
       // Create appropriate TranscriptionError based on status code

@@ -35,9 +35,8 @@ class MockStorageOrganizationService extends StorageOrganizationService {
     }
 
     if (categories != null && categories.isNotEmpty) {
-      results = results
-          .where((file) => categories.contains(file.category))
-          .toList();
+      results =
+          results.where((file) => categories.contains(file.category)).toList();
     }
 
     if (tags != null && tags.isNotEmpty) {

@@ -16,10 +16,10 @@ class OneDriveProvider implements CloudProviderInterface {
   static const String _authBaseUrl = 'https://login.microsoftonline.com';
   static const String _commonTenant = 'common';
   static const String _consumerTenant = '9188040d-6c67-4c5b-b112-36a304b66dad';
-  
+
   // Maximum file size for simple upload (4MB)
   static const int _simpleUploadLimit = 4 * 1024 * 1024;
-  
+
   // Chunk size for resumable uploads (10MB)
   static const int _uploadChunkSize = 10 * 1024 * 1024;
 
@@ -49,7 +49,7 @@ class OneDriveProvider implements CloudProviderInterface {
     // Initialize token information if provided
     if (_credentials.containsKey('access_token')) {
       _accessToken = _credentials['access_token'];
-      
+
       // Parse token expiry if provided
       if (_credentials.containsKey('expires_at')) {
         try {
@@ -59,11 +59,11 @@ class OneDriveProvider implements CloudProviderInterface {
         }
       }
     }
-    
+
     if (_credentials.containsKey('refresh_token')) {
       _refreshToken = _credentials['refresh_token'];
     }
-    
+
     if (_credentials.containsKey('account_type')) {
       _accountType = _credentials['account_type'];
     }
@@ -96,11 +96,11 @@ class OneDriveProvider implements CloudProviderInterface {
       if (response.statusCode == 200) {
         final userInfo = json.decode(response.body);
         _userId = userInfo['id'];
-        
+
         // Determine account type based on user principal name or other indicators
         final userPrincipalName = userInfo['userPrincipalName'] as String?;
         if (userPrincipalName != null) {
-          if (userPrincipalName.contains('@outlook.com') || 
+          if (userPrincipalName.contains('@outlook.com') ||
               userPrincipalName.contains('@hotmail.com') ||
               userPrincipalName.contains('@live.com')) {
             _accountType = 'personal';
@@ -108,7 +108,7 @@ class OneDriveProvider implements CloudProviderInterface {
             _accountType = 'work';
           }
         }
-        
+
         log(
           'OneDriveProvider: Connected as ${userInfo['displayName'] ?? "unknown user"} ($_accountType account)',
         );
@@ -148,7 +148,7 @@ class OneDriveProvider implements CloudProviderInterface {
         }
       }
       _uploadSessions.clear();
-      
+
       _httpClient?.close();
       _httpClient = null;
       _accessToken = null;
@@ -213,7 +213,7 @@ class OneDriveProvider implements CloudProviderInterface {
           fileContent: fileContent,
           onProgress: onProgress,
         );
-        
+
         if (success) {
           log('OneDriveProvider: Successfully uploaded $fileName');
           return true;
@@ -228,7 +228,7 @@ class OneDriveProvider implements CloudProviderInterface {
           fileContent: fileContent,
           onProgress: onProgress,
         );
-        
+
         if (success) {
           log('OneDriveProvider: Successfully uploaded large file $fileName');
           return true;
@@ -370,9 +370,8 @@ class OneDriveProvider implements CloudProviderInterface {
 
         final result = <CloudFileInfo>[];
         for (final item in items) {
-          final filePath = path.isEmpty
-              ? item['name']
-              : '$path/${item['name']}';
+          final filePath =
+              path.isEmpty ? item['name'] : '$path/${item['name']}';
           final isDirectory = item['folder'] != null;
 
           result.add(
@@ -587,7 +586,7 @@ class OneDriveProvider implements CloudProviderInterface {
     _accessToken = _credentials['access_token'];
     _refreshToken = _credentials['refresh_token'];
     _accountType = _credentials['account_type'];
-    
+
     if (_credentials.containsKey('expires_at')) {
       try {
         _tokenExpiry = DateTime.parse(_credentials['expires_at']!);
@@ -751,10 +750,11 @@ class OneDriveProvider implements CloudProviderInterface {
 
     try {
       log('OneDriveProvider: Refreshing access token...');
-      
+
       // Determine the correct tenant based on account type
-      final tenant = _accountType == 'personal' ? _consumerTenant : _commonTenant;
-      
+      final tenant =
+          _accountType == 'personal' ? _consumerTenant : _commonTenant;
+
       final response = await _httpClient!.post(
         Uri.parse('$_authBaseUrl/$tenant/oauth2/v2.0/token'),
         headers: {
@@ -764,23 +764,24 @@ class OneDriveProvider implements CloudProviderInterface {
           'client_id': _credentials['client_id']!,
           'refresh_token': _refreshToken!,
           'grant_type': 'refresh_token',
-          'scope': 'https://graph.microsoft.com/Files.ReadWrite.All offline_access',
+          'scope':
+              'https://graph.microsoft.com/Files.ReadWrite.All offline_access',
         },
       );
 
       if (response.statusCode == 200) {
         final tokenData = json.decode(response.body);
         _accessToken = tokenData['access_token'];
-        
+
         if (tokenData.containsKey('refresh_token')) {
           _refreshToken = tokenData['refresh_token'];
         }
-        
+
         if (tokenData.containsKey('expires_in')) {
           final expiresIn = tokenData['expires_in'] as int;
           _tokenExpiry = DateTime.now().add(Duration(seconds: expiresIn));
         }
-        
+
         // Update credentials for persistence
         _credentials['access_token'] = _accessToken!;
         if (_refreshToken != null) {
@@ -789,7 +790,7 @@ class OneDriveProvider implements CloudProviderInterface {
         if (_tokenExpiry != null) {
           _credentials['expires_at'] = _tokenExpiry!.toIso8601String();
         }
-        
+
         log('OneDriveProvider: Access token refreshed successfully');
         return true;
       } else {
@@ -809,19 +810,19 @@ class OneDriveProvider implements CloudProviderInterface {
       throw StateError('Client ID not configured');
     }
 
-    final defaultRedirectUri = redirectUri ?? 'http://localhost:8080/auth/callback';
-    final defaultScopes = scopes ?? [
-      'https://graph.microsoft.com/Files.ReadWrite.All',
-      'offline_access'
-    ];
-    
+    final defaultRedirectUri =
+        redirectUri ?? 'http://localhost:8080/auth/callback';
+    final defaultScopes = scopes ??
+        ['https://graph.microsoft.com/Files.ReadWrite.All', 'offline_access'];
+
     // Determine tenant based on account type preference
     final tenant = _accountType == 'personal' ? _consumerTenant : _commonTenant;
-    
+
     // Generate a random state parameter for security
     final state = _generateRandomString(32);
-    
-    final authUrl = Uri.parse('$_authBaseUrl/$tenant/oauth2/v2.0/authorize').replace(
+
+    final authUrl =
+        Uri.parse('$_authBaseUrl/$tenant/oauth2/v2.0/authorize').replace(
       queryParameters: {
         'client_id': clientId,
         'response_type': 'code',
@@ -848,18 +849,20 @@ class OneDriveProvider implements CloudProviderInterface {
 
     try {
       log('OneDriveProvider: Exchanging authorization code for token...');
-      
+
       // Determine tenant based on account type
-      final tenant = _accountType == 'personal' ? _consumerTenant : _commonTenant;
-      
+      final tenant =
+          _accountType == 'personal' ? _consumerTenant : _commonTenant;
+
       final body = <String, String>{
         'client_id': clientId,
         'code': code,
         'redirect_uri': redirectUri,
         'grant_type': 'authorization_code',
-        'scope': 'https://graph.microsoft.com/Files.ReadWrite.All offline_access',
+        'scope':
+            'https://graph.microsoft.com/Files.ReadWrite.All offline_access',
       };
-      
+
       // Add client secret for confidential clients (work accounts typically)
       if (clientSecret != null) {
         body['client_secret'] = clientSecret;
@@ -875,15 +878,15 @@ class OneDriveProvider implements CloudProviderInterface {
 
       if (response.statusCode == 200) {
         final tokenData = json.decode(response.body);
-        
+
         _accessToken = tokenData['access_token'];
         _refreshToken = tokenData['refresh_token'];
-        
+
         if (tokenData.containsKey('expires_in')) {
           final expiresIn = tokenData['expires_in'] as int;
           _tokenExpiry = DateTime.now().add(Duration(seconds: expiresIn));
         }
-        
+
         // Update credentials
         _credentials['access_token'] = _accessToken!;
         if (_refreshToken != null) {
@@ -892,7 +895,7 @@ class OneDriveProvider implements CloudProviderInterface {
         if (_tokenExpiry != null) {
           _credentials['expires_at'] = _tokenExpiry!.toIso8601String();
         }
-        
+
         log('OneDriveProvider: Successfully obtained access token');
         return true;
       } else {
@@ -916,7 +919,7 @@ class OneDriveProvider implements CloudProviderInterface {
   }) async {
     try {
       if (onProgress != null) onProgress(0.0);
-      
+
       final response = await _httpClient!.put(
         Uri.parse(
           '$_graphBaseUrl/me/drive/items/$parentId:/$fileName:/content',
@@ -955,27 +958,28 @@ class OneDriveProvider implements CloudProviderInterface {
         fileName: fileName,
         fileSize: fileContent.length,
       );
-      
+
       if (sessionUrl == null) {
         log('OneDriveProvider: Failed to create upload session');
         return false;
       }
-      
+
       // Store session for potential cancellation
       _uploadSessions[fileName] = sessionUrl;
-      
+
       try {
         // Upload file in chunks
         final totalSize = fileContent.length;
         int uploadedBytes = 0;
-        
+
         while (uploadedBytes < totalSize) {
           final chunkStart = uploadedBytes;
-          final chunkEnd = math.min(uploadedBytes + _uploadChunkSize, totalSize) - 1;
+          final chunkEnd =
+              math.min(uploadedBytes + _uploadChunkSize, totalSize) - 1;
           final chunkSize = chunkEnd - chunkStart + 1;
-          
+
           final chunk = fileContent.sublist(chunkStart, chunkEnd + 1);
-          
+
           final success = await _uploadChunk(
             sessionUrl: sessionUrl,
             chunk: chunk,
@@ -983,35 +987,33 @@ class OneDriveProvider implements CloudProviderInterface {
             rangeEnd: chunkEnd,
             totalSize: totalSize,
           );
-          
+
           if (!success) {
             log('OneDriveProvider: Chunk upload failed at range $chunkStart-$chunkEnd');
             await _cancelUploadSession(sessionUrl);
             return false;
           }
-          
+
           uploadedBytes += chunkSize;
-          
+
           // Report progress
           if (onProgress != null) {
             final progress = uploadedBytes / totalSize;
             onProgress(progress);
           }
         }
-        
+
         // Remove session from tracking
         _uploadSessions.remove(fileName);
-        
+
         log('OneDriveProvider: Resumable upload completed successfully');
         return true;
-        
       } catch (e) {
         log('OneDriveProvider: Error during chunk upload: $e');
         await _cancelUploadSession(sessionUrl);
         _uploadSessions.remove(fileName);
         return false;
       }
-      
     } catch (e) {
       log('OneDriveProvider: Resumable upload error: $e');
       return false;
@@ -1031,7 +1033,7 @@ class OneDriveProvider implements CloudProviderInterface {
           'name': fileName,
         },
       };
-      
+
       final response = await _httpClient!.post(
         Uri.parse(
           '$_graphBaseUrl/me/drive/items/$parentId:/$fileName:/createUploadSession',
@@ -1039,7 +1041,7 @@ class OneDriveProvider implements CloudProviderInterface {
         headers: _getAuthHeaders(),
         body: json.encode(sessionData),
       );
-      
+
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
         return responseData['uploadUrl'] as String?;
@@ -1070,12 +1072,12 @@ class OneDriveProvider implements CloudProviderInterface {
         },
         body: chunk,
       );
-      
+
       // 202 Accepted means more chunks expected
       // 201 Created means upload complete
       // 200 OK means upload complete
-      if (response.statusCode == 202 || 
-          response.statusCode == 201 || 
+      if (response.statusCode == 202 ||
+          response.statusCode == 201 ||
           response.statusCode == 200) {
         return true;
       } else {
@@ -1110,7 +1112,7 @@ class OneDriveProvider implements CloudProviderInterface {
   }) async {
     try {
       final changes = <CloudFileChange>[];
-      
+
       // Build delta URL
       String deltaUrl;
       if (_deltaToken != null) {
@@ -1120,26 +1122,28 @@ class OneDriveProvider implements CloudProviderInterface {
         // Start new delta query
         deltaUrl = '$_graphBaseUrl/me/drive/root/delta';
       }
-      
+
       // Apply directory filter if specified
       if (directoryPath != null && directoryPath.isNotEmpty) {
         // For directory-specific deltas, we need to use the item path
-        final cleanPath = directoryPath.startsWith('/') ? directoryPath.substring(1) : directoryPath;
+        final cleanPath = directoryPath.startsWith('/')
+            ? directoryPath.substring(1)
+            : directoryPath;
         deltaUrl = '$_graphBaseUrl/me/drive/root:/$cleanPath:/delta';
       }
-      
+
       String? nextLink = deltaUrl;
-      
+
       while (nextLink != null) {
         final response = await _httpClient!.get(
           Uri.parse(nextLink),
           headers: _getAuthHeaders(),
         );
-        
+
         if (response.statusCode == 200) {
           final responseData = json.decode(response.body);
           final items = responseData['value'] as List;
-          
+
           for (final item in items) {
             final change = _parseItemToChange(item, directoryPath);
             if (change != null) {
@@ -1149,12 +1153,13 @@ class OneDriveProvider implements CloudProviderInterface {
               }
             }
           }
-          
+
           // Check for pagination
           nextLink = responseData['@odata.nextLink'] as String?;
-          
+
           // Update delta token if this is the final page
-          if (nextLink == null && responseData.containsKey('@odata.deltaLink')) {
+          if (nextLink == null &&
+              responseData.containsKey('@odata.deltaLink')) {
             final deltaLink = responseData['@odata.deltaLink'] as String;
             final uri = Uri.parse(deltaLink);
             _deltaToken = uri.queryParameters['token'];
@@ -1164,7 +1169,7 @@ class OneDriveProvider implements CloudProviderInterface {
           break;
         }
       }
-      
+
       log('OneDriveProvider: Retrieved ${changes.length} delta changes');
       return changes;
     } catch (e) {
@@ -1174,15 +1179,16 @@ class OneDriveProvider implements CloudProviderInterface {
   }
 
   /// Parse OneDrive item to CloudFileChange
-  CloudFileChange? _parseItemToChange(Map<String, dynamic> item, String? basePath) {
+  CloudFileChange? _parseItemToChange(
+      Map<String, dynamic> item, String? basePath) {
     try {
       final itemName = item['name'] as String?;
       if (itemName == null) return null;
-      
-      final itemPath = basePath != null && basePath.isNotEmpty 
+
+      final itemPath = basePath != null && basePath.isNotEmpty
           ? '$basePath/$itemName'
           : itemName;
-      
+
       // Determine change type
       CloudChangeType changeType;
       if (item.containsKey('deleted')) {
@@ -1190,15 +1196,18 @@ class OneDriveProvider implements CloudProviderInterface {
       } else if (item.containsKey('file') || item.containsKey('folder')) {
         // Check if this is a new item or modified
         final createdDateTime = DateTime.parse(item['createdDateTime']);
-        final lastModifiedDateTime = DateTime.parse(item['lastModifiedDateTime']);
-        
+        final lastModifiedDateTime =
+            DateTime.parse(item['lastModifiedDateTime']);
+
         // If created and modified times are very close, it's likely a new file
-        final timeDiff = lastModifiedDateTime.difference(createdDateTime).inMinutes;
-        changeType = timeDiff < 1 ? CloudChangeType.created : CloudChangeType.modified;
+        final timeDiff =
+            lastModifiedDateTime.difference(createdDateTime).inMinutes;
+        changeType =
+            timeDiff < 1 ? CloudChangeType.created : CloudChangeType.modified;
       } else {
         return null; // Unknown item type
       }
-      
+
       // Create file info if not deleted
       CloudFileInfo? fileInfo;
       if (changeType != CloudChangeType.deleted) {
@@ -1213,7 +1222,7 @@ class OneDriveProvider implements CloudProviderInterface {
           metadata: {'oneDriveItem': item},
         );
       }
-      
+
       return CloudFileChange(
         path: itemPath,
         type: changeType,
@@ -1236,13 +1245,14 @@ class OneDriveProvider implements CloudProviderInterface {
 
   /// Generate a random string for OAuth state parameter
   String _generateRandomString(int length) {
-    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const chars =
+        'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     final random = math.Random.secure();
     return String.fromCharCodes(
-      Iterable.generate(length, (_) => chars.codeUnitAt(random.nextInt(chars.length))),
+      Iterable.generate(
+          length, (_) => chars.codeUnitAt(random.nextInt(chars.length))),
     );
   }
-
 
   /// Check if the current account supports business features
   bool get isBusinessAccount => _accountType == 'work';

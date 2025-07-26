@@ -262,12 +262,11 @@ class FileCategorizationService {
     }
 
     // Add popular tags as suggestions
-    final popularTags =
-        tagFrequency.entries
-            .where((entry) => entry.value >= 3) // Tags used by at least 3 files
-            .map((entry) => entry.key)
-            .toList()
-          ..sort((a, b) => tagFrequency[b]!.compareTo(tagFrequency[a]!));
+    final popularTags = tagFrequency.entries
+        .where((entry) => entry.value >= 3) // Tags used by at least 3 files
+        .map((entry) => entry.key)
+        .toList()
+      ..sort((a, b) => tagFrequency[b]!.compareTo(tagFrequency[a]!));
 
     suggestions.addAll(popularTags.take(10)); // Top 10 popular tags
 
@@ -415,14 +414,10 @@ class FileCategorizationService {
 
   static double _calculateFilenameSimilarity(String name1, String name2) {
     // Simple Jaccard similarity for filename comparison
-    final words1 = name1
-        .split(RegExp(r'\W+'))
-        .where((w) => w.isNotEmpty)
-        .toSet();
-    final words2 = name2
-        .split(RegExp(r'\W+'))
-        .where((w) => w.isNotEmpty)
-        .toSet();
+    final words1 =
+        name1.split(RegExp(r'\W+')).where((w) => w.isNotEmpty).toSet();
+    final words2 =
+        name2.split(RegExp(r'\W+')).where((w) => w.isNotEmpty).toSet();
 
     if (words1.isEmpty && words2.isEmpty) return 1.0;
     if (words1.isEmpty || words2.isEmpty) return 0.0;

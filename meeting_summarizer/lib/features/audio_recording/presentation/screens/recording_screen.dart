@@ -94,14 +94,11 @@ class _RecordingScreenState extends State<RecordingScreen>
   /// Initialize audio recording service
   void _initializeServices() {
     _audioService = AudioRecordingService();
-    _audioService
-        .initialize()
-        .then((_) {
-          setState(() {});
-        })
-        .catchError((error) {
-          _showErrorSnackBar('Failed to initialize audio service: $error');
-        });
+    _audioService.initialize().then((_) {
+      setState(() {});
+    }).catchError((error) {
+      _showErrorSnackBar('Failed to initialize audio service: $error');
+    });
 
     // Initialize transcription settings service
     _initializeTranscriptionSettings();
@@ -389,9 +386,8 @@ class _RecordingScreenState extends State<RecordingScreen>
   String _formatDuration(Duration duration) {
     final minutes = duration.inMinutes.toString().padLeft(2, '0');
     final seconds = (duration.inSeconds % 60).toString().padLeft(2, '0');
-    final centiseconds = ((duration.inMilliseconds % 1000) ~/ 10)
-        .toString()
-        .padLeft(2, '0');
+    final centiseconds =
+        ((duration.inMilliseconds % 1000) ~/ 10).toString().padLeft(2, '0');
     return '$minutes:$seconds.$centiseconds';
   }
 
@@ -461,17 +457,16 @@ class _RecordingScreenState extends State<RecordingScreen>
             children: AudioFormat.values
                 .where((f) => f.isSupportedOnCurrentPlatform)
                 .map((format) {
-                  return RadioListTile<AudioFormat>(
-                    title: Text(format.displayName),
-                    subtitle: Text(format.detailedDescription),
-                    value: format,
-                    groupValue: _selectedFormat,
-                    onChanged: (value) {
-                      Navigator.of(context).pop(value);
-                    },
-                  );
-                })
-                .toList(),
+              return RadioListTile<AudioFormat>(
+                title: Text(format.displayName),
+                subtitle: Text(format.detailedDescription),
+                value: format,
+                groupValue: _selectedFormat,
+                onChanged: (value) {
+                  Navigator.of(context).pop(value);
+                },
+              );
+            }).toList(),
           ),
         );
       },
@@ -1110,9 +1105,8 @@ class _RecordingScreenState extends State<RecordingScreen>
                     BoxShadow(
                       color: _getRecordButtonColor().withValues(alpha: 0.4),
                       blurRadius: 20,
-                      spreadRadius: _recordingState == RecordingState.recording
-                          ? 5
-                          : 0,
+                      spreadRadius:
+                          _recordingState == RecordingState.recording ? 5 : 0,
                     ),
                   ],
                 ),
@@ -1224,8 +1218,7 @@ class _RecordingScreenState extends State<RecordingScreen>
                   style: theme.textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w600,
                     color: theme.colorScheme.primary,
-                    fontSize:
-                        (theme.textTheme.titleSmall?.fontSize ?? 14) *
+                    fontSize: (theme.textTheme.titleSmall?.fontSize ?? 14) *
                         textScale,
                   ),
                 ),

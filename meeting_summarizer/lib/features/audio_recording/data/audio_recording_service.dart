@@ -33,7 +33,7 @@ class AudioRecordingService implements AudioServiceInterface {
   Timer? _amplitudeTimer;
   String? _recordingPath;
   StreamSubscription<Map<PermissionType, PermissionState>>?
-  _permissionSubscription;
+      _permissionSubscription;
 
   /// Constructor with optional platform injection for testing
   AudioRecordingService({
@@ -169,8 +169,7 @@ class AudioRecordingService implements AudioServiceInterface {
       // Prepare file path with fallback directory handling
       String directory;
       try {
-        directory =
-            configuration.outputDirectory ??
+        directory = configuration.outputDirectory ??
             (await getApplicationDocumentsDirectory()).path;
       } catch (e) {
         log('AudioRecordingService: Failed to get documents directory: $e');
@@ -183,9 +182,8 @@ class AudioRecordingService implements AudioServiceInterface {
           fileName ?? 'recording_${DateTime.now().millisecondsSinceEpoch}';
 
       // Use appropriate extension based on platform
-      final extension = Platform.isMacOS
-          ? 'aac'
-          : configuration.format.extension;
+      final extension =
+          Platform.isMacOS ? 'aac' : configuration.format.extension;
       _recordingPath = '$directory/$filename.$extension';
 
       // Start recording using platform implementation with graceful fallback
@@ -574,12 +572,10 @@ class AudioRecordingService implements AudioServiceInterface {
       for (int i = 0; i < chunkSize; i++) {
         // Generate a test signal with some noise
         final t = (now + i) / 1000.0;
-        final signal =
-            0.1 *
+        final signal = 0.1 *
             (math.sin(2 * math.pi * 440 * t) + // 440 Hz tone
-                0.05 *
-                    (math.Random().nextDouble() - 0.5) // Some noise
-                    );
+                0.05 * (math.Random().nextDouble() - 0.5) // Some noise
+            );
         audioChunk[i] = signal;
       }
 
@@ -736,9 +732,8 @@ class AudioRecordingService implements AudioServiceInterface {
         cancelRecording();
 
         // Update session with detailed error information
-        final fullMessage = suggestAction != null
-            ? '$message $suggestAction'
-            : message;
+        final fullMessage =
+            suggestAction != null ? '$message $suggestAction' : message;
 
         _updateSession(
           isRecoverable ? RecordingState.paused : RecordingState.error,

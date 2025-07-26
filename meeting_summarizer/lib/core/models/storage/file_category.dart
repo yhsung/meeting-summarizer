@@ -45,20 +45,20 @@ enum FileCategory {
 
   /// Get all categories that store user content (exclude cache)
   static List<FileCategory> get userContentCategories => [
-    recordings,
-    enhancedAudio,
-    transcriptions,
-    summaries,
-    exports,
-    imports,
-    archive,
-  ];
+        recordings,
+        enhancedAudio,
+        transcriptions,
+        summaries,
+        exports,
+        imports,
+        archive,
+      ];
 
   /// Get categories that can be safely cleaned up
   static List<FileCategory> get cleanupableCategories => [
-    cache,
-    exports, // Old exports can be regenerated
-  ];
+        cache,
+        exports, // Old exports can be regenerated
+      ];
 
   /// Create FileCategory from directory name string
   static FileCategory fromString(String directoryName) {

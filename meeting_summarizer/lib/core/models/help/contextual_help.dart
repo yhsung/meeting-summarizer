@@ -5,7 +5,7 @@ class ContextualHelp {
   final String id;
   final String context; // Screen or widget identifier
   final String
-  trigger; // What triggers this help (first visit, user action, etc.)
+      trigger; // What triggers this help (first visit, user action, etc.)
   final String title;
   final String content;
   final HelpTooltipType type;
@@ -13,7 +13,7 @@ class ContextualHelp {
   final Duration? displayDuration;
   final bool isDismissible;
   final List<String>
-  prerequisites; // Other help items that should be shown first
+      prerequisites; // Other help items that should be shown first
   final Map<String, dynamic>? customData;
 
   const ContextualHelp({

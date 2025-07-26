@@ -230,17 +230,16 @@ class CodecManager {
   }
 
   CodecType _selectForQuality(List<CodecType> codecs) {
-    final losslessCodecs = codecs
-        .where((codec) => _codecDatabase[codec]!.isLossless)
-        .toList();
+    final losslessCodecs =
+        codecs.where((codec) => _codecDatabase[codec]!.isLossless).toList();
     if (losslessCodecs.isNotEmpty) {
       return losslessCodecs.first;
     }
 
     codecs.sort(
       (a, b) => _codecDatabase[b]!.compressionEfficiency.compareTo(
-        _codecDatabase[a]!.compressionEfficiency,
-      ),
+            _codecDatabase[a]!.compressionEfficiency,
+          ),
     );
     return codecs.first;
   }

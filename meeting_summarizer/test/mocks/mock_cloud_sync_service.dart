@@ -237,9 +237,8 @@ class MockCloudSyncService implements CloudSyncInterface {
     await _simulateOperation();
 
     final List<SyncOperation> operations = [];
-    final providersToSync = provider != null
-        ? [provider]
-        : _enabledProviders.toList();
+    final providersToSync =
+        provider != null ? [provider] : _enabledProviders.toList();
 
     for (final syncProvider in providersToSync) {
       _updateProviderSyncStatus(syncProvider, SyncState.syncing);
@@ -353,9 +352,8 @@ class MockCloudSyncService implements CloudSyncInterface {
     }
 
     if (since != null) {
-      operations = operations
-          .where((op) => op.createdAt.isAfter(since))
-          .toList();
+      operations =
+          operations.where((op) => op.createdAt.isAfter(since)).toList();
     }
 
     operations.sort((a, b) => b.createdAt.compareTo(a.createdAt));
@@ -390,8 +388,8 @@ class MockCloudSyncService implements CloudSyncInterface {
     final limits = provider.getStorageLimits();
     final random = math.Random();
     final totalBytes = limits.freeStorageGB * 1024 * 1024 * 1024;
-    final usedBytes = (totalBytes * (0.3 + random.nextDouble() * 0.4))
-        .round(); // 30-70% used
+    final usedBytes =
+        (totalBytes * (0.3 + random.nextDouble() * 0.4)).round(); // 30-70% used
 
     return CloudStorageQuota(
       totalBytes: totalBytes,
@@ -517,8 +515,7 @@ class MockCloudSyncService implements CloudSyncInterface {
 
   void _updateProviderSyncStatus(CloudProvider provider, SyncState state) {
     final currentStatus = _providerSyncStatus[provider];
-    final updatedStatus =
-        currentStatus?.copyWith(
+    final updatedStatus = currentStatus?.copyWith(
           state: state,
           lastSync: state == SyncState.completed
               ? DateTime.now()
@@ -707,8 +704,7 @@ class MockCloudSyncService implements CloudSyncInterface {
     await _simulateOperation();
 
     // Mock connection test - succeeds if provider is enabled and not failing
-    final isConnected =
-        _enabledProviders.contains(provider) &&
+    final isConnected = _enabledProviders.contains(provider) &&
         !_shouldFailOperations &&
         !_shouldSimulateNetworkIssues;
 

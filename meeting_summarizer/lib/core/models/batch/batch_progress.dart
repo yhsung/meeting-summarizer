@@ -72,9 +72,8 @@ class BatchProgress {
     required Duration elapsedTime,
     Duration? estimatedTimeRemaining,
   }) {
-    final percentage = totalFiles > 0
-        ? (processedFiles / totalFiles) * 100
-        : 0.0;
+    final percentage =
+        totalFiles > 0 ? (processedFiles / totalFiles) * 100 : 0.0;
 
     return BatchProgress(
       batchId: batchId,
@@ -132,9 +131,8 @@ class BatchProgress {
     required DateTime startTime,
     required Duration elapsedTime,
   }) {
-    final percentage = totalFiles > 0
-        ? (processedFiles / totalFiles) * 100
-        : 0.0;
+    final percentage =
+        totalFiles > 0 ? (processedFiles / totalFiles) * 100 : 0.0;
 
     return BatchProgress(
       batchId: batchId,

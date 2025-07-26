@@ -204,9 +204,8 @@ class MockWhisperApiService implements TranscriptionServiceInterface {
 
   @override
   Future<TranscriptionUsageStats> getUsageStats() async {
-    final failedRequests = _shouldFailTranscription
-        ? _totalRequestsProcessed
-        : 0;
+    final failedRequests =
+        _shouldFailTranscription ? _totalRequestsProcessed : 0;
     final successfulRequests = _totalRequestsProcessed - failedRequests;
 
     return TranscriptionUsageStats(
@@ -218,8 +217,8 @@ class MockWhisperApiService implements TranscriptionServiceInterface {
             _mockTranscriptionDelay.inMilliseconds * _totalRequestsProcessed,
       ),
       averageProcessingTime: _mockTranscriptionDelay.inMilliseconds.toDouble(),
-      totalAudioMinutes: (_totalRequestsProcessed * 2.5)
-          .round(), // ~2.5 minutes per request
+      totalAudioMinutes:
+          (_totalRequestsProcessed * 2.5).round(), // ~2.5 minutes per request
       lastRequestTime: DateTime.now(),
       peakMetrics: PeakUsageMetrics(),
     );

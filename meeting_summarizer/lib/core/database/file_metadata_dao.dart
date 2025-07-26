@@ -10,8 +10,7 @@ class FileMetadataDao {
   static const String tableName = 'file_metadata';
 
   /// SQL for creating the file metadata table
-  static const String createTableSql =
-      '''
+  static const String createTableSql = '''
     CREATE TABLE $tableName (
       id TEXT PRIMARY KEY,
       file_name TEXT NOT NULL,
@@ -42,8 +41,7 @@ class FileMetadataDao {
   ];
 
   /// SQL for full-text search virtual table
-  static const String createFtsSql =
-      '''
+  static const String createFtsSql = '''
     CREATE VIRTUAL TABLE ${tableName}_fts USING fts5(
       id UNINDEXED,
       file_name,
@@ -115,9 +113,8 @@ class FileMetadataDao {
     bool includeArchived = false,
   }) async {
     final db = await _databaseHelper.database;
-    final whereClause = includeArchived
-        ? 'category = ?'
-        : 'category = ? AND is_archived = 0';
+    final whereClause =
+        includeArchived ? 'category = ?' : 'category = ? AND is_archived = 0';
 
     final results = await db.query(
       tableName,
@@ -139,9 +136,8 @@ class FileMetadataDao {
 
     // Build WHERE clause for tag matching
     final tagConditions = tags.map((tag) => "tags LIKE '%\"$tag\"%'").toList();
-    final tagClause = matchAll
-        ? tagConditions.join(' AND ')
-        : tagConditions.join(' OR ');
+    final tagClause =
+        matchAll ? tagConditions.join(' AND ') : tagConditions.join(' OR ');
 
     final archiveClause = includeArchived ? '' : ' AND is_archived = 0';
     final whereClause = '($tagClause)$archiveClause';
@@ -207,17 +203,15 @@ class FileMetadataDao {
 
     // Tag filter
     if (tags != null && tags.isNotEmpty) {
-      final tagConditions = tags
-          .map((tag) => "tags LIKE '%\"$tag\"%'")
-          .toList();
+      final tagConditions =
+          tags.map((tag) => "tags LIKE '%\"$tag\"%'").toList();
       whereClauses.add('(${tagConditions.join(' OR ')})');
     }
 
     // Full-text search
     String fromClause = tableName;
     if (query != null && query.isNotEmpty) {
-      fromClause =
-          '''
+      fromClause = '''
         $tableName 
         JOIN ${tableName}_fts ON $tableName.rowid = ${tableName}_fts.rowid
       ''';
@@ -226,9 +220,8 @@ class FileMetadataDao {
     }
 
     // Build final query
-    final whereClause = whereClauses.isNotEmpty
-        ? whereClauses.join(' AND ')
-        : null;
+    final whereClause =
+        whereClauses.isNotEmpty ? whereClauses.join(' AND ') : null;
 
     final results = await db.query(
       fromClause,

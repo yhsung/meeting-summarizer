@@ -112,8 +112,8 @@ class _BackgroundRecordingControllerState
     });
 
     try {
-      final hasPermissions = await widget.audioService
-          .requestBackgroundPermissions();
+      final hasPermissions =
+          await widget.audioService.requestBackgroundPermissions();
       if (!hasPermissions) {
         _showSnackBar('Background permissions required', Icons.error);
         return;

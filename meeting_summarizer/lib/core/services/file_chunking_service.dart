@@ -54,9 +54,8 @@ class FileChunkingService {
 
       while (offset < fileSize) {
         final remainingBytes = fileSize - offset;
-        final currentChunkSize = remainingBytes > chunkSize
-            ? chunkSize
-            : remainingBytes;
+        final currentChunkSize =
+            remainingBytes > chunkSize ? chunkSize : remainingBytes;
 
         await randomAccessFile.setPosition(offset);
         final chunkData = await randomAccessFile.read(currentChunkSize);
@@ -393,9 +392,8 @@ class FileChunkingService {
 
     while (offset < data.length) {
       final remainingBytes = data.length - offset;
-      final currentChunkSize = remainingBytes > chunkSize
-          ? chunkSize
-          : remainingBytes;
+      final currentChunkSize =
+          remainingBytes > chunkSize ? chunkSize : remainingBytes;
 
       final chunkData = data.sublist(offset, offset + currentChunkSize);
 

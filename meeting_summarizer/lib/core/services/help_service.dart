@@ -110,9 +110,8 @@ class HelpService implements HelpServiceInterface {
 
       if (cachedData != null) {
         final List<dynamic> jsonList = json.decode(cachedData);
-        _cachedArticles = jsonList
-            .map((json) => HelpArticle.fromJson(json))
-            .toList();
+        _cachedArticles =
+            jsonList.map((json) => HelpArticle.fromJson(json)).toList();
       } else {
         // Load default articles if no cache
         _cachedArticles = _getDefaultArticles();
@@ -171,9 +170,8 @@ class HelpService implements HelpServiceInterface {
 
       if (cachedData != null) {
         final List<dynamic> jsonList = json.decode(cachedData);
-        _cachedContextualHelp = jsonList
-            .map((json) => ContextualHelp.fromJson(json))
-            .toList();
+        _cachedContextualHelp =
+            jsonList.map((json) => ContextualHelp.fromJson(json)).toList();
       } else {
         _cachedContextualHelp = _getDefaultContextualHelp();
 

@@ -169,7 +169,7 @@ class _SummaryControlsState extends State<SummaryControls>
           value: widget.selectedType,
           onChanged: widget.enabled && !widget.isGenerating
               ? (value) =>
-                    value != null ? widget.onTypeChanged?.call(value) : null
+                  value != null ? widget.onTypeChanged?.call(value) : null
               : null,
           decoration: InputDecoration(
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
@@ -199,7 +199,9 @@ class _SummaryControlsState extends State<SummaryControls>
                         ),
                         Text(
                           _getDescriptionForType(type),
-                          style: Theme.of(context).textTheme.bodySmall
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall
                               ?.copyWith(color: Colors.grey[600]),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,

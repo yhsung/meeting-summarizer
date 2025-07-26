@@ -167,28 +167,27 @@ class _FeedbackFormState extends State<FeedbackForm> {
                       children: FeedbackType.values
                           .where((type) => type != FeedbackType.rating)
                           .map((type) {
-                            final isSelected = _selectedType == type;
-                            return FilterChip(
-                              label: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(type.icon),
-                                  const SizedBox(width: 4),
-                                  Text(type.displayName),
-                                ],
-                              ),
-                              selected: isSelected,
-                              onSelected: (selected) {
-                                if (selected) {
-                                  setState(() {
-                                    _selectedType = type;
-                                    _populateDefaultSubject();
-                                  });
-                                }
-                              },
-                            );
-                          })
-                          .toList(),
+                        final isSelected = _selectedType == type;
+                        return FilterChip(
+                          label: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(type.icon),
+                              const SizedBox(width: 4),
+                              Text(type.displayName),
+                            ],
+                          ),
+                          selected: isSelected,
+                          onSelected: (selected) {
+                            if (selected) {
+                              setState(() {
+                                _selectedType = type;
+                                _populateDefaultSubject();
+                              });
+                            }
+                          },
+                        );
+                      }).toList(),
                     ),
                   ],
                 ),

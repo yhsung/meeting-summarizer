@@ -85,21 +85,21 @@ enum SummaryType {
 
   /// Get summary types suitable for meetings
   static List<SummaryType> get meetingTypes => [
-    SummaryType.brief,
-    SummaryType.detailed,
-    SummaryType.actionItems,
-    SummaryType.executive,
-    SummaryType.meetingNotes,
-    SummaryType.keyHighlights,
-  ];
+        SummaryType.brief,
+        SummaryType.detailed,
+        SummaryType.actionItems,
+        SummaryType.executive,
+        SummaryType.meetingNotes,
+        SummaryType.keyHighlights,
+      ];
 
   /// Get summary types suitable for content analysis
   static List<SummaryType> get analysisTypes => [
-    SummaryType.topical,
-    SummaryType.speakerFocused,
-    SummaryType.bulletPoints,
-    SummaryType.keyHighlights,
-  ];
+        SummaryType.topical,
+        SummaryType.speakerFocused,
+        SummaryType.bulletPoints,
+        SummaryType.keyHighlights,
+      ];
 
   @override
   String toString() => value;
@@ -220,20 +220,20 @@ enum SummaryFocus {
 
   /// Get business-focused areas
   static List<SummaryFocus> get businessFocuses => [
-    SummaryFocus.decisions,
-    SummaryFocus.business,
-    SummaryFocus.strategic,
-    SummaryFocus.financial,
-    SummaryFocus.opportunities,
-  ];
+        SummaryFocus.decisions,
+        SummaryFocus.business,
+        SummaryFocus.strategic,
+        SummaryFocus.financial,
+        SummaryFocus.opportunities,
+      ];
 
   /// Get project-focused areas
   static List<SummaryFocus> get projectFocuses => [
-    SummaryFocus.actions,
-    SummaryFocus.technical,
-    SummaryFocus.timeline,
-    SummaryFocus.risks,
-  ];
+        SummaryFocus.actions,
+        SummaryFocus.technical,
+        SummaryFocus.timeline,
+        SummaryFocus.risks,
+      ];
 
   @override
   String toString() => value;

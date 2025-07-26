@@ -401,9 +401,8 @@ void main() {
         expect(result.failedCount, equals(1));
 
         // Check that successful operations completed
-        final successfulResults = result.results
-            .where((r) => r.success)
-            .toList();
+        final successfulResults =
+            result.results.where((r) => r.success).toList();
         expect(successfulResults, hasLength(2));
       });
     });

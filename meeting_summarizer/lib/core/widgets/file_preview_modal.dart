@@ -143,9 +143,8 @@ class _FilePreviewModalState extends State<FilePreviewModal> {
             if (_isLoading) _buildLoadingOverlay(),
           ],
         ),
-        bottomNavigationBar: _allFiles.length > 1
-            ? _buildNavigationBar()
-            : null,
+        bottomNavigationBar:
+            _allFiles.length > 1 ? _buildNavigationBar() : null,
       ),
     );
   }

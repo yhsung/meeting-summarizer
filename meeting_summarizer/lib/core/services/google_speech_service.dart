@@ -592,9 +592,8 @@ class GoogleSpeechService implements TranscriptionServiceInterface {
       'apiKeyFromEnv': _loadApiKeyFromEnvironment() != null,
       'serviceAccountFromEnv': _loadServiceAccountPathFromEnvironment() != null,
       'hasAnyCredentials': _apiKey != null || _authClient != null,
-      'settingsApiKeyMasked': settingsApiKey != null
-          ? _maskApiKey(settingsApiKey)
-          : null,
+      'settingsApiKeyMasked':
+          settingsApiKey != null ? _maskApiKey(settingsApiKey) : null,
       'checkSources': [
         'App Settings (google provider)',
         'Environment Variables',
@@ -762,8 +761,8 @@ class GoogleSpeechService implements TranscriptionServiceInterface {
       model: _getGoogleRecognitionModel(request),
       maxAlternatives:
           request.maxAlternatives > 0 && request.maxAlternatives <= 30
-          ? request.maxAlternatives
-          : 1, // Google Speech API supports 1-30 alternatives
+              ? request.maxAlternatives
+              : 1, // Google Speech API supports 1-30 alternatives
     );
 
     // Add alternative language codes for auto-detection
@@ -785,9 +784,8 @@ class GoogleSpeechService implements TranscriptionServiceInterface {
     if (request.enableSpeakerDiarization) {
       final maxSpeakers = request.maxSpeakers ?? 6;
       // Google Speech API supports 1-8 speakers
-      final validMaxSpeakers = maxSpeakers > 0 && maxSpeakers <= 8
-          ? maxSpeakers
-          : 6;
+      final validMaxSpeakers =
+          maxSpeakers > 0 && maxSpeakers <= 8 ? maxSpeakers : 6;
 
       config.diarizationConfig = speech.SpeakerDiarizationConfig(
         enableSpeakerDiarization: true,
@@ -928,9 +926,8 @@ class GoogleSpeechService implements TranscriptionServiceInterface {
     }
 
     final finalText = textBuilder.toString().trim();
-    final averageConfidence = resultCount > 0
-        ? totalConfidence / resultCount
-        : 0.0;
+    final averageConfidence =
+        resultCount > 0 ? totalConfidence / resultCount : 0.0;
 
     // Detect language from response if auto-detection was used
     TranscriptionLanguage? detectedLanguage = request.language;

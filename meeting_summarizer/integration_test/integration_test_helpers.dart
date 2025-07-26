@@ -60,14 +60,14 @@ class IntegrationTestHelpers {
     // Set test-specific paths
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
-          const MethodChannel('plugins.flutter.io/path_provider'),
-          (MethodCall methodCall) async {
-            if (methodCall.method == 'getApplicationDocumentsDirectory') {
-              return _testDirectory!.path;
-            }
-            return null;
-          },
-        );
+      const MethodChannel('plugins.flutter.io/path_provider'),
+      (MethodCall methodCall) async {
+        if (methodCall.method == 'getApplicationDocumentsDirectory') {
+          return _testDirectory!.path;
+        }
+        return null;
+      },
+    );
   }
 
   /// Create a test recording with mock data
@@ -323,8 +323,7 @@ Key Outcomes:
     final db = await _testDatabaseHelper!.database;
 
     if (expectedRecordings != null) {
-      final recordingCount =
-          Sqflite.firstIntValue(
+      final recordingCount = Sqflite.firstIntValue(
             await db.rawQuery('SELECT COUNT(*) FROM recordings'),
           ) ??
           0;
@@ -332,8 +331,7 @@ Key Outcomes:
     }
 
     if (expectedTranscriptions != null) {
-      final transcriptionCount =
-          Sqflite.firstIntValue(
+      final transcriptionCount = Sqflite.firstIntValue(
             await db.rawQuery('SELECT COUNT(*) FROM transcriptions'),
           ) ??
           0;
@@ -341,8 +339,7 @@ Key Outcomes:
     }
 
     if (expectedSummaries != null) {
-      final summaryCount =
-          Sqflite.firstIntValue(
+      final summaryCount = Sqflite.firstIntValue(
             await db.rawQuery('SELECT COUNT(*) FROM summaries'),
           ) ??
           0;
@@ -363,42 +360,42 @@ Key Outcomes:
     // Mock network connectivity to simulate offline state
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
-          const MethodChannel('dev.fluttercommunity.plus/connectivity'),
-          (MethodCall methodCall) async {
-            if (methodCall.method == 'check') {
-              return 'none';
-            }
-            return null;
-          },
-        );
+      const MethodChannel('dev.fluttercommunity.plus/connectivity'),
+      (MethodCall methodCall) async {
+        if (methodCall.method == 'check') {
+          return 'none';
+        }
+        return null;
+      },
+    );
   }
 
   /// Mock online connectivity
   static void mockOnlineMode() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
-          const MethodChannel('dev.fluttercommunity.plus/connectivity'),
-          (MethodCall methodCall) async {
-            if (methodCall.method == 'check') {
-              return 'wifi';
-            }
-            return null;
-          },
-        );
+      const MethodChannel('dev.fluttercommunity.plus/connectivity'),
+      (MethodCall methodCall) async {
+        if (methodCall.method == 'check') {
+          return 'wifi';
+        }
+        return null;
+      },
+    );
   }
 
   /// Reset all mocks
   static void resetMocks() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
-          const MethodChannel('plugins.flutter.io/path_provider'),
-          null,
-        );
+      const MethodChannel('plugins.flutter.io/path_provider'),
+      null,
+    );
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
-          const MethodChannel('dev.fluttercommunity.plus/connectivity'),
-          null,
-        );
+      const MethodChannel('dev.fluttercommunity.plus/connectivity'),
+      null,
+    );
   }
 
   /// Get current platform name for testing

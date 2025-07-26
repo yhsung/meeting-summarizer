@@ -524,9 +524,8 @@ DURATION: [minutes]
 
     for (final sentence in sentences) {
       final lowerSentence = sentence.toLowerCase();
-      final matches = cluster
-          .where((keyword) => lowerSentence.contains(keyword))
-          .length;
+      final matches =
+          cluster.where((keyword) => lowerSentence.contains(keyword)).length;
       totalMatches += matches;
     }
 
@@ -583,12 +582,10 @@ DURATION: [minutes]
   /// Check if one topic is a subtopic of another
   static bool _isSubtopic(TopicExtract parentTopic, TopicExtract childTopic) {
     // Check if child topic keywords are subset of parent
-    final parentKeywords = parentTopic.keywords
-        .map((k) => k.toLowerCase())
-        .toSet();
-    final childKeywords = childTopic.keywords
-        .map((k) => k.toLowerCase())
-        .toSet();
+    final parentKeywords =
+        parentTopic.keywords.map((k) => k.toLowerCase()).toSet();
+    final childKeywords =
+        childTopic.keywords.map((k) => k.toLowerCase()).toSet();
 
     final overlap = parentKeywords.intersection(childKeywords).length;
     final childSize = childKeywords.length;

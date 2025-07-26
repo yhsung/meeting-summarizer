@@ -111,26 +111,26 @@ enum DataCategory {
 
   /// Get categories that are considered sensitive under GDPR
   static List<DataCategory> get sensitiveCategories => [
-    DataCategory.audioData,
-    DataCategory.biometricData,
-    DataCategory.locationData,
-    DataCategory.personalInfo,
-  ];
+        DataCategory.audioData,
+        DataCategory.biometricData,
+        DataCategory.locationData,
+        DataCategory.personalInfo,
+      ];
 
   /// Get categories that are technical/operational
   static List<DataCategory> get technicalCategories => [
-    DataCategory.deviceData,
-    DataCategory.diagnosticData,
-    DataCategory.fileSystemData,
-  ];
+        DataCategory.deviceData,
+        DataCategory.diagnosticData,
+        DataCategory.fileSystemData,
+      ];
 
   /// Get categories related to content processing
   static List<DataCategory> get contentCategories => [
-    DataCategory.audioData,
-    DataCategory.transcriptionData,
-    DataCategory.summaryData,
-    DataCategory.communicationData,
-  ];
+        DataCategory.audioData,
+        DataCategory.transcriptionData,
+        DataCategory.summaryData,
+        DataCategory.communicationData,
+      ];
 
   /// Check if this category contains sensitive personal data
   bool get isSensitive => sensitiveCategories.contains(this);
@@ -241,18 +241,18 @@ enum ProcessingPurpose {
 
   /// Get purposes that are essential for app functionality
   static List<ProcessingPurpose> get essentialPurposes => [
-    ProcessingPurpose.coreService,
-    ProcessingPurpose.security,
-    ProcessingPurpose.legalCompliance,
-  ];
+        ProcessingPurpose.coreService,
+        ProcessingPurpose.security,
+        ProcessingPurpose.legalCompliance,
+      ];
 
   /// Get purposes that are optional/enhancement-related
   static List<ProcessingPurpose> get optionalPurposes => [
-    ProcessingPurpose.analytics,
-    ProcessingPurpose.marketing,
-    ProcessingPurpose.performance,
-    ProcessingPurpose.research,
-  ];
+        ProcessingPurpose.analytics,
+        ProcessingPurpose.marketing,
+        ProcessingPurpose.performance,
+        ProcessingPurpose.research,
+      ];
 
   /// Check if this purpose is essential for app functionality
   bool get isEssential => essentialPurposes.contains(this);

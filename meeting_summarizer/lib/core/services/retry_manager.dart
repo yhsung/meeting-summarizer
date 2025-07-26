@@ -227,11 +227,10 @@ class RetryManager {
       totalAttempts: contexts.fold(0, (sum, ctx) => sum + ctx.currentAttempt),
       averageAttempts: contexts.isNotEmpty
           ? contexts.fold(0, (sum, ctx) => sum + ctx.currentAttempt) /
-                contexts.length
+              contexts.length
           : 0.0,
-      retryPolicies: contexts
-          .map((ctx) => ctx.policy.runtimeType.toString())
-          .toSet(),
+      retryPolicies:
+          contexts.map((ctx) => ctx.policy.runtimeType.toString()).toSet(),
     );
   }
 

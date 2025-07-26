@@ -255,8 +255,8 @@ class _HelpScreenState extends State<HelpScreen>
             Text(
               'Try different keywords or browse categories',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.outline,
-              ),
+                    color: Theme.of(context).colorScheme.outline,
+                  ),
             ),
           ],
         ),
@@ -273,7 +273,6 @@ class _HelpScreenState extends State<HelpScreen>
             style: Theme.of(context).textTheme.headlineSmall,
           ),
           const SizedBox(height: 16),
-
           if (_searchArticles.isNotEmpty) ...[
             Text(
               'Articles (${_searchArticles.length})',
@@ -286,7 +285,6 @@ class _HelpScreenState extends State<HelpScreen>
             ),
             const SizedBox(height: 24),
           ],
-
           if (_searchFaqs.isNotEmpty) ...[
             Text(
               'FAQ (${_searchFaqs.length})',

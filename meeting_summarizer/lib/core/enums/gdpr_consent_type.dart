@@ -100,16 +100,16 @@ enum GDPRConsentType {
 
   /// Get consent types that are optional
   static List<GDPRConsentType> get optionalTypes => [
-    GDPRConsentType.analytics,
-    GDPRConsentType.marketing,
-    GDPRConsentType.personalization,
-    GDPRConsentType.crashReporting,
-    GDPRConsentType.thirdPartyIntegrations,
-    GDPRConsentType.dataSharing,
-    GDPRConsentType.aiTraining,
-    GDPRConsentType.cloudStorage,
-    GDPRConsentType.location,
-  ];
+        GDPRConsentType.analytics,
+        GDPRConsentType.marketing,
+        GDPRConsentType.personalization,
+        GDPRConsentType.crashReporting,
+        GDPRConsentType.thirdPartyIntegrations,
+        GDPRConsentType.dataSharing,
+        GDPRConsentType.aiTraining,
+        GDPRConsentType.cloudStorage,
+        GDPRConsentType.location,
+      ];
 
   /// Check if this consent type is required for app functionality
   bool get isRequired => requiredTypes.contains(this);
@@ -162,10 +162,10 @@ enum ConsentStatus {
 
   /// Check if consent needs user action
   bool get needsUserAction => [
-    ConsentStatus.notRequested,
-    ConsentStatus.pending,
-    ConsentStatus.expired,
-  ].contains(this);
+        ConsentStatus.notRequested,
+        ConsentStatus.pending,
+        ConsentStatus.expired,
+      ].contains(this);
 
   @override
   String toString() => value;

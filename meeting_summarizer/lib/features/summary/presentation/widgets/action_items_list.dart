@@ -48,8 +48,8 @@ class _ActionItemsListState extends State<ActionItemsList> {
                 Text(
                   'Action Items (${widget.actionItems.length})',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
               ],
             ),
@@ -89,11 +89,12 @@ class _ActionItemsListState extends State<ActionItemsList> {
                 child: Text(
                   actionItem.text,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
-                    decoration: actionItem.status == ActionItemStatus.completed
-                        ? TextDecoration.lineThrough
-                        : null,
-                  ),
+                        fontWeight: FontWeight.w500,
+                        decoration:
+                            actionItem.status == ActionItemStatus.completed
+                                ? TextDecoration.lineThrough
+                                : null,
+                      ),
                 ),
               ),
               if (!widget.readOnly) _buildStatusButton(actionItem),
@@ -124,9 +125,9 @@ class _ActionItemsListState extends State<ActionItemsList> {
                 Text(
                   'Overdue',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.red,
-                    fontWeight: FontWeight.bold,
-                  ),
+                        color: Colors.red,
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
               ],
             ),

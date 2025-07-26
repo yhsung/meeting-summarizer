@@ -36,10 +36,10 @@ class FeedbackService {
     required SharedPreferences prefs,
     InAppReview? inAppReview,
     Uuid? uuid,
-  }) : _databaseHelper = databaseHelper,
-       _prefs = prefs,
-       _inAppReview = inAppReview ?? InAppReview.instance,
-       _uuid = uuid ?? const Uuid();
+  })  : _databaseHelper = databaseHelper,
+        _prefs = prefs,
+        _inAppReview = inAppReview ?? InAppReview.instance,
+        _uuid = uuid ?? const Uuid();
 
   /// Initialize the feedback service and create necessary tables
   Future<void> initialize() async {
@@ -62,8 +62,7 @@ class FeedbackService {
 
   /// Create the feedback table if it doesn't exist
   Future<void> _createFeedbackTable() async {
-    const createTableQuery =
-        '''
+    const createTableQuery = '''
       CREATE TABLE IF NOT EXISTS $_feedbackTableName (
         id TEXT PRIMARY KEY,
         type TEXT NOT NULL,
@@ -145,8 +144,7 @@ class FeedbackService {
 
   /// Store feedback in local database
   Future<void> _storeFeedback(FeedbackItem feedback) async {
-    const insertQuery =
-        '''
+    const insertQuery = '''
       INSERT INTO $_feedbackTableName (
         id, type, rating, subject, message, email, app_version, platform,
         created_at, is_submitted, attachment_path, tags

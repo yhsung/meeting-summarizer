@@ -263,13 +263,13 @@ class ConnectivityStats {
   });
 
   Map<String, dynamic> toJson() => {
-    'currentResults': currentResults.map((r) => r.toString()).toList(),
-    'primaryResult': primaryResult.toString(),
-    'isConnected': isConnected,
-    'isMetered': isMetered,
-    'isSuitableForLargeTransfers': isSuitableForLargeTransfers,
-    'connectivityType': connectivityType,
-  };
+        'currentResults': currentResults.map((r) => r.toString()).toList(),
+        'primaryResult': primaryResult.toString(),
+        'isConnected': isConnected,
+        'isMetered': isMetered,
+        'isSuitableForLargeTransfers': isSuitableForLargeTransfers,
+        'connectivityType': connectivityType,
+      };
 
   @override
   String toString() {

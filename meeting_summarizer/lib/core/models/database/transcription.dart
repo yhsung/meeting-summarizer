@@ -11,7 +11,7 @@ class Transcription {
   final String language;
   final String provider; // Transcription service provider
   final List<TranscriptionSegment>?
-  segments; // Time-segmented transcription data
+      segments; // Time-segmented transcription data
   final TranscriptionStatus status;
   final String? errorMessage; // Error details if transcription failed
   final int? processingTime; // Processing time in milliseconds

@@ -160,9 +160,8 @@ class AIProcessingException extends SummarizationException {
   @override
   String toString() {
     final codeStr = code != null ? ' [$code]' : '';
-    final responseStr = modelResponse != null
-        ? ' Response: $modelResponse'
-        : '';
+    final responseStr =
+        modelResponse != null ? ' Response: $modelResponse' : '';
     return 'AIProcessingException$codeStr: $message.$responseStr';
   }
 }

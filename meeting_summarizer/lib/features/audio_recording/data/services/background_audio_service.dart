@@ -266,8 +266,8 @@ class BackgroundAudioService implements AudioServiceInterface {
     // Create enhanced session with background info
     // This would require extending RecordingSession model in a real implementation
     return session.copyWith(
-      // Add background-specific metadata here
-    );
+        // Add background-specific metadata here
+        );
   }
 
   /// Get detailed background status information

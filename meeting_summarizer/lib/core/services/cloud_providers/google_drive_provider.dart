@@ -215,12 +215,10 @@ class GoogleDriveProvider implements CloudProviderInterface {
       }
 
       // Download the file content
-      final media =
-          await _driveApi!.files.get(
-                fileId,
-                downloadOptions: drive.DownloadOptions.fullMedia,
-              )
-              as drive.Media;
+      final media = await _driveApi!.files.get(
+        fileId,
+        downloadOptions: drive.DownloadOptions.fullMedia,
+      ) as drive.Media;
 
       // Ensure local directory exists
       final localFile = File(localFilePath);
@@ -395,9 +393,8 @@ class GoogleDriveProvider implements CloudProviderInterface {
 
       if (fileList.files != null) {
         for (final file in fileList.files!) {
-          final filePath = basePath.isEmpty
-              ? file.name!
-              : '$basePath/${file.name!}';
+          final filePath =
+              basePath.isEmpty ? file.name! : '$basePath/${file.name!}';
           final isDirectory =
               file.mimeType == 'application/vnd.google-apps.folder';
 
@@ -745,10 +742,8 @@ class GoogleDriveProvider implements CloudProviderInterface {
     try {
       if (path.isEmpty) return null;
 
-      final pathParts = path
-          .split('/')
-          .where((part) => part.isNotEmpty)
-          .toList();
+      final pathParts =
+          path.split('/').where((part) => part.isNotEmpty).toList();
       if (pathParts.isEmpty) return null;
 
       String? currentParentId = 'root';
@@ -794,10 +789,8 @@ class GoogleDriveProvider implements CloudProviderInterface {
   /// Ensure directory exists and return its ID
   Future<String?> _ensureDirectoryExists(String dirPath) async {
     try {
-      final pathParts = dirPath
-          .split('/')
-          .where((part) => part.isNotEmpty)
-          .toList();
+      final pathParts =
+          dirPath.split('/').where((part) => part.isNotEmpty).toList();
       if (pathParts.isEmpty) return 'root';
 
       String? currentParentId = 'root';

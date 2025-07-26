@@ -113,9 +113,8 @@ class RetentionSchedule {
       'startDate': startDate.toIso8601String(),
       'endDate': endDate.toIso8601String(),
       'totalActions': totalActions,
-      'scheduledActions': scheduledActions
-          .map((action) => action.toJson())
-          .toList(),
+      'scheduledActions':
+          scheduledActions.map((action) => action.toJson()).toList(),
       'summary': summary.toJson(),
     };
   }

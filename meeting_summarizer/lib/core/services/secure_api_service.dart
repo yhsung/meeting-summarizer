@@ -173,10 +173,10 @@ class SecureApiService {
     required FlutterSecureStorage secureStorage,
     required OfflineQueueService offlineQueueService,
     required SecurityConfig config,
-  }) : _dio = dio,
-       _secureStorage = secureStorage,
-       _offlineQueueService = offlineQueueService,
-       _config = config;
+  })  : _dio = dio,
+        _secureStorage = secureStorage,
+        _offlineQueueService = offlineQueueService,
+        _config = config;
 
   static SecureApiService? _instance;
 
@@ -533,9 +533,8 @@ class SecureApiService {
         );
       }
 
-      final responseData = response.data != null
-          ? jsonEncode(response.data)
-          : '';
+      final responseData =
+          response.data != null ? jsonEncode(response.data) : '';
       final verificationData = '${response.statusCode}$timestamp$responseData';
       final verificationBytes = utf8.encode(verificationData);
       final hash = sha256.convert(verificationBytes);
@@ -829,18 +828,17 @@ class SecureApiService {
 
     final averageResponseTime = _requestMetrics.isNotEmpty
         ? _requestMetrics
-                  .where((m) => m.duration != null)
-                  .map((m) => m.duration!.inMilliseconds)
-                  .reduce((a, b) => a + b) /
-              _requestMetrics.length
+                .where((m) => m.duration != null)
+                .map((m) => m.duration!.inMilliseconds)
+                .reduce((a, b) => a + b) /
+            _requestMetrics.length
         : 0.0;
 
     return {
       'totalRequests': totalRequests,
       'successfulRequests': successfulRequests,
-      'successRate': totalRequests > 0
-          ? successfulRequests / totalRequests
-          : 0.0,
+      'successRate':
+          totalRequests > 0 ? successfulRequests / totalRequests : 0.0,
       'averageResponseTime': averageResponseTime,
       'certificatePinningEnabled': _config.pinnedCertificates.isNotEmpty,
       'encryptionEnabled': _config.enableEncryption,

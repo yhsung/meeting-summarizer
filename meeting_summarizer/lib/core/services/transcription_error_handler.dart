@@ -536,8 +536,7 @@ class RetryExecutor {
         );
 
         // Check if we should retry
-        final shouldRetry =
-            attempt < retryPolicy.maxAttempts &&
+        final shouldRetry = attempt < retryPolicy.maxAttempts &&
             error.isRetryable &&
             retryPolicy.isRetryable(error.type);
 

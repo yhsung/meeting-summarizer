@@ -292,9 +292,8 @@ class _PermissionSetupWidgetState extends State<PermissionSetupWidget> {
     setState(() => _isLoading = true);
 
     try {
-      final permissions = _requiredPermissions
-          .map((p) => p.permission)
-          .toList();
+      final permissions =
+          _requiredPermissions.map((p) => p.permission).toList();
 
       Map<Permission, PermissionStatus> statuses;
       try {
@@ -305,8 +304,8 @@ class _PermissionSetupWidgetState extends State<PermissionSetupWidget> {
         statuses = <Permission, PermissionStatus>{};
         for (final permission in permissions) {
           try {
-            statuses[permission] = await _permissionService
-                .checkPermissionStatus(permission);
+            statuses[permission] =
+                await _permissionService.checkPermissionStatus(permission);
           } catch (e) {
             debugPrint('Error checking individual permission $permission: $e');
             statuses[permission] = PermissionStatus.denied;

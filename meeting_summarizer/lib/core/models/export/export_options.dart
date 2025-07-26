@@ -225,10 +225,10 @@ enum ExportField {
 
   /// Get essential fields for basic exports
   static List<ExportField> get essential => [
-    ExportField.basicInfo,
-    ExportField.properties,
-    ExportField.categories,
-  ];
+        ExportField.basicInfo,
+        ExportField.properties,
+        ExportField.categories,
+      ];
 }
 
 /// Date range specification for filtered exports

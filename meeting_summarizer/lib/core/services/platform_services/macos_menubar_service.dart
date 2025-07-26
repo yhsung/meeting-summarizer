@@ -56,7 +56,7 @@ class MacOSMenuBarService {
 
   /// Callbacks for menu bar actions
   void Function(MenuBarAction action, Map<String, dynamic>? parameters)?
-  onMenuBarAction;
+      onMenuBarAction;
   void Function(String query, SpotlightResultType type)? onSpotlightSearch;
 
   /// Initialize macOS Menu Bar service

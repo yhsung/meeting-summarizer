@@ -15,7 +15,7 @@ class ApiKeyService {
   bool _useSecureStorage = true;
 
   ApiKeyService({FlutterSecureStorage? secureStorage})
-    : _secureStorage = secureStorage ?? const FlutterSecureStorage();
+      : _secureStorage = secureStorage ?? const FlutterSecureStorage();
 
   /// Store an API key securely
   ///
@@ -330,8 +330,8 @@ class ApiKeyService {
       isValidFormat: validateApiKeyFormat(provider, apiKey),
       keyLength: apiKey.length,
       keyPrefix: _maskApiKey(apiKey),
-      lastUpdated:
-          DateTime.now(), // Would need to store this separately for real tracking
+      lastUpdated: DateTime
+          .now(), // Would need to store this separately for real tracking
     );
   }
 

@@ -81,8 +81,7 @@ class SettingsBackupService {
       log('SettingsBackupService: Creating local backup...');
 
       final timestamp = DateTime.now();
-      final backupFileName =
-          backupName ??
+      final backupFileName = backupName ??
           '${_settingsFileName.split('.').first}_${timestamp.millisecondsSinceEpoch}.json';
 
       // Export settings from SettingsService
@@ -133,10 +132,8 @@ class SettingsBackupService {
         success: true,
         backupPath: backupFilePath,
         timestamp: timestamp,
-        settingsCount:
-            (backupData['backup_info']
-                    as Map<String, dynamic>)['total_settings']
-                as int,
+        settingsCount: (backupData['backup_info']
+            as Map<String, dynamic>)['total_settings'] as int,
         encrypted: encrypt,
         size: await backupFile.length(),
       );
@@ -964,7 +961,7 @@ class SettingsMigrationRule {
   final String ruleId;
   final String description;
   final Future<Map<String, dynamic>> Function(Map<String, dynamic> settings)
-  apply;
+      apply;
 
   const SettingsMigrationRule({
     required this.ruleId,
@@ -998,16 +995,16 @@ class SettingsMigrationLog {
   });
 
   Map<String, dynamic> toJson() => {
-    'timestamp': timestamp.toIso8601String(),
-    'operation': operation.name,
-    'from_version': fromVersion,
-    'to_version': toVersion,
-    'settings_count': settingsCount,
-    'settings_changed': settingsChanged,
-    'settings_added': settingsAdded,
-    'settings_removed': settingsRemoved,
-    'backup_path': backupPath,
-  };
+        'timestamp': timestamp.toIso8601String(),
+        'operation': operation.name,
+        'from_version': fromVersion,
+        'to_version': toVersion,
+        'settings_count': settingsCount,
+        'settings_changed': settingsChanged,
+        'settings_added': settingsAdded,
+        'settings_removed': settingsRemoved,
+        'backup_path': backupPath,
+      };
 
   factory SettingsMigrationLog.fromJson(Map<String, dynamic> json) {
     return SettingsMigrationLog(

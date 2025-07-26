@@ -32,7 +32,7 @@ class _AudioTestWidgetState extends State<AudioTestWidget>
 
   late AnimationController _volumeAnimationController;
   late AnimationController _pulseAnimationController;
-  
+
   // Audio recording and playback
   final AudioRecorder _audioRecorder = AudioRecorder();
   final AudioPlayer _audioPlayer = AudioPlayer();
@@ -52,7 +52,7 @@ class _AudioTestWidgetState extends State<AudioTestWidget>
 
     // Initialize the robust permission service if not already done
     _initializePermissionService();
-    
+
     // Set up audio player listeners
     _setupAudioPlayerListeners();
   }
@@ -65,7 +65,7 @@ class _AudioTestWidgetState extends State<AudioTestWidget>
           _isPlaying = false;
           _testComplete = true;
         });
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Audio playback completed! Audio test successful.'),
@@ -74,7 +74,7 @@ class _AudioTestWidgetState extends State<AudioTestWidget>
         );
       }
     });
-    
+
     // Handle state changes
     _audioPlayer.onPlayerStateChanged.listen((PlayerState state) {
       if (mounted) {
@@ -130,11 +130,9 @@ class _AudioTestWidgetState extends State<AudioTestWidget>
             animation: _pulseAnimationController,
             builder: (context, child) {
               return Container(
-                width:
-                    80 +
+                width: 80 +
                     (_isRecording ? _pulseAnimationController.value * 20 : 0),
-                height:
-                    80 +
+                height: 80 +
                     (_isRecording ? _pulseAnimationController.value * 20 : 0),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
@@ -143,15 +141,15 @@ class _AudioTestWidgetState extends State<AudioTestWidget>
                           0.8 - _pulseAnimationController.value * 0.3,
                         )
                       : _isPlaying
-                      ? Colors.green.withOpacity(0.8)
-                      : Colors.grey.withOpacity(0.3),
+                          ? Colors.green.withOpacity(0.8)
+                          : Colors.grey.withOpacity(0.3),
                 ),
                 child: Icon(
                   _isRecording
                       ? Icons.mic
                       : _isPlaying
-                      ? Icons.volume_up
-                      : Icons.mic_none,
+                          ? Icons.volume_up
+                          : Icons.mic_none,
                   size: 40,
                   color: Colors.white,
                 ),
@@ -163,8 +161,8 @@ class _AudioTestWidgetState extends State<AudioTestWidget>
             _isRecording
                 ? 'Recording...'
                 : _isPlaying
-                ? 'Playing...'
-                : 'Ready to test',
+                    ? 'Playing...'
+                    : 'Ready to test',
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
           ),
           if (_isRecording) ...[
@@ -382,7 +380,8 @@ class _AudioTestWidgetState extends State<AudioTestWidget>
     try {
       // Get temporary directory for recording
       final directory = await getTemporaryDirectory();
-      _recordingPath = '${directory.path}/audio_test_${DateTime.now().millisecondsSinceEpoch}.m4a';
+      _recordingPath =
+          '${directory.path}/audio_test_${DateTime.now().millisecondsSinceEpoch}.m4a';
 
       // Start recording
       await _audioRecorder.start(
@@ -426,7 +425,7 @@ class _AudioTestWidgetState extends State<AudioTestWidget>
       // Store the recorded file for potential playback
       if (_recordingPath != null && await File(_recordingPath!).exists()) {
         _recordedFile = File(_recordingPath!);
-        
+
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -463,7 +462,7 @@ class _AudioTestWidgetState extends State<AudioTestWidget>
         setState(() {
           _isPlaying = true;
         });
-        
+
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -473,7 +472,7 @@ class _AudioTestWidgetState extends State<AudioTestWidget>
             ),
           );
         }
-        
+
         // Play the recorded audio file
         await _audioPlayer.play(DeviceFileSource(_recordedFile!.path));
       }
@@ -482,7 +481,7 @@ class _AudioTestWidgetState extends State<AudioTestWidget>
         setState(() {
           _isPlaying = false;
         });
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Failed to play audio: $e'),
@@ -503,7 +502,7 @@ class _AudioTestWidgetState extends State<AudioTestWidget>
     try {
       // Get current amplitude from the recorder
       final amplitude = await _audioRecorder.getAmplitude();
-      
+
       if (_isRecording && mounted) {
         setState(() {
           // Convert amplitude to a 0-1 range for volume visualization
@@ -512,7 +511,7 @@ class _AudioTestWidgetState extends State<AudioTestWidget>
           _volumeLevel = normalizedAmplitude.clamp(0.0, 1.0);
         });
         _volumeAnimationController.forward(from: 0);
-        
+
         // Continue monitoring
         Future.delayed(const Duration(milliseconds: 100), () {
           _monitorAmplitude();

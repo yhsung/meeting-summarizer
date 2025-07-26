@@ -1,6 +1,7 @@
 package com.yhsung.meeting_summarizer.services
 
 import android.app.admin.DevicePolicyManager
+import android.content.ComponentName
 import android.content.Context
 import android.os.Build
 import android.os.UserManager
@@ -30,7 +31,7 @@ class WorkProfileManager(private val context: Context) {
             
             isSupported = isWorkProfile || isManagedProfile || isDeviceOwner || isProfileOwner
             
-            val result = mapOf(
+            val result: Map<String, Any> = mapOf(
                 "supported" to isSupported,
                 "isWorkProfile" to isWorkProfile,
                 "hasPolicyRestrictions" to hasPolicyRestrictions,
@@ -45,9 +46,9 @@ class WorkProfileManager(private val context: Context) {
             result
         } catch (e: Exception) {
             Log.e(TAG, "Failed to check work profile support", e)
-            mapOf(
+            mapOf<String, Any>(
                 "supported" to false,
-                "error" to e.message
+                "error" to (e.message ?: "Unknown error")
             )
         }
     }
@@ -125,17 +126,26 @@ class WorkProfileManager(private val context: Context) {
                     when (key) {
                         "disableCamera" -> {
                             if (value as? Boolean == true) {
-                                devicePolicyManager.setCameraDisabled(null, true)
+                                val componentName = getDeviceAdminComponentName()
+                                if (componentName != null) {
+                                    devicePolicyManager.setCameraDisabled(componentName, true)
+                                }
                             }
                         }
                         "disableScreenCapture" -> {
                             if (value as? Boolean == true && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                                devicePolicyManager.setScreenCaptureDisabled(null, true)
+                                val componentName = getDeviceAdminComponentName()
+                                if (componentName != null) {
+                                    devicePolicyManager.setScreenCaptureDisabled(componentName, true)
+                                }
                             }
                         }
                         "requireStorageEncryption" -> {
                             if (value as? Boolean == true) {
-                                devicePolicyManager.setStorageEncryption(null, true)
+                                val componentName = getDeviceAdminComponentName()
+                                if (componentName != null) {
+                                    devicePolicyManager.setStorageEncryption(componentName, true)
+                                }
                             }
                         }
                     }
@@ -200,7 +210,8 @@ class WorkProfileManager(private val context: Context) {
     private fun hasPolicyRestrictions(): Boolean {
         return try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                devicePolicyManager.isAdminActive(null) || 
+                val componentName = getDeviceAdminComponentName()
+                (componentName != null && devicePolicyManager.isAdminActive(componentName)) || 
                 userManager.hasUserRestriction(UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES)
             } else {
                 false
@@ -213,7 +224,8 @@ class WorkProfileManager(private val context: Context) {
     private fun hasUserRestrictions(): Boolean {
         return try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-                userManager.userRestrictions.isNotEmpty()
+                val restrictions = userManager.userRestrictions
+                restrictions != null && restrictions.size() > 0
             } else {
                 false
             }
@@ -225,17 +237,20 @@ class WorkProfileManager(private val context: Context) {
     private fun configureScreenLockPolicy() {
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                // Set password quality requirements
-                devicePolicyManager.setPasswordQuality(
-                    null, 
-                    DevicePolicyManager.PASSWORD_QUALITY_BIOMETRIC_WEAK
-                )
-                
-                // Set minimum password length
-                devicePolicyManager.setPasswordMinimumLength(null, 6)
-                
-                // Set screen lock timeout
-                devicePolicyManager.setMaximumTimeToLock(null, 300000) // 5 minutes
+                val componentName = getDeviceAdminComponentName()
+                if (componentName != null) {
+                    // Set password quality requirements
+                    devicePolicyManager.setPasswordQuality(
+                        componentName, 
+                        DevicePolicyManager.PASSWORD_QUALITY_BIOMETRIC_WEAK
+                    )
+                    
+                    // Set minimum password length
+                    devicePolicyManager.setPasswordMinimumLength(componentName, 6)
+                    
+                    // Set screen lock timeout
+                    devicePolicyManager.setMaximumTimeToLock(componentName, 300000) // 5 minutes
+                }
             }
         } catch (e: Exception) {
             Log.e(TAG, "Failed to configure screen lock policy", e)
@@ -255,8 +270,11 @@ class WorkProfileManager(private val context: Context) {
     private fun enableSecurityLogging() {
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                // Enable security logging for compliance
-                devicePolicyManager.setSecurityLoggingEnabled(null, true)
+                val componentName = getDeviceAdminComponentName()
+                if (componentName != null) {
+                    // Enable security logging for compliance
+                    devicePolicyManager.setSecurityLoggingEnabled(componentName, true)
+                }
             }
         } catch (e: Exception) {
             Log.e(TAG, "Failed to enable security logging", e)
@@ -281,6 +299,16 @@ class WorkProfileManager(private val context: Context) {
     private fun setupRemoteWipeCapability() {
         // Set up remote wipe capability
         Log.d(TAG, "Remote wipe capability setup completed")
+    }
+
+    private fun getDeviceAdminComponentName(): ComponentName? {
+        return try {
+            // This should match the component name defined in AndroidManifest.xml
+            ComponentName(context, "com.yhsung.meeting_summarizer.DeviceAdminReceiver")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to get device admin component name", e)
+            null
+        }
     }
 
     fun getComplianceStatus(): Map<String, Any> {

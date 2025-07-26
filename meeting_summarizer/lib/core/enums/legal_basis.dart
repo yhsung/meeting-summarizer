@@ -72,12 +72,12 @@ enum LegalBasis {
 
   /// Get legal bases that don't require explicit consent
   static List<LegalBasis> get nonConsentBases => [
-    LegalBasis.contract,
-    LegalBasis.legalObligation,
-    LegalBasis.vitalInterests,
-    LegalBasis.publicTask,
-    LegalBasis.legitimateInterests,
-  ];
+        LegalBasis.contract,
+        LegalBasis.legalObligation,
+        LegalBasis.vitalInterests,
+        LegalBasis.publicTask,
+        LegalBasis.legitimateInterests,
+      ];
 
   /// Check if this legal basis requires explicit user consent
   bool get requiresConsent => consentBasedBases.contains(this);
@@ -192,19 +192,19 @@ enum RetentionPeriod {
 
   /// Get retention periods suitable for different data types
   static List<RetentionPeriod> get shortTermPeriods => [
-    RetentionPeriod.immediate,
-    RetentionPeriod.thirtyDays,
-    RetentionPeriod.ninetyDays,
-    RetentionPeriod.sixMonths,
-  ];
+        RetentionPeriod.immediate,
+        RetentionPeriod.thirtyDays,
+        RetentionPeriod.ninetyDays,
+        RetentionPeriod.sixMonths,
+      ];
 
   static List<RetentionPeriod> get longTermPeriods => [
-    RetentionPeriod.oneYear,
-    RetentionPeriod.twoYears,
-    RetentionPeriod.fiveYears,
-    RetentionPeriod.sevenYears,
-    RetentionPeriod.indefinite,
-  ];
+        RetentionPeriod.oneYear,
+        RetentionPeriod.twoYears,
+        RetentionPeriod.fiveYears,
+        RetentionPeriod.sevenYears,
+        RetentionPeriod.indefinite,
+      ];
 
   /// Check if this is a short-term retention period
   bool get isShortTerm => shortTermPeriods.contains(this);

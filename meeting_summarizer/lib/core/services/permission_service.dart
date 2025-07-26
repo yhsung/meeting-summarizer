@@ -14,7 +14,7 @@ class PermissionService implements PermissionServiceInterface {
   Timer? _monitoringTimer;
 
   final StreamController<Map<PermissionType, PermissionState>>
-  _permissionStateController =
+      _permissionStateController =
       StreamController<Map<PermissionType, PermissionState>>.broadcast();
 
   Map<PermissionType, PermissionState> _currentStates = {};
@@ -509,9 +509,8 @@ class PermissionService implements PermissionServiceInterface {
 
     for (final history in _requestHistory.values) {
       totalRequests += history.length;
-      successfulRequests += history
-          .where((state) => state == PermissionState.granted)
-          .length;
+      successfulRequests +=
+          history.where((state) => state == PermissionState.granted).length;
     }
 
     return totalRequests > 0 ? (successfulRequests / totalRequests) * 100 : 0.0;

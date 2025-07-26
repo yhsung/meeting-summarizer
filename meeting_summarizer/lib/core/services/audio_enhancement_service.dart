@@ -130,10 +130,10 @@ class AudioEnhancementService implements AudioEnhancementServiceInterface {
           (_performanceMetrics['processedSamples'] ?? 0) + audioData.length;
       _performanceMetrics['totalProcessingTime'] =
           (_performanceMetrics['totalProcessingTime'] ?? 0) +
-          stopwatch.elapsedMilliseconds;
+              stopwatch.elapsedMilliseconds;
       _performanceMetrics['averageProcessingTime'] =
           _performanceMetrics['totalProcessingTime'] /
-          (_performanceMetrics['processedSamples'] / audioData.length);
+              (_performanceMetrics['processedSamples'] / audioData.length);
 
       return AudioEnhancementResult(
         enhancedAudioData: processedData,

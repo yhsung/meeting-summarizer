@@ -114,9 +114,8 @@ class SummarizationResult {
       'content': content,
       'summaryType': summaryType.value,
       'actionItems': actionItems.map((item) => item.toJson()).toList(),
-      'keyDecisions': keyDecisions
-          .map((decision) => decision.toJson())
-          .toList(),
+      'keyDecisions':
+          keyDecisions.map((decision) => decision.toJson()).toList(),
       'topics': topics.map((topic) => topic.toJson()).toList(),
       'keyHighlights': keyHighlights,
       'confidenceScore': confidenceScore,
@@ -213,9 +212,8 @@ class ActionItem {
       id: json['id'] ?? '',
       description: json['description'] ?? '',
       assignee: json['assignee'],
-      dueDate: json['dueDate'] != null
-          ? DateTime.tryParse(json['dueDate'])
-          : null,
+      dueDate:
+          json['dueDate'] != null ? DateTime.tryParse(json['dueDate']) : null,
       priority: json['priority'] ?? 'medium',
       context: json['context'],
       timestamp: json['timestamp'] != null

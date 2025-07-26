@@ -448,27 +448,26 @@ class _SummaryGeneratorState extends State<SummaryGenerator>
                   isCompleted
                       ? Icons.check_circle
                       : isCurrent
-                      ? Icons.radio_button_checked
-                      : Icons.radio_button_unchecked,
+                          ? Icons.radio_button_checked
+                          : Icons.radio_button_unchecked,
                   size: 16,
                   color: isCompleted
                       ? Colors.green
                       : isCurrent
-                      ? Theme.of(context).primaryColor
-                      : Colors.grey,
+                          ? Theme.of(context).primaryColor
+                          : Colors.grey,
                 ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     step,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: isCompleted || isCurrent
-                          ? Colors.black87
-                          : Colors.grey[600],
-                      fontWeight: isCurrent
-                          ? FontWeight.bold
-                          : FontWeight.normal,
-                    ),
+                          color: isCompleted || isCurrent
+                              ? Colors.black87
+                              : Colors.grey[600],
+                          fontWeight:
+                              isCurrent ? FontWeight.bold : FontWeight.normal,
+                        ),
                   ),
                 ),
               ],

@@ -613,14 +613,12 @@ class MockDatabaseHelper {
       transcriptionId: transcriptionId ?? '1',
       content: content ?? mockSummaries[random.nextInt(mockSummaries.length)],
       type: models
-          .SummaryType
-          .values[random.nextInt(models.SummaryType.values.length)],
+          .SummaryType.values[random.nextInt(models.SummaryType.values.length)],
       provider: 'mock-provider',
       confidence: 0.8 + random.nextDouble() * 0.2, // 0.8-1.0
       wordCount: (content?.split(' ').length ?? 30) + random.nextInt(20),
       characterCount: (content?.length ?? 150) + random.nextInt(100),
-      sentiment: models
-          .SentimentType
+      sentiment: models.SentimentType
           .values[random.nextInt(models.SentimentType.values.length)],
       createdAt: now.subtract(Duration(days: random.nextInt(30))),
       updatedAt: now,

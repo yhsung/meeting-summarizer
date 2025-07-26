@@ -116,11 +116,11 @@ enum RequestStatus {
 
   /// Check if request is in a final state
   bool get isFinal => [
-    RequestStatus.completed,
-    RequestStatus.rejected,
-    RequestStatus.cancelled,
-    RequestStatus.failed,
-  ].contains(this);
+        RequestStatus.completed,
+        RequestStatus.rejected,
+        RequestStatus.cancelled,
+        RequestStatus.failed,
+      ].contains(this);
 
   /// Check if request is still active
   bool get isActive => !isFinal;
@@ -239,8 +239,7 @@ class UserRightsRequest {
       completedAt: json['completedAt'] != null
           ? DateTime.tryParse(json['completedAt'])
           : null,
-      dueDate:
-          DateTime.tryParse(json['dueDate'] ?? '') ??
+      dueDate: DateTime.tryParse(json['dueDate'] ?? '') ??
           DateTime.now().add(const Duration(days: 30)),
       assignedTo: json['assignedTo'],
       processingNotes: json['processingNotes'],

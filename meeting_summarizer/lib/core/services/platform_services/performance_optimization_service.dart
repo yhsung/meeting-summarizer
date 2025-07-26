@@ -90,7 +90,7 @@ class PerformanceOptimizationService {
   void Function(PerformanceMetrics metrics)? onPerformanceUpdate;
   void Function(OptimizationStrategy strategy)? onStrategyChanged;
   void Function(String warning, Map<String, dynamic> details)?
-  onPerformanceWarning;
+      onPerformanceWarning;
 
   /// Initialize performance optimization service
   Future<bool> initialize() async {

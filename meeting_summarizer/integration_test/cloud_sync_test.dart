@@ -282,9 +282,9 @@ void main() {
         // Don't wait between operations to simulate concurrent creation
         final transcription =
             await IntegrationTestHelpers.createTestTranscription(
-              recordingId: recording.id,
-              content: 'Concurrent transcription $i',
-            );
+          recordingId: recording.id,
+          content: 'Concurrent transcription $i',
+        );
 
         await IntegrationTestHelpers.createTestSummary(
           transcriptionId: transcription.id,

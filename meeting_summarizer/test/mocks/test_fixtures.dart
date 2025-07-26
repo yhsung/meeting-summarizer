@@ -46,29 +46,29 @@ class TestFixtures {
   // Common transcription requests for testing
   static final TranscriptionRequest basicTranscriptionRequest =
       TranscriptionRequest(
-        language: TranscriptionLanguage.english,
-        enableTimestamps: true,
-        enableSpeakerDiarization: false,
-      );
+    language: TranscriptionLanguage.english,
+    enableTimestamps: true,
+    enableSpeakerDiarization: false,
+  );
 
   static final TranscriptionRequest advancedTranscriptionRequest =
       TranscriptionRequest(
-        language: TranscriptionLanguage.english,
-        enableTimestamps: true,
-        enableWordTimestamps: true,
-        enableSpeakerDiarization: true,
-        maxSpeakers: 4,
-        customVocabulary: ['API', 'deployment', 'sprint', 'stakeholder'],
-        temperature: 0.1,
-      );
+    language: TranscriptionLanguage.english,
+    enableTimestamps: true,
+    enableWordTimestamps: true,
+    enableSpeakerDiarization: true,
+    maxSpeakers: 4,
+    customVocabulary: ['API', 'deployment', 'sprint', 'stakeholder'],
+    temperature: 0.1,
+  );
 
   static final TranscriptionRequest multilingualTranscriptionRequest =
       TranscriptionRequest(
-        language: TranscriptionLanguage.auto,
-        enableTimestamps: true,
-        enableSpeakerDiarization: true,
-        maxSpeakers: 3,
-      );
+    language: TranscriptionLanguage.auto,
+    enableTimestamps: true,
+    enableSpeakerDiarization: true,
+    maxSpeakers: 3,
+  );
 
   // Test recording sessions
   static final RecordingSession activeRecordingSession = RecordingSession(
@@ -154,53 +154,57 @@ class TestFixtures {
 
   // Predefined test scenarios
   static TestScenario get basicRecordingScenario => TestScenario(
-    name: 'Basic Recording Workflow',
-    description: 'Test basic recording, transcription, and summarization',
-    audioConfiguration: mediumQualityAudio,
-    transcriptionRequest: basicTranscriptionRequest,
-    expectedDuration: Duration(minutes: 10),
-    expectedTranscriptionText: shortMeetingTranscription,
-  );
+        name: 'Basic Recording Workflow',
+        description: 'Test basic recording, transcription, and summarization',
+        audioConfiguration: mediumQualityAudio,
+        transcriptionRequest: basicTranscriptionRequest,
+        expectedDuration: Duration(minutes: 10),
+        expectedTranscriptionText: shortMeetingTranscription,
+      );
 
   static TestScenario get highQualityScenario => TestScenario(
-    name: 'High Quality Full Workflow',
-    description:
-        'Test high-quality recording with advanced transcription features',
-    audioConfiguration: highQualityAudio,
-    transcriptionRequest: advancedTranscriptionRequest,
-    expectedDuration: Duration(minutes: 45),
-    expectedTranscriptionText: longMeetingTranscription,
-  );
+        name: 'High Quality Full Workflow',
+        description:
+            'Test high-quality recording with advanced transcription features',
+        audioConfiguration: highQualityAudio,
+        transcriptionRequest: advancedTranscriptionRequest,
+        expectedDuration: Duration(minutes: 45),
+        expectedTranscriptionText: longMeetingTranscription,
+      );
 
   static TestScenario get technicalMeetingScenario => TestScenario(
-    name: 'Technical Meeting with Custom Vocabulary',
-    description: 'Test transcription accuracy with technical terminology',
-    audioConfiguration: mediumQualityAudio,
-    transcriptionRequest: advancedTranscriptionRequest,
-    expectedDuration: Duration(minutes: 20),
-    expectedTranscriptionText: technicalMeetingTranscription,
-  );
+        name: 'Technical Meeting with Custom Vocabulary',
+        description: 'Test transcription accuracy with technical terminology',
+        audioConfiguration: mediumQualityAudio,
+        transcriptionRequest: advancedTranscriptionRequest,
+        expectedDuration: Duration(minutes: 20),
+        expectedTranscriptionText: technicalMeetingTranscription,
+      );
 
   static TestScenario get errorHandlingScenario => TestScenario(
-    name: 'Error Handling and Recovery',
-    description: 'Test error scenarios and graceful degradation',
-    audioConfiguration: lowQualityAudio,
-    transcriptionRequest: basicTranscriptionRequest,
-    expectedDuration: Duration(minutes: 5),
-    shouldSimulateErrors: true,
-    expectedErrors: ['Storage error', 'Network timeout', 'Permission denied'],
-  );
+        name: 'Error Handling and Recovery',
+        description: 'Test error scenarios and graceful degradation',
+        audioConfiguration: lowQualityAudio,
+        transcriptionRequest: basicTranscriptionRequest,
+        expectedDuration: Duration(minutes: 5),
+        shouldSimulateErrors: true,
+        expectedErrors: [
+          'Storage error',
+          'Network timeout',
+          'Permission denied'
+        ],
+      );
 
   // Performance test scenarios
   static TestScenario get performanceStressScenario => TestScenario(
-    name: 'Performance Stress Test',
-    description: 'Test system performance under load',
-    audioConfiguration: mediumQualityAudio,
-    transcriptionRequest: basicTranscriptionRequest,
-    expectedDuration: Duration(hours: 2),
-    concurrentOperations: 10,
-    expectedTranscriptionText: longMeetingTranscription,
-  );
+        name: 'Performance Stress Test',
+        description: 'Test system performance under load',
+        audioConfiguration: mediumQualityAudio,
+        transcriptionRequest: basicTranscriptionRequest,
+        expectedDuration: Duration(hours: 2),
+        concurrentOperations: 10,
+        expectedTranscriptionText: longMeetingTranscription,
+      );
 
   // Mock service configurations for common test scenarios
   static MockAudioRecordingService createConfiguredAudioService({

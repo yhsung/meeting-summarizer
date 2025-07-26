@@ -20,7 +20,7 @@ class FineGrainedAccessManager {
   static const Duration _decisionCacheExpiry = Duration(minutes: 5);
 
   FineGrainedAccessManager(this._dao)
-    : _inheritanceManager = PermissionInheritanceManager(_dao);
+      : _inheritanceManager = PermissionInheritanceManager(_dao);
 
   /// Validate access with detailed conditions and constraints
   Future<AccessValidationResult> validateAccess({
@@ -71,9 +71,8 @@ class FineGrainedAccessManager {
       }
 
       // Find applicable permissions
-      final applicablePermissions = permissions
-          .where((p) => p.actions.contains(action))
-          .toList();
+      final applicablePermissions =
+          permissions.where((p) => p.actions.contains(action)).toList();
 
       if (applicablePermissions.isEmpty) {
         return _createDeniedResult(
@@ -98,9 +97,8 @@ class FineGrainedAccessManager {
       }
 
       // Check if any permission grants access
-      final grantingResults = validationResults
-          .where((r) => r.isGranted)
-          .toList();
+      final grantingResults =
+          validationResults.where((r) => r.isGranted).toList();
 
       AccessValidationResult finalResult;
 
@@ -109,9 +107,8 @@ class FineGrainedAccessManager {
           userId: userId,
           resource: resource,
           action: action,
-          grantingPermissions: grantingResults
-              .map((r) => r.permission)
-              .toList(),
+          grantingPermissions:
+              grantingResults.map((r) => r.permission).toList(),
           validationDetails: validationResults,
           context: context,
         );
@@ -444,13 +441,11 @@ class FineGrainedAccessManager {
         errorMessage: result.isGranted ? null : result.reason,
         contextData: {
           'action': result.action.value,
-          'validation_details': result.validationDetails
-              ?.map((d) => d.toJson())
-              .toList(),
+          'validation_details':
+              result.validationDetails?.map((d) => d.toJson()).toList(),
           if (result.grantingPermissions != null)
-            'granting_permissions': result.grantingPermissions!
-                .map((p) => p.id)
-                .toList(),
+            'granting_permissions':
+                result.grantingPermissions!.map((p) => p.id).toList(),
         },
         riskLevel: result.isGranted ? 'low' : 'medium',
         sessionId: sessionId,
@@ -557,9 +552,9 @@ class AccessValidationResult {
     required this.grantingPermissions,
     this.validationDetails,
     this.context = const {},
-  }) : isGranted = true,
-       reason = 'Access granted',
-       timestamp = DateTime.now();
+  })  : isGranted = true,
+        reason = 'Access granted',
+        timestamp = DateTime.now();
 
   AccessValidationResult.denied({
     required this.userId,
@@ -568,20 +563,20 @@ class AccessValidationResult {
     required this.reason,
     this.validationDetails,
     this.context = const {},
-  }) : isGranted = false,
-       grantingPermissions = null,
-       timestamp = DateTime.now();
+  })  : isGranted = false,
+        grantingPermissions = null,
+        timestamp = DateTime.now();
 
   AccessValidationResult._fromCached(_AccessDecision decision)
-    : isGranted = decision.isGranted,
-      userId = '',
-      resource = '',
-      action = AccessAction.read,
-      reason = decision.reason,
-      grantingPermissions = null,
-      validationDetails = null,
-      context = const {},
-      timestamp = decision.timestamp;
+      : isGranted = decision.isGranted,
+        userId = '',
+        resource = '',
+        action = AccessAction.read,
+        reason = decision.reason,
+        grantingPermissions = null,
+        validationDetails = null,
+        context = const {},
+        timestamp = decision.timestamp;
 }
 
 /// Result of individual permission validation
@@ -594,8 +589,8 @@ class PermissionValidationResult {
   PermissionValidationResult.granted({
     required this.permission,
     required this.reason,
-  }) : isGranted = true,
-       failedConditions = null;
+  })  : isGranted = true,
+        failedConditions = null;
 
   PermissionValidationResult.denied({
     required this.permission,

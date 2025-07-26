@@ -163,9 +163,8 @@ class DeltaSyncService {
         );
       }
 
-      final changedChunks = fileChange.changedChunks!
-          .where((chunk) => chunk.isChanged)
-          .toList();
+      final changedChunks =
+          fileChange.changedChunks!.where((chunk) => chunk.isChanged).toList();
 
       if (changedChunks.isEmpty) {
         return DeltaSyncResult(
@@ -383,9 +382,8 @@ class DeltaSyncService {
     final totalFileSize = fileChange.fileSize;
     final transferredBytes = result.bytesTransferred;
     final savedBytes = totalFileSize - transferredBytes;
-    final savingsPercentage = totalFileSize > 0
-        ? (savedBytes / totalFileSize) * 100
-        : 0.0;
+    final savingsPercentage =
+        totalFileSize > 0 ? (savedBytes / totalFileSize) * 100 : 0.0;
 
     return BandwidthSavings(
       totalFileSize: totalFileSize,

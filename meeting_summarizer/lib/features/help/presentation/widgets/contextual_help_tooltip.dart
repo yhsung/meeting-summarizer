@@ -264,8 +264,8 @@ class _HelpTooltipOverlayState extends State<_HelpTooltipOverlay>
                     child: Text(
                       widget.help.title,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                   ),
                   if (widget.help.isDismissible)
@@ -313,8 +313,8 @@ class _HelpTooltipOverlayState extends State<_HelpTooltipOverlay>
                   Text(
                     widget.help.title,
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                          fontWeight: FontWeight.bold,
+                        ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 16),

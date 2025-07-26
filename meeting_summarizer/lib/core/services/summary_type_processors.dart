@@ -96,8 +96,7 @@ class BriefSummaryProcessor extends SummaryTypeProcessor {
         createdAt: DateTime.now(),
         sourceTranscriptionId: sessionId ?? _uuid.v4(),
         metadata: SummarizationMetadata(
-          totalTokens:
-              (transcriptionText.length / 4).ceil() +
+          totalTokens: (transcriptionText.length / 4).ceil() +
               (processedContent.length / 4).ceil(),
           promptTokens: (transcriptionText.length / 4).ceil(),
           completionTokens: (processedContent.length / 4).ceil(),
@@ -116,10 +115,8 @@ class BriefSummaryProcessor extends SummaryTypeProcessor {
     SummarizationConfiguration config,
   ) {
     // Ensure brief summaries are concise and well-structured
-    final sentences = content
-        .split('. ')
-        .where((s) => s.trim().isNotEmpty)
-        .toList();
+    final sentences =
+        content.split('. ').where((s) => s.trim().isNotEmpty).toList();
 
     // Limit to key sentences for brief format
     final maxSentences = config.summaryLength == SummaryLength.short ? 3 : 5;
@@ -341,8 +338,7 @@ class DetailedSummaryProcessor extends SummaryTypeProcessor {
         createdAt: DateTime.now(),
         sourceTranscriptionId: sessionId ?? _uuid.v4(),
         metadata: SummarizationMetadata(
-          totalTokens:
-              (transcriptionText.length / 4).ceil() +
+          totalTokens: (transcriptionText.length / 4).ceil() +
               (processedContent.length / 4).ceil(),
           promptTokens: (transcriptionText.length / 4).ceil(),
           completionTokens: (processedContent.length / 4).ceil(),

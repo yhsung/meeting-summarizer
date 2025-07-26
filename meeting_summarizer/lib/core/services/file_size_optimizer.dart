@@ -115,8 +115,7 @@ class FileSizeOptimizer {
       sampleRate: optimalQuality.sampleRate,
       bitDepth: optimalQuality.bitDepth,
       channels: recordingType.toLowerCase().contains('stereo') ? 2 : 1,
-      enableNoiseReduction:
-          recordingType.toLowerCase().contains('speech') ||
+      enableNoiseReduction: recordingType.toLowerCase().contains('speech') ||
           recordingType.toLowerCase().contains('voice') ||
           recordingType.toLowerCase().contains('meeting'),
       enableAutoGainControl: true,
@@ -315,8 +314,7 @@ class FileSizeOptimizer {
   ) {
     final optimizations = <String>[];
 
-    final isSpeech =
-        recordingType.toLowerCase().contains('speech') ||
+    final isSpeech = recordingType.toLowerCase().contains('speech') ||
         recordingType.toLowerCase().contains('voice') ||
         recordingType.toLowerCase().contains('meeting');
 

@@ -45,20 +45,23 @@ class VersionManagementService {
       final versionId = _generateVersionId();
       final now = DateTime.now();
 
-      await _database!.insert('file_versions', {
-        'id': versionId,
-        'file_path': filePath,
-        'provider_id': provider.id,
-        'size': version.size,
-        'checksum': version.checksum,
-        'mime_type': version.mimeType,
-        'modified_at': version.modifiedAt.toIso8601String(),
-        'recorded_at': now.toIso8601String(),
-        'change_type': changeType.name,
-        'previous_version_id': previousVersionId,
-        'exists': version.exists ? 1 : 0,
-        'metadata': _serializeMetadata(version.metadata),
-      }, conflictAlgorithm: ConflictAlgorithm.replace);
+      await _database!.insert(
+          'file_versions',
+          {
+            'id': versionId,
+            'file_path': filePath,
+            'provider_id': provider.id,
+            'size': version.size,
+            'checksum': version.checksum,
+            'mime_type': version.mimeType,
+            'modified_at': version.modifiedAt.toIso8601String(),
+            'recorded_at': now.toIso8601String(),
+            'change_type': changeType.name,
+            'previous_version_id': previousVersionId,
+            'exists': version.exists ? 1 : 0,
+            'metadata': _serializeMetadata(version.metadata),
+          },
+          conflictAlgorithm: ConflictAlgorithm.replace);
 
       log(
         'VersionManagementService: Recorded version $versionId for $filePath',

@@ -366,8 +366,8 @@ class ConflictResolutionService {
     if (!conflict.remoteVersion.exists) return ConflictResolution.keepLocal;
 
     return conflict.localVersion.modifiedAt.isAfter(
-          conflict.remoteVersion.modifiedAt,
-        )
+      conflict.remoteVersion.modifiedAt,
+    )
         ? ConflictResolution.keepLocal
         : ConflictResolution.keepRemote;
   }

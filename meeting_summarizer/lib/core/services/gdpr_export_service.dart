@@ -34,27 +34,27 @@ class GDPRExportConfig {
   });
 
   static GDPRExportConfig get completeExport => const GDPRExportConfig(
-    includedDataTypes: [
-      'recordings',
-      'transcriptions',
-      'summaries',
-      'settings',
-      'privacy_data',
-      'audit_log',
-    ],
-    format: ExportFormat.json,
-    includeFiles: true,
-    includeAnonymizedData: true,
-    includeMetadata: true,
-  );
+        includedDataTypes: [
+          'recordings',
+          'transcriptions',
+          'summaries',
+          'settings',
+          'privacy_data',
+          'audit_log',
+        ],
+        format: ExportFormat.json,
+        includeFiles: true,
+        includeAnonymizedData: true,
+        includeMetadata: true,
+      );
 
   static GDPRExportConfig get minimalExport => const GDPRExportConfig(
-    includedDataTypes: ['privacy_data', 'settings'],
-    format: ExportFormat.json,
-    includeFiles: false,
-    includeAnonymizedData: false,
-    includeMetadata: false,
-  );
+        includedDataTypes: ['privacy_data', 'settings'],
+        format: ExportFormat.json,
+        includeFiles: false,
+        includeAnonymizedData: false,
+        includeMetadata: false,
+      );
 }
 
 class GDPRExportResult {
@@ -122,22 +122,19 @@ class DatabaseQueryService {
   }
 
   Future<Map<String, dynamic>> getDatabaseStats() async {
-    final recordingsCount =
-        Sqflite.firstIntValue(
+    final recordingsCount = Sqflite.firstIntValue(
           await database.rawQuery(
             'SELECT COUNT(*) FROM recordings WHERE is_deleted = 0',
           ),
         ) ??
         0;
 
-    final transcriptionsCount =
-        Sqflite.firstIntValue(
+    final transcriptionsCount = Sqflite.firstIntValue(
           await database.rawQuery('SELECT COUNT(*) FROM transcriptions'),
         ) ??
         0;
 
-    final summariesCount =
-        Sqflite.firstIntValue(
+    final summariesCount = Sqflite.firstIntValue(
           await database.rawQuery('SELECT COUNT(*) FROM summaries'),
         ) ??
         0;
@@ -245,17 +242,15 @@ class GDPRExportService {
       final anonymizedData = await _privacyService.requestDataExport(
         includeAnonymizedData: true,
       );
-      exportData['anonymized_data'] = anonymizedData.anonymizedData
-          .map((data) => data.toJson())
-          .toList();
+      exportData['anonymized_data'] =
+          anonymizedData.anonymizedData.map((data) => data.toJson()).toList();
       totalRecords += anonymizedData.anonymizedData.length;
     }
 
     // Export audit log
     if (config.includedDataTypes.contains('audit_log')) {
-      exportData['audit_log'] = _privacyService.auditLog
-          .map((event) => event.toJson())
-          .toList();
+      exportData['audit_log'] =
+          _privacyService.auditLog.map((event) => event.toJson()).toList();
       totalRecords += _privacyService.auditLog.length;
     }
 

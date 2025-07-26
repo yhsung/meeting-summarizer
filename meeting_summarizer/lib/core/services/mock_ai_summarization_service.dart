@@ -179,25 +179,25 @@ Proceed with implementation as planned with weekly progress reviews.
 
   @override
   ServiceCapabilities get capabilities => const ServiceCapabilities(
-    supportedLanguages: ['en', 'es', 'fr', 'de'],
-    supportedSummaryTypes: [
-      'brief',
-      'detailed',
-      'bullet_points',
-      'action_items',
-      'executive',
-      'meeting_notes',
-      'key_highlights',
-      'topical',
-    ],
-    maxInputTokens: 10000,
-    maxOutputTokens: 2000,
-    supportsStreaming: true,
-    supportsActionItems: true,
-    supportsDecisionExtraction: true,
-    supportsTopicExtraction: true,
-    supportsBatchProcessing: false,
-  );
+        supportedLanguages: ['en', 'es', 'fr', 'de'],
+        supportedSummaryTypes: [
+          'brief',
+          'detailed',
+          'bullet_points',
+          'action_items',
+          'executive',
+          'meeting_notes',
+          'key_highlights',
+          'topical',
+        ],
+        maxInputTokens: 10000,
+        maxOutputTokens: 2000,
+        supportsStreaming: true,
+        supportsActionItems: true,
+        supportsDecisionExtraction: true,
+        supportsTopicExtraction: true,
+        supportsBatchProcessing: false,
+      );
 
   @override
   Future<SummarizationResult> generateSummaryInternal({
@@ -524,9 +524,8 @@ Proceed with implementation as planned with weekly progress reviews.
       return ActionItem(
         id: _uuid.v4(),
         description: description,
-        assignee: _random.nextBool()
-            ? 'Team Member ${_random.nextInt(5) + 1}'
-            : null,
+        assignee:
+            _random.nextBool() ? 'Team Member ${_random.nextInt(5) + 1}' : null,
         dueDate: _random.nextBool()
             ? DateTime.now().add(Duration(days: 1 + _random.nextInt(14)))
             : null,

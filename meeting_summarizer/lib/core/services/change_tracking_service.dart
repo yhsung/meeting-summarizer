@@ -523,15 +523,18 @@ class ChangeTrackingService {
       final db = await _database!.database;
       final fileId = _generateFileId(filePath, provider);
 
-      await db.insert('file_tracking', {
-        'id': fileId,
-        'file_path': filePath,
-        'provider_id': provider.id,
-        'last_modification_time': modificationTime.millisecondsSinceEpoch,
-        'last_known_checksum': checksum,
-        'file_size': fileSize,
-        'tracked_since': DateTime.now().millisecondsSinceEpoch,
-      }, conflictAlgorithm: ConflictAlgorithm.replace);
+      await db.insert(
+          'file_tracking',
+          {
+            'id': fileId,
+            'file_path': filePath,
+            'provider_id': provider.id,
+            'last_modification_time': modificationTime.millisecondsSinceEpoch,
+            'last_known_checksum': checksum,
+            'file_size': fileSize,
+            'tracked_since': DateTime.now().millisecondsSinceEpoch,
+          },
+          conflictAlgorithm: ConflictAlgorithm.replace);
 
       // Update in-memory cache
       _lastModificationTimes[fileId] = modificationTime;

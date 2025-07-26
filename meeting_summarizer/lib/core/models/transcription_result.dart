@@ -99,9 +99,8 @@ class TranscriptionResult {
     return TranscriptionResult(
       text: text,
       confidence: _calculateOverallConfidence(segments),
-      language: language != null
-          ? TranscriptionLanguage.fromCode(language)
-          : null,
+      language:
+          language != null ? TranscriptionLanguage.fromCode(language) : null,
       processingTimeMs: processingTimeMs,
       audioDurationMs: audioDurationMs,
       segments: segments,
@@ -239,27 +238,23 @@ class TranscriptionResult {
           : null,
       processingTimeMs: json['processing_time_ms'] as int,
       audioDurationMs: json['audio_duration_ms'] as int,
-      segments:
-          (json['segments'] as List?)
+      segments: (json['segments'] as List?)
               ?.map(
                 (s) => TranscriptionSegment.fromJson(s as Map<String, dynamic>),
               )
               .toList() ??
           [],
-      words:
-          (json['words'] as List?)
+      words: (json['words'] as List?)
               ?.map(
                 (w) => TranscriptionWord.fromJson(w as Map<String, dynamic>),
               )
               .toList() ??
           [],
-      speakers:
-          (json['speakers'] as List?)
+      speakers: (json['speakers'] as List?)
               ?.map((s) => Speaker.fromJson(s as Map<String, dynamic>))
               .toList() ??
           [],
-      alternatives:
-          (json['alternatives'] as List?)
+      alternatives: (json['alternatives'] as List?)
               ?.map(
                 (a) => TranscriptionAlternative.fromJson(
                   a as Map<String, dynamic>,
@@ -443,27 +438,23 @@ class TranscriptionQualityMetrics {
     final averageConfidence =
         confidences.reduce((a, b) => a + b) / confidences.length;
 
-    final variance =
-        confidences
+    final variance = confidences
             .map((c) => (c - averageConfidence) * (c - averageConfidence))
             .reduce((a, b) => a + b) /
         confidences.length;
 
-    final lowConfidenceSegments = segments
-        .where((s) => s.confidence < 0.8)
-        .length;
+    final lowConfidenceSegments =
+        segments.where((s) => s.confidence < 0.8).length;
 
     // Calculate speech rate (approximate)
-    final totalDuration = segments.isEmpty
-        ? 0.0
-        : segments.last.end - segments.first.start;
+    final totalDuration =
+        segments.isEmpty ? 0.0 : segments.last.end - segments.first.start;
     final totalWords = segments.fold<int>(
       0,
       (sum, segment) => sum + segment.text.split(' ').length,
     );
-    final speechRate = totalDuration > 0
-        ? (totalWords / totalDuration) * 60
-        : 0.0;
+    final speechRate =
+        totalDuration > 0 ? (totalWords / totalDuration) * 60 : 0.0;
 
     return TranscriptionQualityMetrics(
       averageConfidence: averageConfidence,
@@ -501,9 +492,8 @@ class TranscriptionQualityMetrics {
   double get qualityScore {
     final confidenceScore = averageConfidence;
     final consistencyScore = 1.0 - (confidenceVariance.clamp(0.0, 1.0));
-    final reliabilityScore = totalSegments > 0
-        ? 1.0 - (lowConfidenceSegments / totalSegments)
-        : 1.0;
+    final reliabilityScore =
+        totalSegments > 0 ? 1.0 - (lowConfidenceSegments / totalSegments) : 1.0;
 
     return (confidenceScore + consistencyScore + reliabilityScore) / 3;
   }
