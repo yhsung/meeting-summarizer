@@ -19,7 +19,7 @@ void main() {
     setUpAll(() async {
       // Initialize database factory for testing
       databaseFactory = databaseFactoryFfi;
-      
+
       // Initialize shared preferences for testing
       SharedPreferences.setMockInitialValues({});
       prefs = await SharedPreferences.getInstance();
