@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'core/services/robust_permission_service.dart';
 import 'core/services/theme_service.dart';
 import 'features/audio_recording/presentation/screens/recording_screen.dart';
 import 'features/transcription/presentation/screens/transcription_screen.dart';
@@ -12,6 +13,10 @@ import 'features/feedback/presentation/widgets/feedback_integration_widget.dart'
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize the robust permission service early
+  await RobustPermissionService.instance.initialize();
+
   runApp(const MeetingSummarizerApp());
 }
 

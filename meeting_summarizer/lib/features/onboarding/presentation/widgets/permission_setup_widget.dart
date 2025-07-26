@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import '../../../../core/services/robust_permission_service.dart';
 import '../../data/services/onboarding_service.dart';
 
 /// Widget for handling permission setup during onboarding
@@ -13,6 +14,8 @@ class PermissionSetupWidget extends StatefulWidget {
 
 class _PermissionSetupWidgetState extends State<PermissionSetupWidget> {
   final OnboardingService _onboardingService = OnboardingService.instance;
+  final RobustPermissionService _permissionService =
+      RobustPermissionService.instance;
 
   Map<Permission, PermissionStatus> _permissionStatuses = {};
   bool _isLoading = false;
@@ -44,7 +47,13 @@ class _PermissionSetupWidgetState extends State<PermissionSetupWidget> {
   @override
   void initState() {
     super.initState();
-    _checkPermissions();
+    _initializeAndCheckPermissions();
+  }
+
+  Future<void> _initializeAndCheckPermissions() async {
+    // Initialize the robust permission service first
+    await _permissionService.initialize();
+    await _checkPermissions();
   }
 
   @override
@@ -241,8 +250,8 @@ class _PermissionSetupWidgetState extends State<PermissionSetupWidget> {
 
       for (final permissionInfo in _requiredPermissions) {
         try {
-          statuses[permissionInfo.permission] =
-              await permissionInfo.permission.status;
+          statuses[permissionInfo.permission] = await _permissionService
+              .checkPermissionStatus(permissionInfo.permission);
         } catch (e) {
           debugPrint(
             'Error checking permission ${permissionInfo.permission}: $e',
@@ -289,14 +298,15 @@ class _PermissionSetupWidgetState extends State<PermissionSetupWidget> {
 
       Map<Permission, PermissionStatus> statuses;
       try {
-        statuses = await permissions.request();
+        statuses = await _permissionService.requestPermissions(permissions);
       } catch (e) {
         debugPrint('Error requesting permissions: $e');
         // Fallback to checking individual permissions
         statuses = <Permission, PermissionStatus>{};
         for (final permission in permissions) {
           try {
-            statuses[permission] = await permission.status;
+            statuses[permission] = await _permissionService
+                .checkPermissionStatus(permission);
           } catch (e) {
             debugPrint('Error checking individual permission $permission: $e');
             statuses[permission] = PermissionStatus.denied;
