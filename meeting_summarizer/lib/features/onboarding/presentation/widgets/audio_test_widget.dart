@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:record/record.dart';
+import 'package:audio_waveforms/audio_waveforms.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../../../../core/services/robust_permission_service.dart';
 import '../../data/services/onboarding_service.dart';
@@ -24,9 +27,14 @@ class _AudioTestWidgetState extends State<AudioTestWidget>
   bool _testComplete = false;
   double _volumeLevel = 0.0;
   String _audioQuality = 'Good';
+  String? _recordingPath;
 
   late AnimationController _volumeAnimationController;
   late AnimationController _pulseAnimationController;
+  
+  // Audio recording and playback
+  final AudioRecorder _audioRecorder = AudioRecorder();
+  PlayerController? _playerController;
 
   @override
   void initState() {
@@ -54,6 +62,8 @@ class _AudioTestWidgetState extends State<AudioTestWidget>
   void dispose() {
     _volumeAnimationController.dispose();
     _pulseAnimationController.dispose();
+    _audioRecorder.dispose();
+    _playerController?.dispose();
     super.dispose();
   }
 
@@ -78,8 +88,8 @@ class _AudioTestWidgetState extends State<AudioTestWidget>
         border: Border.all(color: Theme.of(context).dividerColor),
         borderRadius: BorderRadius.circular(16),
         color: _isRecording
-            ? Colors.red.withOpacity(0.05)
-            : Colors.grey.withOpacity(0.05),
+            ? Colors.red.withValues(alpha: 0.05)
+            : Colors.grey.withValues(alpha: 0.05),
       ),
       child: Column(
         children: [
@@ -328,67 +338,141 @@ class _AudioTestWidgetState extends State<AudioTestWidget>
       return;
     }
 
-    setState(() {
-      _isRecording = !_isRecording;
-    });
-
     if (_isRecording) {
-      _startVolumeSimulation();
+      await _stopRecording();
     } else {
-      _stopVolumeSimulation();
+      await _startRecording();
+    }
+  }
+
+  Future<void> _startRecording() async {
+    try {
+      // Get temporary directory for recording
+      final directory = await getTemporaryDirectory();
+      _recordingPath = '${directory.path}/audio_test_${DateTime.now().millisecondsSinceEpoch}.m4a';
+
+      // Start recording
+      await _audioRecorder.start(
+        const RecordConfig(
+          encoder: AudioEncoder.aacLc,
+          bitRate: 128000,
+          sampleRate: 44100,
+        ),
+        path: _recordingPath!,
+      );
+
       setState(() {
+        _isRecording = true;
+      });
+
+      // Start monitoring amplitude for volume visualization
+      _startAmplitudeMonitoring();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to start recording: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _stopRecording() async {
+    try {
+      await _audioRecorder.stop();
+
+      setState(() {
+        _isRecording = false;
         _hasRecording = true;
+        _volumeLevel = 0.0;
         _audioQuality = _calculateAudioQuality();
       });
+
+      // Initialize player controller for playback
+      if (_recordingPath != null) {
+        _playerController = PlayerController();
+        await _playerController!.preparePlayer(
+          path: _recordingPath!,
+          shouldExtractWaveform: true,
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to stop recording: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
   Future<void> _togglePlayback() async {
-    if (!_hasRecording) return;
-
-    setState(() {
-      _isPlaying = !_isPlaying;
-    });
+    if (!_hasRecording || _playerController == null) return;
 
     if (_isPlaying) {
-      // Simulate playback duration
-      await Future.delayed(const Duration(seconds: 3));
-      if (mounted) {
-        setState(() {
-          _isPlaying = false;
-          _testComplete = true;
-        });
-      }
+      await _playerController!.pausePlayer();
+      setState(() {
+        _isPlaying = false;
+      });
+    } else {
+      await _playerController!.startPlayer();
+      setState(() {
+        _isPlaying = true;
+      });
+      
+      // Listen for playback completion
+      _playerController!.onPlayerStateChanged.listen((state) {
+        if (state.isPlaying && mounted) {
+          setState(() {
+            _isPlaying = true;
+          });
+        } else if (state.isPaused && mounted) {
+          setState(() {
+            _isPlaying = false;
+            _testComplete = true;
+          });
+        }
+      });
     }
   }
 
-  void _startVolumeSimulation() {
-    // Simulate volume level changes during recording
-    _simulateVolumeChanges();
+  void _startAmplitudeMonitoring() {
+    _monitorAmplitude();
   }
 
-  void _stopVolumeSimulation() {
-    // Reset volume level
-    setState(() {
-      _volumeLevel = 0.0;
-    });
-  }
-
-  void _simulateVolumeChanges() {
+  void _monitorAmplitude() async {
     if (!_isRecording) return;
 
-    // Simulate random volume changes
-    Future.delayed(const Duration(milliseconds: 100), () {
+    try {
+      // Get current amplitude from the recorder
+      final amplitude = await _audioRecorder.getAmplitude();
+      
       if (_isRecording && mounted) {
         setState(() {
-          _volumeLevel =
-              0.3 +
-              (0.7 * (DateTime.now().millisecondsSinceEpoch % 1000) / 1000);
+          // Convert amplitude to a 0-1 range for volume visualization
+          // Amplitude.current ranges from -160dB to 0dB, normalize it
+          final normalizedAmplitude = (amplitude.current + 160) / 160;
+          _volumeLevel = normalizedAmplitude.clamp(0.0, 1.0);
         });
         _volumeAnimationController.forward(from: 0);
-        _simulateVolumeChanges();
+        
+        // Continue monitoring
+        Future.delayed(const Duration(milliseconds: 100), () {
+          _monitorAmplitude();
+        });
       }
-    });
+    } catch (e) {
+      // If amplitude monitoring fails, continue without it
+      if (_isRecording && mounted) {
+        Future.delayed(const Duration(milliseconds: 100), () {
+          _monitorAmplitude();
+        });
+      }
+    }
   }
 
   String _calculateAudioQuality() {
