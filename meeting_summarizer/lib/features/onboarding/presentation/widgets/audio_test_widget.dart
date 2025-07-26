@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import '../../../../core/services/robust_permission_service.dart';
 import '../../data/services/onboarding_service.dart';
 
 /// Widget for testing audio quality during onboarding
@@ -14,6 +15,8 @@ class AudioTestWidget extends StatefulWidget {
 class _AudioTestWidgetState extends State<AudioTestWidget>
     with TickerProviderStateMixin {
   final OnboardingService _onboardingService = OnboardingService.instance;
+  final RobustPermissionService _permissionService =
+      RobustPermissionService.instance;
 
   bool _isRecording = false;
   bool _isPlaying = false;
@@ -36,6 +39,15 @@ class _AudioTestWidgetState extends State<AudioTestWidget>
       duration: const Duration(seconds: 1),
       vsync: this,
     )..repeat();
+
+    // Initialize the robust permission service if not already done
+    _initializePermissionService();
+  }
+
+  Future<void> _initializePermissionService() async {
+    if (!_permissionService.isInitialized) {
+      await _permissionService.initialize();
+    }
   }
 
   @override
@@ -298,15 +310,21 @@ class _AudioTestWidgetState extends State<AudioTestWidget>
   }
 
   Future<void> _toggleRecording() async {
-    // Check microphone permission
-    final status = await Permission.microphone.status;
+    // Check microphone permission using robust service
+    final status = await _permissionService.checkPermissionStatus(
+      Permission.microphone,
+    );
     if (!status.isGranted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Microphone permission is required for audio testing'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Microphone permission is required for audio testing',
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
       return;
     }
 
