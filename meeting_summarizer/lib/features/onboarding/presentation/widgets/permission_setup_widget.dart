@@ -240,20 +240,42 @@ class _PermissionSetupWidgetState extends State<PermissionSetupWidget> {
       final statuses = <Permission, PermissionStatus>{};
 
       for (final permissionInfo in _requiredPermissions) {
-        statuses[permissionInfo.permission] =
-            await permissionInfo.permission.status;
+        try {
+          statuses[permissionInfo.permission] =
+              await permissionInfo.permission.status;
+        } catch (e) {
+          debugPrint(
+            'Error checking permission ${permissionInfo.permission}: $e',
+          );
+          // Fallback to denied status if we can't check
+          statuses[permissionInfo.permission] = PermissionStatus.denied;
+        }
       }
 
-      setState(() {
-        _permissionStatuses = statuses;
-      });
+      if (mounted) {
+        setState(() {
+          _permissionStatuses = statuses;
+        });
 
-      // Update onboarding service if all required permissions are granted
-      if (_allRequiredPermissionsGranted()) {
-        await _onboardingService.markPermissionsGranted();
+        // Update onboarding service if all required permissions are granted
+        if (_allRequiredPermissionsGranted()) {
+          await _onboardingService.markPermissionsGranted();
+        }
+      }
+    } catch (e) {
+      debugPrint('Error in _checkPermissions: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error checking permissions: $e'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
       }
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -264,27 +286,57 @@ class _PermissionSetupWidgetState extends State<PermissionSetupWidget> {
       final permissions = _requiredPermissions
           .map((p) => p.permission)
           .toList();
-      final statuses = await permissions.request();
 
-      setState(() {
-        _permissionStatuses = statuses;
-      });
-
-      // Check for permanently denied permissions
-      final permanentlyDenied = statuses.entries
-          .where((entry) => entry.value == PermissionStatus.permanentlyDenied)
-          .toList();
-
-      if (permanentlyDenied.isNotEmpty && mounted) {
-        _showPermissionDeniedDialog(permanentlyDenied);
+      Map<Permission, PermissionStatus> statuses;
+      try {
+        statuses = await permissions.request();
+      } catch (e) {
+        debugPrint('Error requesting permissions: $e');
+        // Fallback to checking individual permissions
+        statuses = <Permission, PermissionStatus>{};
+        for (final permission in permissions) {
+          try {
+            statuses[permission] = await permission.status;
+          } catch (e) {
+            debugPrint('Error checking individual permission $permission: $e');
+            statuses[permission] = PermissionStatus.denied;
+          }
+        }
       }
 
-      // Update onboarding service
-      if (_allRequiredPermissionsGranted()) {
-        await _onboardingService.markPermissionsGranted();
+      if (mounted) {
+        setState(() {
+          _permissionStatuses = statuses;
+        });
+
+        // Check for permanently denied permissions
+        final permanentlyDenied = statuses.entries
+            .where((entry) => entry.value == PermissionStatus.permanentlyDenied)
+            .toList();
+
+        if (permanentlyDenied.isNotEmpty) {
+          _showPermissionDeniedDialog(permanentlyDenied);
+        }
+
+        // Update onboarding service
+        if (_allRequiredPermissionsGranted()) {
+          await _onboardingService.markPermissionsGranted();
+        }
+      }
+    } catch (e) {
+      debugPrint('Error in _requestAllPermissions: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error requesting permissions: $e'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
       }
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 

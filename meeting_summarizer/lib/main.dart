@@ -10,7 +10,8 @@ import 'features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'features/onboarding/data/services/onboarding_service.dart';
 import 'features/feedback/presentation/widgets/feedback_integration_widget.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MeetingSummarizerApp());
 }
 
