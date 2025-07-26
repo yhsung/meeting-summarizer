@@ -7,7 +7,7 @@ on:
     branches: [ main, develop ]
 
 env:
-  FLUTTER_VERSION: '3.24.3'
+  FLUTTER_VERSION: '3.32.4'
 
 jobs:
   # Job 1: Code Quality and Analysis
@@ -54,9 +54,9 @@ jobs:
       working-directory: ./meeting_summarizer
       run: flutter analyze
 
-  # Job 2: Unit and Widget Tests
+  # Job 2: Unit and Widget Tests with Coverage
   test:
-    name: Unit & Widget Tests
+    name: Unit & Widget Tests with Coverage
     runs-on: ubuntu-latest
     needs: analyze
     
@@ -83,22 +83,214 @@ jobs:
         cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
         cache-path: '${{ runner.tool_cache }}/flutter/:channel:-:version:-:arch:'
     
+    - name: Install system dependencies for coverage
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y lcov bc
+    
     - name: Install dependencies
       working-directory: ./meeting_summarizer
       run: flutter pub get
     
-    - name: Run unit tests with coverage
+    - name: Run comprehensive coverage analysis
       working-directory: ./meeting_summarizer
-      run: flutter test --coverage --reporter expanded
+      run: |
+        # Make scripts executable
+        chmod +x scripts/run_coverage.sh
+        
+        # Run coverage with comprehensive analysis
+        ./scripts/run_coverage.sh --enforce --upload
+      env:
+        CI: true
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+    
+    - name: Check coverage quality gates
+      working-directory: ./meeting_summarizer
+      run: |
+        # Extract coverage percentage from generated report
+        if [ -f "coverage/coverage_percent.txt" ]; then
+          COVERAGE=$(cat coverage/coverage_percent.txt)
+          echo "Current coverage: $COVERAGE%"
+          
+          # Minimum coverage threshold (80%)
+          MINIMUM=80.0
+          
+          if (( $(echo "$COVERAGE < $MINIMUM" | bc -l) )); then
+            echo "❌ Coverage $COVERAGE% is below minimum threshold $MINIMUM%"
+            echo "::error title=Coverage Too Low::Coverage $COVERAGE% is below the minimum threshold of $MINIMUM%"
+            exit 1
+          else
+            echo "✅ Coverage $COVERAGE% meets minimum threshold $MINIMUM%"
+            echo "::notice title=Coverage Success::Coverage $COVERAGE% meets quality standards"
+          fi
+        else
+          echo "⚠️ Coverage percentage file not found"
+        fi
+    
+    - name: Generate coverage summary for PR
+      if: github.event_name == 'pull_request'
+      working-directory: ./meeting_summarizer
+      run: |
+        if [ -f "coverage/coverage-summary.md" ]; then
+          echo "## 📊 Code Coverage Report" >> $GITHUB_STEP_SUMMARY
+          cat coverage/coverage-summary.md >> $GITHUB_STEP_SUMMARY
+        fi
+    
+    - name: Upload coverage reports
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-reports
+        path: |
+          meeting_summarizer/coverage/
+        retention-days: 30
     
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v4
+      if: success() || failure()
       with:
         file: meeting_summarizer/coverage/lcov.info
         flags: unittests
-        name: codecov-umbrella
+        name: meeting-summarizer-coverage
+        fail_ci_if_error: false
+        verbose: true
+    
+    - name: Upload to Coveralls
+      uses: coverallsapp/github-action@v2
+      if: success() || failure()
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        path-to-lcov: meeting_summarizer/coverage/lcov.info
+        flag-name: Unit Tests
+        parallel: false
+    
+    - name: Comment coverage on PR
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const path = './meeting_summarizer/coverage/coverage_percent.txt';
+          
+          if (fs.existsSync(path)) {
+            const coverage = fs.readFileSync(path, 'utf8').trim();
+            const threshold = 80.0;
+            const status = parseFloat(coverage) >= threshold ? '✅' : '❌';
+            const statusText = parseFloat(coverage) >= threshold ? 'PASSED' : 'FAILED';
+            
+            const comment = `## ${status} Code Coverage Report
+            
+            **Coverage:** ${coverage}%  
+            **Threshold:** ${threshold}%  
+            **Status:** ${statusText}
+            
+            ${parseFloat(coverage) < threshold ? 
+              '⚠️ Coverage is below the minimum threshold. Please add more tests.' : 
+              '🎉 Coverage meets quality standards!'}
+            
+            [View detailed coverage report](../actions/runs/${{ github.run_id }})`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+          }
 
-  # Job 3: Integration Tests
+  # Job 3: Coverage Quality Analysis and Reporting
+  coverage_analysis:
+    name: Coverage Quality Analysis
+    runs-on: ubuntu-latest
+    needs: test
+    if: always()
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Full history for trend analysis
+    
+    - name: Download coverage reports
+      uses: actions/download-artifact@v4
+      with:
+        name: coverage-reports
+        path: ./meeting_summarizer/coverage/
+    
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: ${{ env.FLUTTER_VERSION }}
+        channel: 'stable'
+        cache: true
+    
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y lcov bc
+    
+    - name: Run detailed coverage analysis
+      working-directory: ./meeting_summarizer
+      run: |
+        if [ -f "scripts/coverage_analysis.dart" ]; then
+          dart run scripts/coverage_analysis.dart
+        fi
+    
+    - name: Generate coverage trend analysis
+      working-directory: ./meeting_summarizer
+      run: |
+        # Create coverage trend data
+        CURRENT_COVERAGE=""
+        if [ -f "coverage/coverage_percent.txt" ]; then
+          CURRENT_COVERAGE=$(cat coverage/coverage_percent.txt)
+        fi
+        
+        # Get previous coverage from last successful run
+        PREVIOUS_COVERAGE=""
+        if [ -f "coverage/trends.json" ]; then
+          PREVIOUS_COVERAGE=$(tail -n 2 coverage/trends.json | head -n 1 | grep -o '"line_coverage":[0-9.]*' | cut -d: -f2 || echo "")
+        fi
+        
+        # Generate trend report
+        cat > coverage/trend-analysis.md << EOF
+        # Coverage Trend Analysis
+        
+        ## Current Build
+        - **Coverage**: ${CURRENT_COVERAGE}%
+        - **Commit**: \${{ github.sha }}
+        - **Branch**: \${{ github.ref_name }}
+        
+        ## Trend Analysis
+        EOF
+        
+        if [ -n "$PREVIOUS_COVERAGE" ] && [ -n "$CURRENT_COVERAGE" ]; then
+          CHANGE=$(echo "$CURRENT_COVERAGE - $PREVIOUS_COVERAGE" | bc -l)
+          if (( $(echo "$CHANGE > 0" | bc -l) )); then
+            echo "- **Trend**: 📈 Improved by ${CHANGE}%" >> coverage/trend-analysis.md
+          elif (( $(echo "$CHANGE < 0" | bc -l) )); then
+            echo "- **Trend**: 📉 Decreased by ${CHANGE#-}%" >> coverage/trend-analysis.md
+          else
+            echo "- **Trend**: ➡️ No change" >> coverage/trend-analysis.md
+          fi
+        else
+          echo "- **Trend**: 🆕 First measurement" >> coverage/trend-analysis.md
+        fi
+    
+    - name: Upload comprehensive coverage artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: comprehensive-coverage-analysis
+        path: |
+          meeting_summarizer/coverage/
+        retention-days: 90
+    
+    - name: Update coverage badge
+      if: github.ref == 'refs/heads/main'
+      run: |
+        # Coverage badge will be available as an artifact
+        echo "Coverage badge generated and available in artifacts"
+
+  # Job 4: Integration Tests
   integration_test:
     name: Integration Tests
     runs-on: ubuntu-latest

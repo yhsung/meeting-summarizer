@@ -88,13 +88,21 @@ project/                   # absolute path /Volumes/Samsung970EVOPlus/dev-projec
 │   │   │   │   │   ├── sync_operation.dart    # Sync operation tracking with progress
 │   │   │   │   │   ├── file_change.dart       # File change detection with delta sync support
 │   │   │   │   │   └── file_version.dart      # File versioning and history models
-│   │   │   │   └── user_rights/
-│   │   │   │       ├── user_profile.dart      # Comprehensive user profile with roles and guardian relationships
-│   │   │   │       ├── user_role.dart         # Hierarchical role system with permission inheritance
-│   │   │   │       ├── access_permission.dart # Fine-grained permission model with conditions and expiration
-│   │   │   │       ├── rights_delegation.dart # Rights delegation between users with approval workflows
-│   │   │   │       ├── access_audit_log.dart  # Comprehensive audit trail with risk assessment
-│   │   │   │       └── user_rights_service_event.dart # Event system for real-time user rights monitoring
+│   │   │   │   ├── user_rights/
+│   │   │   │   │   ├── user_profile.dart      # Comprehensive user profile with roles and guardian relationships
+│   │   │   │   │   ├── user_role.dart         # Hierarchical role system with permission inheritance
+│   │   │   │   │   ├── access_permission.dart # Fine-grained permission model with conditions and expiration
+│   │   │   │   │   ├── rights_delegation.dart # Rights delegation between users with approval workflows
+│   │   │   │   │   ├── access_audit_log.dart  # Comprehensive audit trail with risk assessment
+│   │   │   │   │   └── user_rights_service_event.dart # Event system for real-time user rights monitoring
+│   │   │   │   ├── help/
+│   │   │   │   │   ├── help_article.dart      # Help article model with categories, tags, and metadata
+│   │   │   │   │   ├── faq_item.dart          # FAQ item model with voting and view tracking
+│   │   │   │   │   ├── contextual_help.dart   # Context-aware tooltip and guided help model
+│   │   │   │   │   └── help_tour.dart         # Multi-step guided tour model with navigation
+│   │   │   │   └── feedback/
+│   │   │   │       ├── feedback_item.dart     # Feedback data model with type categorization
+│   │   │   │       └── feedback_analytics.dart # Analytics model for feedback insights
 │   │   │   └── services/
 │   │   │       ├── audio_service_interface.dart           # Service interface definition
 │   │   │       ├── audio_format_manager.dart              # Platform-aware format selection
@@ -140,7 +148,11 @@ project/                   # absolute path /Volumes/Samsung970EVOPlus/dev-projec
 │   │   │       ├── local_whisper_service_stub.dart        # Web platform stub for local Whisper
 │   │   │       ├── enhanced_user_rights_service.dart      # Comprehensive user rights management with RBAC and GDPR integration
 │   │   │       ├── permission_inheritance_manager.dart    # Hierarchical permission inheritance with role-based access control
-│   │   │       └── fine_grained_access_manager.dart       # Fine-grained access validation with conditions and audit logging
+│   │   │       ├── fine_grained_access_manager.dart       # Fine-grained access validation with conditions and audit logging
+│   │   │       ├── settings_service.dart                  # Comprehensive settings management with SharedPreferences persistence
+│   │   │       ├── settings_backup_service.dart           # Settings backup and migration with cloud sync and encryption
+│   │   │       ├── help_service.dart                      # In-app help system with articles, FAQ, contextual help and tours
+│   │   │       └── feedback_service.dart                  # User feedback collection with smart rating prompts and analytics
 │   │   ├── features/
 │   │   │   ├── audio_recording/
 │   │   │   │   ├── data/
@@ -181,6 +193,32 @@ project/                   # absolute path /Volumes/Samsung970EVOPlus/dev-projec
 │   │   │   ├── user_rights/
 │   │   │   │   └── widgets/
 │   │   │   │       └── user_rights_dashboard.dart          # Comprehensive user rights dashboard with permissions, history, delegations
+│   │   │   ├── settings/
+│   │   │   │   └── presentation/
+│   │   │   │       ├── screens/
+│   │   │   │       │   └── settings_screen.dart            # Comprehensive settings management screen with tabbed interface
+│   │   │   │       └── widgets/
+│   │   │   │           └── settings_widgets.dart           # Reusable settings widgets for different data types
+│   │   │   ├── help/
+│   │   │   │   └── presentation/
+│   │   │   │       ├── screens/
+│   │   │   │       │   ├── help_screen.dart                # Main help interface with articles, FAQ, and search
+│   │   │   │       │   └── help_article_screen.dart        # Detailed article view with sharing and voting
+│   │   │   │       └── widgets/
+│   │   │   │           ├── help_search_bar.dart            # Search with autocomplete suggestions
+│   │   │   │           ├── help_category_grid.dart         # Visual category browser
+│   │   │   │           ├── help_article_list.dart          # Article display with metadata
+│   │   │   │           ├── help_faq_list.dart              # Expandable FAQ with voting
+│   │   │   │           ├── help_quick_actions.dart         # Action buttons for common tasks
+│   │   │   │           └── contextual_help_tooltip.dart    # Advanced tooltip system with animations
+│   │   │   ├── feedback/
+│   │   │   │   └── presentation/
+│   │   │   │       ├── screens/
+│   │   │   │       │   └── feedback_screen.dart            # Feedback analytics dashboard with insights
+│   │   │   │       └── widgets/
+│   │   │   │           ├── rating_dialog.dart              # Smart rating dialog with usage-based timing
+│   │   │   │           ├── feedback_form.dart              # Comprehensive feedback submission form
+│   │   │   │           └── feedback_integration_widget.dart # App-wide feedback integration wrapper
 │   │   │   └── summary/
 │   │   │       └── presentation/
 │   │   │           ├── screens/
@@ -216,12 +254,17 @@ project/                   # absolute path /Volumes/Samsung970EVOPlus/dev-projec
 │   │   │       ├── file_categorization_service_test.dart # File categorization and tagging tests
 │   │   │       ├── advanced_search_service_test.dart     # Comprehensive search functionality tests (28 test cases)
 │   │   │       ├── export_service_test.dart              # Multi-format export system tests (20 test cases)
-│   │   │       └── cloud_encryption_service_test.dart   # Cloud encryption service comprehensive tests (15 test groups)
+│   │   │       ├── cloud_encryption_service_test.dart   # Cloud encryption service comprehensive tests (15 test groups)
+│   │   │       ├── settings_service_test.dart            # Settings service comprehensive tests (34 test cases)
+│   │   │       ├── settings_backup_service_test.dart     # Settings backup and migration service tests
+│   │   │       └── help_service_test.dart                # Help system service tests with caching and analytics
 │   │   ├── features/
-│   │   │   └── audio_recording/
-│   │   │       ├── audio_recording_service_test.dart
-│   │   │       └── platform/
-│   │   │           └── audio_recording_platform_test.dart
+│   │   │   ├── audio_recording/
+│   │   │   │   ├── audio_recording_service_test.dart
+│   │   │   │   └── platform/
+│   │   │   │       └── audio_recording_platform_test.dart
+│   │   │   └── feedback/
+│   │   │       └── feedback_integration_test.dart        # Comprehensive feedback system integration tests
 │   │   └── widget_test.dart            # Basic widget tests
 │   ├── android/                        # Android platform configuration
 │   ├── ios/                           # iOS platform configuration
