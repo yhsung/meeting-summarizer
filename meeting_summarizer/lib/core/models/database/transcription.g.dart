@@ -50,21 +50,22 @@ const _$TranscriptionStatusEnumMap = {
 };
 
 TranscriptionSegment _$TranscriptionSegmentFromJson(
-  Map<String, dynamic> json,
-) => TranscriptionSegment(
-  startTime: (json['startTime'] as num).toInt(),
-  endTime: (json['endTime'] as num).toInt(),
-  text: json['text'] as String,
-  confidence: (json['confidence'] as num).toDouble(),
-  words: (json['words'] as List<dynamic>?)?.map((e) => e as String).toList(),
-);
+        Map<String, dynamic> json) =>
+    TranscriptionSegment(
+      startTime: (json['startTime'] as num).toInt(),
+      endTime: (json['endTime'] as num).toInt(),
+      text: json['text'] as String,
+      confidence: (json['confidence'] as num).toDouble(),
+      words:
+          (json['words'] as List<dynamic>?)?.map((e) => e as String).toList(),
+    );
 
 Map<String, dynamic> _$TranscriptionSegmentToJson(
-  TranscriptionSegment instance,
-) => <String, dynamic>{
-  'startTime': instance.startTime,
-  'endTime': instance.endTime,
-  'text': instance.text,
-  'confidence': instance.confidence,
-  'words': instance.words,
-};
+        TranscriptionSegment instance) =>
+    <String, dynamic>{
+      'startTime': instance.startTime,
+      'endTime': instance.endTime,
+      'text': instance.text,
+      'confidence': instance.confidence,
+      'words': instance.words,
+    };

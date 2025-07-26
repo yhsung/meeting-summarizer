@@ -7,19 +7,19 @@ part of 'feedback_item.dart';
 // **************************************************************************
 
 FeedbackItem _$FeedbackItemFromJson(Map<String, dynamic> json) => FeedbackItem(
-  id: json['id'] as String,
-  type: $enumDecode(_$FeedbackTypeEnumMap, json['type']),
-  rating: (json['rating'] as num?)?.toInt(),
-  subject: json['subject'] as String,
-  message: json['message'] as String,
-  email: json['email'] as String?,
-  appVersion: json['appVersion'] as String,
-  platform: json['platform'] as String,
-  createdAt: DateTime.parse(json['createdAt'] as String),
-  isSubmitted: json['isSubmitted'] as bool,
-  attachmentPath: json['attachmentPath'] as String?,
-  tags: (json['tags'] as List<dynamic>).map((e) => e as String).toList(),
-);
+      id: json['id'] as String,
+      type: $enumDecode(_$FeedbackTypeEnumMap, json['type']),
+      rating: (json['rating'] as num?)?.toInt(),
+      subject: json['subject'] as String,
+      message: json['message'] as String,
+      email: json['email'] as String?,
+      appVersion: json['appVersion'] as String,
+      platform: json['platform'] as String,
+      createdAt: DateTime.parse(json['createdAt'] as String),
+      isSubmitted: json['isSubmitted'] as bool,
+      attachmentPath: json['attachmentPath'] as String?,
+      tags: (json['tags'] as List<dynamic>).map((e) => e as String).toList(),
+    );
 
 Map<String, dynamic> _$FeedbackItemToJson(FeedbackItem instance) =>
     <String, dynamic>{

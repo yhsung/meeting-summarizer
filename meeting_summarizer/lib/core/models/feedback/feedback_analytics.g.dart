@@ -17,29 +17,29 @@ FeedbackAnalytics _$FeedbackAnalyticsFromJson(Map<String, dynamic> json) =>
       lastFeedbackDate: json['lastFeedbackDate'] == null
           ? null
           : DateTime.parse(json['lastFeedbackDate'] as String),
-      ratingDistribution: (json['ratingDistribution'] as Map<String, dynamic>)
-          .map((k, e) => MapEntry(int.parse(k), (e as num).toInt())),
+      ratingDistribution:
+          (json['ratingDistribution'] as Map<String, dynamic>).map(
+        (k, e) => MapEntry(int.parse(k), (e as num).toInt()),
+      ),
       tagFrequency: Map<String, int>.from(json['tagFrequency'] as Map),
       averageRatingPromptDelay: json['averageRatingPromptDelay'] == null
           ? null
           : Duration(
-              microseconds: (json['averageRatingPromptDelay'] as num).toInt(),
-            ),
+              microseconds: (json['averageRatingPromptDelay'] as num).toInt()),
     );
 
-Map<String, dynamic> _$FeedbackAnalyticsToJson(
-  FeedbackAnalytics instance,
-) => <String, dynamic>{
-  'totalFeedback': instance.totalFeedback,
-  'totalRatings': instance.totalRatings,
-  'averageRating': instance.averageRating,
-  'bugReports': instance.bugReports,
-  'featureRequests': instance.featureRequests,
-  'generalFeedback': instance.generalFeedback,
-  'lastFeedbackDate': instance.lastFeedbackDate?.toIso8601String(),
-  'ratingDistribution': instance.ratingDistribution.map(
-    (k, e) => MapEntry(k.toString(), e),
-  ),
-  'tagFrequency': instance.tagFrequency,
-  'averageRatingPromptDelay': instance.averageRatingPromptDelay?.inMicroseconds,
-};
+Map<String, dynamic> _$FeedbackAnalyticsToJson(FeedbackAnalytics instance) =>
+    <String, dynamic>{
+      'totalFeedback': instance.totalFeedback,
+      'totalRatings': instance.totalRatings,
+      'averageRating': instance.averageRating,
+      'bugReports': instance.bugReports,
+      'featureRequests': instance.featureRequests,
+      'generalFeedback': instance.generalFeedback,
+      'lastFeedbackDate': instance.lastFeedbackDate?.toIso8601String(),
+      'ratingDistribution':
+          instance.ratingDistribution.map((k, e) => MapEntry(k.toString(), e)),
+      'tagFrequency': instance.tagFrequency,
+      'averageRatingPromptDelay':
+          instance.averageRatingPromptDelay?.inMicroseconds,
+    };

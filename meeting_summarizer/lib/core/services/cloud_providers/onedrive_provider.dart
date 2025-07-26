@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
+import 'dart:math' as math;
 import 'package:http/http.dart' as http;
 import '../../models/cloud_sync/cloud_provider.dart';
 import '../../interfaces/cloud_sync_interface.dart';
@@ -12,26 +13,61 @@ class OneDriveProvider implements CloudProviderInterface {
   CloudProvider get provider => CloudProvider.oneDrive;
 
   static const String _graphBaseUrl = 'https://graph.microsoft.com/v1.0';
+  static const String _authBaseUrl = 'https://login.microsoftonline.com';
+  static const String _commonTenant = 'common';
+  static const String _consumerTenant = '9188040d-6c67-4c5b-b112-36a304b66dad';
+  
+  // Maximum file size for simple upload (4MB)
+  static const int _simpleUploadLimit = 4 * 1024 * 1024;
+  
+  // Chunk size for resumable uploads (10MB)
+  static const int _uploadChunkSize = 10 * 1024 * 1024;
 
   Map<String, String> _credentials = {};
   bool _isConnected = false;
   String? _lastError;
   String? _accessToken;
+  String? _refreshToken;
+  DateTime? _tokenExpiry;
   http.Client? _httpClient;
+  String? _accountType; // 'personal' or 'work'
+  String? _userId;
+  final Map<String, String> _uploadSessions = {}; // For resumable uploads
+  String? _deltaToken; // For delta sync
 
   @override
   Future<void> initialize(Map<String, String> credentials) async {
     _credentials = Map.from(credentials);
 
     // Validate required credentials
-    if (!_credentials.containsKey('client_id') ||
-        !_credentials.containsKey('access_token')) {
+    if (!_credentials.containsKey('client_id')) {
       throw ArgumentError(
-        'OneDrive requires client_id and access_token credentials',
+        'OneDrive requires client_id credential',
       );
     }
 
-    _accessToken = _credentials['access_token'];
+    // Initialize token information if provided
+    if (_credentials.containsKey('access_token')) {
+      _accessToken = _credentials['access_token'];
+      
+      // Parse token expiry if provided
+      if (_credentials.containsKey('expires_at')) {
+        try {
+          _tokenExpiry = DateTime.parse(_credentials['expires_at']!);
+        } catch (e) {
+          log('OneDriveProvider: Invalid expires_at format: $e');
+        }
+      }
+    }
+    
+    if (_credentials.containsKey('refresh_token')) {
+      _refreshToken = _credentials['refresh_token'];
+    }
+    
+    if (_credentials.containsKey('account_type')) {
+      _accountType = _credentials['account_type'];
+    }
+
     _httpClient = http.Client();
 
     log('OneDriveProvider: Initialized with Microsoft Graph API');
@@ -40,11 +76,16 @@ class OneDriveProvider implements CloudProviderInterface {
   @override
   Future<bool> connect() async {
     try {
-      if (_accessToken == null || _httpClient == null) {
+      if (_httpClient == null) {
         throw StateError('OneDrive provider not properly initialized');
       }
 
       log('OneDriveProvider: Connecting to Microsoft Graph API...');
+
+      // Check if we need to refresh the access token
+      if (!await _ensureValidToken()) {
+        throw StateError('Unable to obtain valid access token');
+      }
 
       // Test connection by getting user profile
       final response = await _httpClient!.get(
@@ -54,11 +95,31 @@ class OneDriveProvider implements CloudProviderInterface {
 
       if (response.statusCode == 200) {
         final userInfo = json.decode(response.body);
+        _userId = userInfo['id'];
+        
+        // Determine account type based on user principal name or other indicators
+        final userPrincipalName = userInfo['userPrincipalName'] as String?;
+        if (userPrincipalName != null) {
+          if (userPrincipalName.contains('@outlook.com') || 
+              userPrincipalName.contains('@hotmail.com') ||
+              userPrincipalName.contains('@live.com')) {
+            _accountType = 'personal';
+          } else {
+            _accountType = 'work';
+          }
+        }
+        
         log(
-          'OneDriveProvider: Connected as ${userInfo['displayName'] ?? "unknown user"}',
+          'OneDriveProvider: Connected as ${userInfo['displayName'] ?? "unknown user"} ($_accountType account)',
         );
         _isConnected = true;
         return true;
+      } else if (response.statusCode == 401) {
+        // Token might be expired, try to refresh
+        if (await _refreshAccessToken()) {
+          return connect(); // Retry connection
+        }
+        throw Exception('Authentication failed - invalid or expired token');
       } else {
         throw Exception(
           'Failed to connect to OneDrive: ${response.statusCode} ${response.body}',
@@ -75,9 +136,27 @@ class OneDriveProvider implements CloudProviderInterface {
   @override
   Future<void> disconnect() async {
     try {
+      // Cancel any ongoing upload sessions
+      for (final sessionUrl in _uploadSessions.values) {
+        try {
+          await _httpClient?.delete(
+            Uri.parse(sessionUrl),
+            headers: _getAuthHeaders(),
+          );
+        } catch (e) {
+          log('OneDriveProvider: Error canceling upload session: $e');
+        }
+      }
+      _uploadSessions.clear();
+      
       _httpClient?.close();
       _httpClient = null;
       _accessToken = null;
+      _refreshToken = null;
+      _tokenExpiry = null;
+      _deltaToken = null;
+      _userId = null;
+      _accountType = null;
       _isConnected = false;
       log('OneDriveProvider: Disconnected from OneDrive');
     } catch (e) {
@@ -127,31 +206,35 @@ class OneDriveProvider implements CloudProviderInterface {
       final fileContent = await localFile.readAsBytes();
 
       // For small files (<4MB), use simple upload
-      if (fileContent.length < 4 * 1024 * 1024) {
-        final response = await _httpClient!.put(
-          Uri.parse(
-            '$_graphBaseUrl/me/drive/items/$parentId:/$fileName:/content',
-          ),
-          headers: {
-            'Authorization': 'Bearer $_accessToken',
-            'Content-Type': 'application/octet-stream',
-          },
-          body: fileContent,
+      if (fileContent.length < _simpleUploadLimit) {
+        final success = await _simpleUpload(
+          parentId: parentId,
+          fileName: fileName,
+          fileContent: fileContent,
+          onProgress: onProgress,
         );
-
-        if (response.statusCode == 200 || response.statusCode == 201) {
+        
+        if (success) {
           log('OneDriveProvider: Successfully uploaded $fileName');
-          if (onProgress != null) onProgress(1.0);
           return true;
         } else {
-          throw Exception(
-            'Upload failed: ${response.statusCode} ${response.body}',
-          );
+          throw Exception('Simple upload failed');
         }
       } else {
-        // For larger files, we would need to implement upload sessions
-        // For now, throw an error for large files
-        throw Exception('Large file uploads (>4MB) not yet implemented');
+        // For larger files, use resumable upload sessions
+        final success = await _resumableUpload(
+          parentId: parentId,
+          fileName: fileName,
+          fileContent: fileContent,
+          onProgress: onProgress,
+        );
+        
+        if (success) {
+          log('OneDriveProvider: Successfully uploaded large file $fileName');
+          return true;
+        } else {
+          throw Exception('Resumable upload failed');
+        }
       }
     } catch (e) {
       _lastError = e.toString();
@@ -482,9 +565,17 @@ class OneDriveProvider implements CloudProviderInterface {
     DateTime? since,
     String? directoryPath,
   }) async {
-    // OneDrive Delta API would be needed for change tracking
-    // For now, return empty list
-    return [];
+    try {
+      if (!_isConnected || _httpClient == null) {
+        return [];
+      }
+
+      return await _getDeltaChanges(since: since, directoryPath: directoryPath);
+    } catch (e) {
+      _lastError = e.toString();
+      log('OneDriveProvider: Error getting remote changes: $e');
+      return [];
+    }
   }
 
   @override
@@ -494,6 +585,16 @@ class OneDriveProvider implements CloudProviderInterface {
   Future<void> updateConfiguration(Map<String, dynamic> config) async {
     _credentials = Map<String, String>.from(config);
     _accessToken = _credentials['access_token'];
+    _refreshToken = _credentials['refresh_token'];
+    _accountType = _credentials['account_type'];
+    
+    if (_credentials.containsKey('expires_at')) {
+      try {
+        _tokenExpiry = DateTime.parse(_credentials['expires_at']!);
+      } catch (e) {
+        log('OneDriveProvider: Invalid expires_at format in config: $e');
+      }
+    }
   }
 
   @override
@@ -614,4 +715,550 @@ class OneDriveProvider implements CloudProviderInterface {
       return null;
     }
   }
+
+  // OAuth2 Authentication Methods (Subtask 2.1)
+
+  /// Ensure we have a valid access token, refreshing if necessary
+  Future<bool> _ensureValidToken() async {
+    if (_accessToken == null) {
+      if (_refreshToken != null) {
+        return await _refreshAccessToken();
+      }
+      return false;
+    }
+
+    // Check if token is expired (with 5 minute buffer)
+    if (_tokenExpiry != null) {
+      final now = DateTime.now();
+      final bufferTime = Duration(minutes: 5);
+      if (now.add(bufferTime).isAfter(_tokenExpiry!)) {
+        if (_refreshToken != null) {
+          return await _refreshAccessToken();
+        }
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  /// Refresh the access token using the refresh token
+  Future<bool> _refreshAccessToken() async {
+    if (_refreshToken == null || _credentials['client_id'] == null) {
+      log('OneDriveProvider: Cannot refresh token - missing refresh_token or client_id');
+      return false;
+    }
+
+    try {
+      log('OneDriveProvider: Refreshing access token...');
+      
+      // Determine the correct tenant based on account type
+      final tenant = _accountType == 'personal' ? _consumerTenant : _commonTenant;
+      
+      final response = await _httpClient!.post(
+        Uri.parse('$_authBaseUrl/$tenant/oauth2/v2.0/token'),
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: {
+          'client_id': _credentials['client_id']!,
+          'refresh_token': _refreshToken!,
+          'grant_type': 'refresh_token',
+          'scope': 'https://graph.microsoft.com/Files.ReadWrite.All offline_access',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final tokenData = json.decode(response.body);
+        _accessToken = tokenData['access_token'];
+        
+        if (tokenData.containsKey('refresh_token')) {
+          _refreshToken = tokenData['refresh_token'];
+        }
+        
+        if (tokenData.containsKey('expires_in')) {
+          final expiresIn = tokenData['expires_in'] as int;
+          _tokenExpiry = DateTime.now().add(Duration(seconds: expiresIn));
+        }
+        
+        // Update credentials for persistence
+        _credentials['access_token'] = _accessToken!;
+        if (_refreshToken != null) {
+          _credentials['refresh_token'] = _refreshToken!;
+        }
+        if (_tokenExpiry != null) {
+          _credentials['expires_at'] = _tokenExpiry!.toIso8601String();
+        }
+        
+        log('OneDriveProvider: Access token refreshed successfully');
+        return true;
+      } else {
+        log('OneDriveProvider: Token refresh failed: ${response.statusCode} ${response.body}');
+        return false;
+      }
+    } catch (e) {
+      log('OneDriveProvider: Error refreshing token: $e');
+      return false;
+    }
+  }
+
+  /// Generate OAuth2 authorization URL for manual authentication
+  String generateAuthUrl({String? redirectUri, List<String>? scopes}) {
+    final clientId = _credentials['client_id'];
+    if (clientId == null) {
+      throw StateError('Client ID not configured');
+    }
+
+    final defaultRedirectUri = redirectUri ?? 'http://localhost:8080/auth/callback';
+    final defaultScopes = scopes ?? [
+      'https://graph.microsoft.com/Files.ReadWrite.All',
+      'offline_access'
+    ];
+    
+    // Determine tenant based on account type preference
+    final tenant = _accountType == 'personal' ? _consumerTenant : _commonTenant;
+    
+    // Generate a random state parameter for security
+    final state = _generateRandomString(32);
+    
+    final authUrl = Uri.parse('$_authBaseUrl/$tenant/oauth2/v2.0/authorize').replace(
+      queryParameters: {
+        'client_id': clientId,
+        'response_type': 'code',
+        'redirect_uri': defaultRedirectUri,
+        'scope': defaultScopes.join(' '),
+        'state': state,
+        'response_mode': 'query',
+      },
+    );
+
+    return authUrl.toString();
+  }
+
+  /// Exchange authorization code for access token
+  Future<bool> exchangeCodeForToken({
+    required String code,
+    required String redirectUri,
+    String? clientSecret,
+  }) async {
+    final clientId = _credentials['client_id'];
+    if (clientId == null) {
+      throw StateError('Client ID not configured');
+    }
+
+    try {
+      log('OneDriveProvider: Exchanging authorization code for token...');
+      
+      // Determine tenant based on account type
+      final tenant = _accountType == 'personal' ? _consumerTenant : _commonTenant;
+      
+      final body = <String, String>{
+        'client_id': clientId,
+        'code': code,
+        'redirect_uri': redirectUri,
+        'grant_type': 'authorization_code',
+        'scope': 'https://graph.microsoft.com/Files.ReadWrite.All offline_access',
+      };
+      
+      // Add client secret for confidential clients (work accounts typically)
+      if (clientSecret != null) {
+        body['client_secret'] = clientSecret;
+      }
+
+      final response = await _httpClient!.post(
+        Uri.parse('$_authBaseUrl/$tenant/oauth2/v2.0/token'),
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: body,
+      );
+
+      if (response.statusCode == 200) {
+        final tokenData = json.decode(response.body);
+        
+        _accessToken = tokenData['access_token'];
+        _refreshToken = tokenData['refresh_token'];
+        
+        if (tokenData.containsKey('expires_in')) {
+          final expiresIn = tokenData['expires_in'] as int;
+          _tokenExpiry = DateTime.now().add(Duration(seconds: expiresIn));
+        }
+        
+        // Update credentials
+        _credentials['access_token'] = _accessToken!;
+        if (_refreshToken != null) {
+          _credentials['refresh_token'] = _refreshToken!;
+        }
+        if (_tokenExpiry != null) {
+          _credentials['expires_at'] = _tokenExpiry!.toIso8601String();
+        }
+        
+        log('OneDriveProvider: Successfully obtained access token');
+        return true;
+      } else {
+        log('OneDriveProvider: Token exchange failed: ${response.statusCode} ${response.body}');
+        return false;
+      }
+    } catch (e) {
+      log('OneDriveProvider: Error exchanging code for token: $e');
+      return false;
+    }
+  }
+
+  // Resumable File Transfer Methods (Subtask 2.3)
+
+  /// Simple upload for small files
+  Future<bool> _simpleUpload({
+    required String parentId,
+    required String fileName,
+    required List<int> fileContent,
+    Function(double progress)? onProgress,
+  }) async {
+    try {
+      if (onProgress != null) onProgress(0.0);
+      
+      final response = await _httpClient!.put(
+        Uri.parse(
+          '$_graphBaseUrl/me/drive/items/$parentId:/$fileName:/content',
+        ),
+        headers: {
+          'Authorization': 'Bearer $_accessToken',
+          'Content-Type': 'application/octet-stream',
+        },
+        body: fileContent,
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        if (onProgress != null) onProgress(1.0);
+        return true;
+      } else {
+        log('OneDriveProvider: Simple upload failed: ${response.statusCode} ${response.body}');
+        return false;
+      }
+    } catch (e) {
+      log('OneDriveProvider: Simple upload error: $e');
+      return false;
+    }
+  }
+
+  /// Resumable upload for large files
+  Future<bool> _resumableUpload({
+    required String parentId,
+    required String fileName,
+    required List<int> fileContent,
+    Function(double progress)? onProgress,
+  }) async {
+    try {
+      // Create upload session
+      final sessionUrl = await _createUploadSession(
+        parentId: parentId,
+        fileName: fileName,
+        fileSize: fileContent.length,
+      );
+      
+      if (sessionUrl == null) {
+        log('OneDriveProvider: Failed to create upload session');
+        return false;
+      }
+      
+      // Store session for potential cancellation
+      _uploadSessions[fileName] = sessionUrl;
+      
+      try {
+        // Upload file in chunks
+        final totalSize = fileContent.length;
+        int uploadedBytes = 0;
+        
+        while (uploadedBytes < totalSize) {
+          final chunkStart = uploadedBytes;
+          final chunkEnd = math.min(uploadedBytes + _uploadChunkSize, totalSize) - 1;
+          final chunkSize = chunkEnd - chunkStart + 1;
+          
+          final chunk = fileContent.sublist(chunkStart, chunkEnd + 1);
+          
+          final success = await _uploadChunk(
+            sessionUrl: sessionUrl,
+            chunk: chunk,
+            rangeStart: chunkStart,
+            rangeEnd: chunkEnd,
+            totalSize: totalSize,
+          );
+          
+          if (!success) {
+            log('OneDriveProvider: Chunk upload failed at range $chunkStart-$chunkEnd');
+            await _cancelUploadSession(sessionUrl);
+            return false;
+          }
+          
+          uploadedBytes += chunkSize;
+          
+          // Report progress
+          if (onProgress != null) {
+            final progress = uploadedBytes / totalSize;
+            onProgress(progress);
+          }
+        }
+        
+        // Remove session from tracking
+        _uploadSessions.remove(fileName);
+        
+        log('OneDriveProvider: Resumable upload completed successfully');
+        return true;
+        
+      } catch (e) {
+        log('OneDriveProvider: Error during chunk upload: $e');
+        await _cancelUploadSession(sessionUrl);
+        _uploadSessions.remove(fileName);
+        return false;
+      }
+      
+    } catch (e) {
+      log('OneDriveProvider: Resumable upload error: $e');
+      return false;
+    }
+  }
+
+  /// Create an upload session for large files
+  Future<String?> _createUploadSession({
+    required String parentId,
+    required String fileName,
+    required int fileSize,
+  }) async {
+    try {
+      final sessionData = {
+        'item': {
+          '@microsoft.graph.conflictBehavior': 'replace',
+          'name': fileName,
+        },
+      };
+      
+      final response = await _httpClient!.post(
+        Uri.parse(
+          '$_graphBaseUrl/me/drive/items/$parentId:/$fileName:/createUploadSession',
+        ),
+        headers: _getAuthHeaders(),
+        body: json.encode(sessionData),
+      );
+      
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        return responseData['uploadUrl'] as String?;
+      } else {
+        log('OneDriveProvider: Failed to create upload session: ${response.statusCode} ${response.body}');
+        return null;
+      }
+    } catch (e) {
+      log('OneDriveProvider: Error creating upload session: $e');
+      return null;
+    }
+  }
+
+  /// Upload a chunk to the upload session
+  Future<bool> _uploadChunk({
+    required String sessionUrl,
+    required List<int> chunk,
+    required int rangeStart,
+    required int rangeEnd,
+    required int totalSize,
+  }) async {
+    try {
+      final response = await _httpClient!.put(
+        Uri.parse(sessionUrl),
+        headers: {
+          'Content-Range': 'bytes $rangeStart-$rangeEnd/$totalSize',
+          'Content-Length': chunk.length.toString(),
+        },
+        body: chunk,
+      );
+      
+      // 202 Accepted means more chunks expected
+      // 201 Created means upload complete
+      // 200 OK means upload complete
+      if (response.statusCode == 202 || 
+          response.statusCode == 201 || 
+          response.statusCode == 200) {
+        return true;
+      } else {
+        log('OneDriveProvider: Chunk upload failed: ${response.statusCode} ${response.body}');
+        return false;
+      }
+    } catch (e) {
+      log('OneDriveProvider: Error uploading chunk: $e');
+      return false;
+    }
+  }
+
+  /// Cancel an upload session
+  Future<void> _cancelUploadSession(String sessionUrl) async {
+    try {
+      await _httpClient!.delete(
+        Uri.parse(sessionUrl),
+        headers: _getAuthHeaders(),
+      );
+      log('OneDriveProvider: Upload session canceled');
+    } catch (e) {
+      log('OneDriveProvider: Error canceling upload session: $e');
+    }
+  }
+
+  // Delta Sync Methods (Subtask 2.4)
+
+  /// Get delta changes from OneDrive
+  Future<List<CloudFileChange>> _getDeltaChanges({
+    DateTime? since,
+    String? directoryPath,
+  }) async {
+    try {
+      final changes = <CloudFileChange>[];
+      
+      // Build delta URL
+      String deltaUrl;
+      if (_deltaToken != null) {
+        // Continue from previous delta token
+        deltaUrl = '$_graphBaseUrl/me/drive/root/delta?token=$_deltaToken';
+      } else {
+        // Start new delta query
+        deltaUrl = '$_graphBaseUrl/me/drive/root/delta';
+      }
+      
+      // Apply directory filter if specified
+      if (directoryPath != null && directoryPath.isNotEmpty) {
+        // For directory-specific deltas, we need to use the item path
+        final cleanPath = directoryPath.startsWith('/') ? directoryPath.substring(1) : directoryPath;
+        deltaUrl = '$_graphBaseUrl/me/drive/root:/$cleanPath:/delta';
+      }
+      
+      String? nextLink = deltaUrl;
+      
+      while (nextLink != null) {
+        final response = await _httpClient!.get(
+          Uri.parse(nextLink),
+          headers: _getAuthHeaders(),
+        );
+        
+        if (response.statusCode == 200) {
+          final responseData = json.decode(response.body);
+          final items = responseData['value'] as List;
+          
+          for (final item in items) {
+            final change = _parseItemToChange(item, directoryPath);
+            if (change != null) {
+              // Filter by timestamp if specified
+              if (since == null || change.timestamp.isAfter(since)) {
+                changes.add(change);
+              }
+            }
+          }
+          
+          // Check for pagination
+          nextLink = responseData['@odata.nextLink'] as String?;
+          
+          // Update delta token if this is the final page
+          if (nextLink == null && responseData.containsKey('@odata.deltaLink')) {
+            final deltaLink = responseData['@odata.deltaLink'] as String;
+            final uri = Uri.parse(deltaLink);
+            _deltaToken = uri.queryParameters['token'];
+          }
+        } else {
+          log('OneDriveProvider: Delta query failed: ${response.statusCode} ${response.body}');
+          break;
+        }
+      }
+      
+      log('OneDriveProvider: Retrieved ${changes.length} delta changes');
+      return changes;
+    } catch (e) {
+      log('OneDriveProvider: Error getting delta changes: $e');
+      return [];
+    }
+  }
+
+  /// Parse OneDrive item to CloudFileChange
+  CloudFileChange? _parseItemToChange(Map<String, dynamic> item, String? basePath) {
+    try {
+      final itemName = item['name'] as String?;
+      if (itemName == null) return null;
+      
+      final itemPath = basePath != null && basePath.isNotEmpty 
+          ? '$basePath/$itemName'
+          : itemName;
+      
+      // Determine change type
+      CloudChangeType changeType;
+      if (item.containsKey('deleted')) {
+        changeType = CloudChangeType.deleted;
+      } else if (item.containsKey('file') || item.containsKey('folder')) {
+        // Check if this is a new item or modified
+        final createdDateTime = DateTime.parse(item['createdDateTime']);
+        final lastModifiedDateTime = DateTime.parse(item['lastModifiedDateTime']);
+        
+        // If created and modified times are very close, it's likely a new file
+        final timeDiff = lastModifiedDateTime.difference(createdDateTime).inMinutes;
+        changeType = timeDiff < 1 ? CloudChangeType.created : CloudChangeType.modified;
+      } else {
+        return null; // Unknown item type
+      }
+      
+      // Create file info if not deleted
+      CloudFileInfo? fileInfo;
+      if (changeType != CloudChangeType.deleted) {
+        fileInfo = CloudFileInfo(
+          path: itemPath,
+          name: itemName,
+          size: item['size'] ?? 0,
+          modifiedAt: DateTime.parse(item['lastModifiedDateTime']),
+          isDirectory: item['folder'] != null,
+          mimeType: item['file']?['mimeType'],
+          checksum: item['file']?['hashes']?['sha1Hash'],
+          metadata: {'oneDriveItem': item},
+        );
+      }
+      
+      return CloudFileChange(
+        path: itemPath,
+        type: changeType,
+        timestamp: DateTime.parse(item['lastModifiedDateTime']),
+        fileInfo: fileInfo,
+      );
+    } catch (e) {
+      log('OneDriveProvider: Error parsing item to change: $e');
+      return null;
+    }
+  }
+
+  /// Reset delta token to force full sync on next delta call
+  void resetDeltaToken() {
+    _deltaToken = null;
+    log('OneDriveProvider: Delta token reset');
+  }
+
+  // Utility Methods
+
+  /// Generate a random string for OAuth state parameter
+  String _generateRandomString(int length) {
+    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    final random = math.Random.secure();
+    return String.fromCharCodes(
+      Iterable.generate(length, (_) => chars.codeUnitAt(random.nextInt(chars.length))),
+    );
+  }
+
+
+  /// Check if the current account supports business features
+  bool get isBusinessAccount => _accountType == 'work';
+
+  /// Check if the current account is a personal account
+  bool get isPersonalAccount => _accountType == 'personal';
+
+  /// Get current account type
+  String? get accountType => _accountType;
+
+  /// Get current user ID
+  String? get userId => _userId;
+
+  /// Get delta token for external storage
+  String? get deltaToken => _deltaToken;
+
+  /// Set delta token from external storage
+  set deltaToken(String? token) => _deltaToken = token;
 }

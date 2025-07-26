@@ -35,12 +35,10 @@ class MockLocalAuthentication extends _i1.Mock
   }
 
   @override
-  _i3.Future<bool> get canCheckBiometrics =>
-      (super.noSuchMethod(
-            Invocation.getter(#canCheckBiometrics),
-            returnValue: _i3.Future<bool>.value(false),
-          )
-          as _i3.Future<bool>);
+  _i3.Future<bool> get canCheckBiometrics => (super.noSuchMethod(
+        Invocation.getter(#canCheckBiometrics),
+        returnValue: _i3.Future<bool>.value(false),
+      ) as _i3.Future<bool>);
 
   @override
   _i3.Future<bool> authenticate({
@@ -53,38 +51,44 @@ class MockLocalAuthentication extends _i1.Mock
     _i4.AuthenticationOptions? options = const _i4.AuthenticationOptions(),
   }) =>
       (super.noSuchMethod(
-            Invocation.method(#authenticate, [], {
-              #localizedReason: localizedReason,
-              #authMessages: authMessages,
-              #options: options,
-            }),
-            returnValue: _i3.Future<bool>.value(false),
-          )
-          as _i3.Future<bool>);
+        Invocation.method(
+          #authenticate,
+          [],
+          {
+            #localizedReason: localizedReason,
+            #authMessages: authMessages,
+            #options: options,
+          },
+        ),
+        returnValue: _i3.Future<bool>.value(false),
+      ) as _i3.Future<bool>);
 
   @override
-  _i3.Future<bool> stopAuthentication() =>
-      (super.noSuchMethod(
-            Invocation.method(#stopAuthentication, []),
-            returnValue: _i3.Future<bool>.value(false),
-          )
-          as _i3.Future<bool>);
+  _i3.Future<bool> stopAuthentication() => (super.noSuchMethod(
+        Invocation.method(
+          #stopAuthentication,
+          [],
+        ),
+        returnValue: _i3.Future<bool>.value(false),
+      ) as _i3.Future<bool>);
 
   @override
-  _i3.Future<bool> isDeviceSupported() =>
-      (super.noSuchMethod(
-            Invocation.method(#isDeviceSupported, []),
-            returnValue: _i3.Future<bool>.value(false),
-          )
-          as _i3.Future<bool>);
+  _i3.Future<bool> isDeviceSupported() => (super.noSuchMethod(
+        Invocation.method(
+          #isDeviceSupported,
+          [],
+        ),
+        returnValue: _i3.Future<bool>.value(false),
+      ) as _i3.Future<bool>);
 
   @override
   _i3.Future<List<_i4.BiometricType>> getAvailableBiometrics() =>
       (super.noSuchMethod(
-            Invocation.method(#getAvailableBiometrics, []),
-            returnValue: _i3.Future<List<_i4.BiometricType>>.value(
-              <_i4.BiometricType>[],
-            ),
-          )
-          as _i3.Future<List<_i4.BiometricType>>);
+        Invocation.method(
+          #getAvailableBiometrics,
+          [],
+        ),
+        returnValue:
+            _i3.Future<List<_i4.BiometricType>>.value(<_i4.BiometricType>[]),
+      ) as _i3.Future<List<_i4.BiometricType>>);
 }

@@ -7,15 +7,15 @@ part of 'app_settings.dart';
 // **************************************************************************
 
 AppSettings _$AppSettingsFromJson(Map<String, dynamic> json) => AppSettings(
-  key: json['key'] as String,
-  value: json['value'] as String,
-  type: $enumDecode(_$SettingTypeEnumMap, json['type']),
-  category: $enumDecode(_$SettingCategoryEnumMap, json['category']),
-  description: json['description'] as String?,
-  isSensitive: json['isSensitive'] as bool,
-  createdAt: DateTime.parse(json['createdAt'] as String),
-  updatedAt: DateTime.parse(json['updatedAt'] as String),
-);
+      key: json['key'] as String,
+      value: json['value'] as String,
+      type: $enumDecode(_$SettingTypeEnumMap, json['type']),
+      category: $enumDecode(_$SettingCategoryEnumMap, json['category']),
+      description: json['description'] as String?,
+      isSensitive: json['isSensitive'] as bool,
+      createdAt: DateTime.parse(json['createdAt'] as String),
+      updatedAt: DateTime.parse(json['updatedAt'] as String),
+    );
 
 Map<String, dynamic> _$AppSettingsToJson(AppSettings instance) =>
     <String, dynamic>{
