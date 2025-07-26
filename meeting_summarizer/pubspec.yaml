@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.4.0+1
+version: 1.5.0+1
 
 environment:
   sdk: ">=3.5.0 <4.0.0"
@@ -85,6 +85,11 @@ dependencies:
   home_widget: ^0.6.0                 # Android home screen widgets
   system_tray: ^2.0.3                 # Windows system tray integration
   battery_plus: ^6.0.3                # Battery information and optimization
+  
+  # Android platform services dependencies for Task 5
+  android_intent_plus: ^5.1.0         # Android intent handling and deep links
+  device_info_plus: ^10.1.2           # Device information and capabilities
+  android_id: ^0.4.0                  # Android device identification
 
   # User onboarding and settings dependencies for Task 12
   introduction_screen: ^3.1.12        # Interactive onboarding tutorials

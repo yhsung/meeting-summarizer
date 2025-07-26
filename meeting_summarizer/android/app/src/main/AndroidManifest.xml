@@ -4,8 +4,48 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     
+    <!-- Android Platform Services permissions -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    
+    <!-- Android Auto permissions -->
+    <uses-permission android:name="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE" />
+    <uses-permission android:name="com.google.android.gms.car.permission.CAR_INFORMATION" />
+    
+    <!-- Quick Settings Tile permission -->
+    <uses-permission android:name="android.permission.BIND_QUICK_SETTINGS_TILE" />
+    
+    <!-- Home screen widget permissions -->
+    <uses-permission android:name="android.permission.BIND_APPWIDGET" />
+    <uses-permission android:name="android.permission.UPDATE_APPWIDGET" />
+    
+    <!-- Google Assistant integration -->
+    <uses-permission android:name="android.permission.BIND_VOICE_INTERACTION" />
+    
+    <!-- Work profile support -->
+    <uses-permission android:name="android.permission.DEVICE_ADMIN" />
+    <uses-permission android:name="android.permission.MANAGE_DEVICE_ADMINS" />
+    
+    <!-- Battery optimization -->
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+    
     <!-- Audio recording feature -->
     <uses-feature android:name="android.hardware.microphone" android:required="false" />
+    
+    <!-- Android Auto feature -->
+    <uses-feature 
+        android:name="android.hardware.type.automotive" 
+        android:required="false" />
+    
+    <!-- Home screen widget feature -->
+    <uses-feature 
+        android:name="android.software.home_screen" 
+        android:required="false" />
     
     <application
         android:label="meeting_summarizer"
@@ -38,6 +78,112 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+        
+        <!-- Foreground Service for background recording -->
+        <service
+            android:name=".services.RecordingForegroundService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="microphone" />
+        
+        <!-- Quick Settings Tile Service -->
+        <service
+            android:name=".services.RecordingQuickSettingsTileService"
+            android:exported="true"
+            android:icon="@drawable/ic_recording_tile"
+            android:label="@string/quick_settings_label"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+        
+        <!-- Home Screen Widget Providers -->
+        <receiver
+            android:name=".widgets.RecordingControlWidgetProvider"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/recording_control_widget_info" />
+        </receiver>
+        
+        <receiver
+            android:name=".widgets.QuickStatusWidgetProvider"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/quick_status_widget_info" />
+        </receiver>
+        
+        <!-- Google Assistant App Actions -->
+        <activity
+            android:name=".activities.AssistantShortcutActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Transparent">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="meetingsummarizer" />
+            </intent-filter>
+            
+            <!-- Assistant shortcuts -->
+            <intent-filter>
+                <action android:name="com.yhsung.meeting_summarizer.START_RECORDING" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="com.yhsung.meeting_summarizer.STOP_RECORDING" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        
+        <!-- Android Auto Media Browser Service -->
+        <service
+            android:name=".auto.AutoMediaBrowserService"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.media.browse.MediaBrowserService" />
+            </intent-filter>
+        </service>
+        
+        <!-- Boot receiver for service initialization -->
+        <receiver
+            android:name=".receivers.BootReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter android:priority="1000">
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.intent.action.PACKAGE_REPLACED" />
+                <data android:scheme="package" />
+            </intent-filter>
+        </receiver>
+        
+        <!-- Work Profile Device Admin Receiver -->
+        <receiver
+            android:name=".admin.WorkProfileDeviceAdminReceiver"
+            android:exported="true"
+            android:permission="android.permission.BIND_DEVICE_ADMIN">
+            <meta-data
+                android:name="android.app.device_admin"
+                android:resource="@xml/device_admin" />
+            <intent-filter>
+                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
+            </intent-filter>
+        </receiver>
+        
+        <!-- Widget Click Handler Service -->
+        <service
+            android:name=".services.WidgetClickHandlerService"
+            android:enabled="true"
+            android:exported="false" />
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and
