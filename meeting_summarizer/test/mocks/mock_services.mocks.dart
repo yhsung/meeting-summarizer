@@ -93,14 +93,15 @@ import 'package:meeting_summarizer/core/services/permission_service.dart'
 import 'package:meeting_summarizer/core/services/permission_service_interface.dart'
     as _i13;
 import 'package:meeting_summarizer/core/services/platform_services/android_auto_service.dart'
-    as _i58;
-import 'package:meeting_summarizer/core/services/platform_services/enhanced_notifications_service.dart'
-    as _i56;
-import 'package:meeting_summarizer/core/services/platform_services/performance_optimization_service.dart'
     as _i59;
-import 'package:meeting_summarizer/core/services/platform_services/siri_shortcuts_service.dart'
+import 'package:meeting_summarizer/core/services/platform_services/enhanced_notifications_service.dart'
     as _i57;
+import 'package:meeting_summarizer/core/services/platform_services/performance_optimization_service.dart'
+    as _i60;
+import 'package:meeting_summarizer/core/services/platform_services/siri_shortcuts_service.dart'
+    as _i58;
 import 'package:meeting_summarizer/core/services/retry_manager.dart' as _i9;
+import 'package:meeting_summarizer/core/services/settings_service.dart' as _i56;
 import 'package:meeting_summarizer/core/services/theme_service.dart' as _i50;
 import 'package:mockito/mockito.dart' as _i1;
 import 'package:mockito/src/dummies.dart' as _i28;
@@ -2865,11 +2866,179 @@ class MockBatchProcessingService extends _i1.Mock
           as _i22.Future<_i20.BatchStatistics>);
 }
 
+/// A class which mocks [SettingsService].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockSettingsService extends _i1.Mock implements _i56.SettingsService {
+  MockSettingsService() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i22.Future<void> initialize() =>
+      (super.noSuchMethod(
+            Invocation.method(#initialize, []),
+            returnValue: _i22.Future<void>.value(),
+            returnValueForMissingStub: _i22.Future<void>.value(),
+          )
+          as _i22.Future<void>);
+
+  @override
+  T? getSetting<T>(String? key) =>
+      (super.noSuchMethod(Invocation.method(#getSetting, [key])) as T?);
+
+  @override
+  _i22.Future<void> setSetting<T>(
+    String? key,
+    T? value, {
+    _i33.SettingCategory? category,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(#setSetting, [key, value], {#category: category}),
+            returnValue: _i22.Future<void>.value(),
+            returnValueForMissingStub: _i22.Future<void>.value(),
+          )
+          as _i22.Future<void>);
+
+  @override
+  List<_i33.AppSettings> getSettingsByCategory(
+    _i33.SettingCategory? category,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#getSettingsByCategory, [category]),
+            returnValue: <_i33.AppSettings>[],
+          )
+          as List<_i33.AppSettings>);
+
+  @override
+  List<_i33.AppSettings> getAllSettings() =>
+      (super.noSuchMethod(
+            Invocation.method(#getAllSettings, []),
+            returnValue: <_i33.AppSettings>[],
+          )
+          as List<_i33.AppSettings>);
+
+  @override
+  List<_i33.AppSettings> searchSettings(String? query) =>
+      (super.noSuchMethod(
+            Invocation.method(#searchSettings, [query]),
+            returnValue: <_i33.AppSettings>[],
+          )
+          as List<_i33.AppSettings>);
+
+  @override
+  bool validateSetting(String? key, dynamic value) =>
+      (super.noSuchMethod(
+            Invocation.method(#validateSetting, [key, value]),
+            returnValue: false,
+          )
+          as bool);
+
+  @override
+  _i22.Future<void> resetSetting(String? key) =>
+      (super.noSuchMethod(
+            Invocation.method(#resetSetting, [key]),
+            returnValue: _i22.Future<void>.value(),
+            returnValueForMissingStub: _i22.Future<void>.value(),
+          )
+          as _i22.Future<void>);
+
+  @override
+  _i22.Future<void> removeSetting(String? key) =>
+      (super.noSuchMethod(
+            Invocation.method(#removeSetting, [key]),
+            returnValue: _i22.Future<void>.value(),
+            returnValueForMissingStub: _i22.Future<void>.value(),
+          )
+          as _i22.Future<void>);
+
+  @override
+  _i22.Future<void> resetAllSettings() =>
+      (super.noSuchMethod(
+            Invocation.method(#resetAllSettings, []),
+            returnValue: _i22.Future<void>.value(),
+            returnValueForMissingStub: _i22.Future<void>.value(),
+          )
+          as _i22.Future<void>);
+
+  @override
+  Map<String, dynamic> exportSettings({bool? includeSensitive = false}) =>
+      (super.noSuchMethod(
+            Invocation.method(#exportSettings, [], {
+              #includeSensitive: includeSensitive,
+            }),
+            returnValue: <String, dynamic>{},
+          )
+          as Map<String, dynamic>);
+
+  @override
+  _i22.Future<int> importSettings(
+    Map<String, dynamic>? data, {
+    bool? overwriteExisting = false,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #importSettings,
+              [data],
+              {#overwriteExisting: overwriteExisting},
+            ),
+            returnValue: _i22.Future<int>.value(0),
+          )
+          as _i22.Future<int>);
+
+  @override
+  T getSettingWithDefault<T>(String? key, T? defaultValue) =>
+      (super.noSuchMethod(
+            Invocation.method(#getSettingWithDefault, [key, defaultValue]),
+            returnValue: _i28.dummyValue<T>(
+              this,
+              Invocation.method(#getSettingWithDefault, [key, defaultValue]),
+            ),
+          )
+          as T);
+
+  @override
+  bool hasSetting(String? key) =>
+      (super.noSuchMethod(
+            Invocation.method(#hasSetting, [key]),
+            returnValue: false,
+          )
+          as bool);
+
+  @override
+  _i33.AppSettings? getSettingMetadata(String? key) =>
+      (super.noSuchMethod(Invocation.method(#getSettingMetadata, [key]))
+          as _i33.AppSettings?);
+
+  @override
+  Map<_i33.SettingCategory, int> getSettingsCountByCategory() =>
+      (super.noSuchMethod(
+            Invocation.method(#getSettingsCountByCategory, []),
+            returnValue: <_i33.SettingCategory, int>{},
+          )
+          as Map<_i33.SettingCategory, int>);
+
+  @override
+  _i22.Future<void> refresh() =>
+      (super.noSuchMethod(
+            Invocation.method(#refresh, []),
+            returnValue: _i22.Future<void>.value(),
+            returnValueForMissingStub: _i22.Future<void>.value(),
+          )
+          as _i22.Future<void>);
+
+  @override
+  void dispose() => super.noSuchMethod(
+    Invocation.method(#dispose, []),
+    returnValueForMissingStub: null,
+  );
+}
+
 /// A class which mocks [EnhancedNotificationsService].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockEnhancedNotificationsService extends _i1.Mock
-    implements _i56.EnhancedNotificationsService {
+    implements _i57.EnhancedNotificationsService {
   MockEnhancedNotificationsService() {
     _i1.throwOnMissingStub(this);
   }
@@ -2881,7 +3050,7 @@ class MockEnhancedNotificationsService extends _i1.Mock
 
   @override
   set onNotificationAction(
-    void Function(_i56.NotificationActionType, Map<String, dynamic>?)?
+    void Function(_i57.NotificationActionType, Map<String, dynamic>?)?
     _onNotificationAction,
   ) => super.noSuchMethod(
     Invocation.setter(#onNotificationAction, _onNotificationAction),
@@ -2992,7 +3161,7 @@ class MockEnhancedNotificationsService extends _i1.Mock
   _i22.Future<void> showStatusNotification({
     required String? title,
     required String? message,
-    _i56.NotificationPriority? priority = _i56.NotificationPriority.normal,
+    _i57.NotificationPriority? priority = _i57.NotificationPriority.normal,
     Map<String, dynamic>? data,
   }) =>
       (super.noSuchMethod(
@@ -3036,7 +3205,7 @@ class MockEnhancedNotificationsService extends _i1.Mock
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockSiriShortcutsService extends _i1.Mock
-    implements _i57.SiriShortcutsService {
+    implements _i58.SiriShortcutsService {
   MockSiriShortcutsService() {
     _i1.throwOnMissingStub(this);
   }
@@ -3113,7 +3282,7 @@ class MockSiriShortcutsService extends _i1.Mock
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockAndroidAutoService extends _i1.Mock
-    implements _i58.AndroidAutoService {
+    implements _i59.AndroidAutoService {
   MockAndroidAutoService() {
     _i1.throwOnMissingStub(this);
   }
@@ -3124,16 +3293,16 @@ class MockAndroidAutoService extends _i1.Mock
           as bool);
 
   @override
-  _i58.AndroidAutoState get autoState =>
+  _i59.AndroidAutoState get autoState =>
       (super.noSuchMethod(
             Invocation.getter(#autoState),
-            returnValue: _i58.AndroidAutoState.disconnected,
+            returnValue: _i59.AndroidAutoState.disconnected,
           )
-          as _i58.AndroidAutoState);
+          as _i59.AndroidAutoState);
 
   @override
   set onWidgetAction(
-    void Function(_i58.WidgetAction, Map<String, dynamic>?)? _onWidgetAction,
+    void Function(_i59.WidgetAction, Map<String, dynamic>?)? _onWidgetAction,
   ) => super.noSuchMethod(
     Invocation.setter(#onWidgetAction, _onWidgetAction),
     returnValueForMissingStub: null,
@@ -3141,7 +3310,7 @@ class MockAndroidAutoService extends _i1.Mock
 
   @override
   set onAutoStateChanged(
-    void Function(_i58.AndroidAutoState)? _onAutoStateChanged,
+    void Function(_i59.AndroidAutoState)? _onAutoStateChanged,
   ) => super.noSuchMethod(
     Invocation.setter(#onAutoStateChanged, _onAutoStateChanged),
     returnValueForMissingStub: null,
@@ -3287,7 +3456,7 @@ class MockAndroidAutoService extends _i1.Mock
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockPerformanceOptimizationService extends _i1.Mock
-    implements _i59.PerformanceOptimizationService {
+    implements _i60.PerformanceOptimizationService {
   MockPerformanceOptimizationService() {
     _i1.throwOnMissingStub(this);
   }
@@ -3298,32 +3467,32 @@ class MockPerformanceOptimizationService extends _i1.Mock
           as bool);
 
   @override
-  _i59.OptimizationStrategy get currentStrategy =>
+  _i60.OptimizationStrategy get currentStrategy =>
       (super.noSuchMethod(
             Invocation.getter(#currentStrategy),
-            returnValue: _i59.OptimizationStrategy.batteryOptimized,
+            returnValue: _i60.OptimizationStrategy.batteryOptimized,
           )
-          as _i59.OptimizationStrategy);
+          as _i60.OptimizationStrategy);
 
   @override
-  _i59.BackgroundMode get backgroundMode =>
+  _i60.BackgroundMode get backgroundMode =>
       (super.noSuchMethod(
             Invocation.getter(#backgroundMode),
-            returnValue: _i59.BackgroundMode.full,
+            returnValue: _i60.BackgroundMode.full,
           )
-          as _i59.BackgroundMode);
+          as _i60.BackgroundMode);
 
   @override
-  _i59.MemoryStrategy get memoryStrategy =>
+  _i60.MemoryStrategy get memoryStrategy =>
       (super.noSuchMethod(
             Invocation.getter(#memoryStrategy),
-            returnValue: _i59.MemoryStrategy.aggressive,
+            returnValue: _i60.MemoryStrategy.aggressive,
           )
-          as _i59.MemoryStrategy);
+          as _i60.MemoryStrategy);
 
   @override
   set onPerformanceUpdate(
-    void Function(_i59.PerformanceMetrics)? _onPerformanceUpdate,
+    void Function(_i60.PerformanceMetrics)? _onPerformanceUpdate,
   ) => super.noSuchMethod(
     Invocation.setter(#onPerformanceUpdate, _onPerformanceUpdate),
     returnValueForMissingStub: null,
@@ -3331,7 +3500,7 @@ class MockPerformanceOptimizationService extends _i1.Mock
 
   @override
   set onStrategyChanged(
-    void Function(_i59.OptimizationStrategy)? _onStrategyChanged,
+    void Function(_i60.OptimizationStrategy)? _onStrategyChanged,
   ) => super.noSuchMethod(
     Invocation.setter(#onStrategyChanged, _onStrategyChanged),
     returnValueForMissingStub: null,
@@ -3355,7 +3524,7 @@ class MockPerformanceOptimizationService extends _i1.Mock
 
   @override
   _i22.Future<void> setOptimizationStrategy(
-    _i59.OptimizationStrategy? strategy,
+    _i60.OptimizationStrategy? strategy,
   ) =>
       (super.noSuchMethod(
             Invocation.method(#setOptimizationStrategy, [strategy]),
@@ -3365,7 +3534,7 @@ class MockPerformanceOptimizationService extends _i1.Mock
           as _i22.Future<void>);
 
   @override
-  _i22.Future<void> setBackgroundMode(_i59.BackgroundMode? mode) =>
+  _i22.Future<void> setBackgroundMode(_i60.BackgroundMode? mode) =>
       (super.noSuchMethod(
             Invocation.method(#setBackgroundMode, [mode]),
             returnValue: _i22.Future<void>.value(),
@@ -3374,7 +3543,7 @@ class MockPerformanceOptimizationService extends _i1.Mock
           as _i22.Future<void>);
 
   @override
-  _i22.Future<void> setMemoryStrategy(_i59.MemoryStrategy? strategy) =>
+  _i22.Future<void> setMemoryStrategy(_i60.MemoryStrategy? strategy) =>
       (super.noSuchMethod(
             Invocation.method(#setMemoryStrategy, [strategy]),
             returnValue: _i22.Future<void>.value(),
@@ -3383,12 +3552,12 @@ class MockPerformanceOptimizationService extends _i1.Mock
           as _i22.Future<void>);
 
   @override
-  _i22.Future<_i59.PerformanceMetrics?> getCurrentMetrics() =>
+  _i22.Future<_i60.PerformanceMetrics?> getCurrentMetrics() =>
       (super.noSuchMethod(
             Invocation.method(#getCurrentMetrics, []),
-            returnValue: _i22.Future<_i59.PerformanceMetrics?>.value(),
+            returnValue: _i22.Future<_i60.PerformanceMetrics?>.value(),
           )
-          as _i22.Future<_i59.PerformanceMetrics?>);
+          as _i22.Future<_i60.PerformanceMetrics?>);
 
   @override
   Map<String, dynamic> generatePerformanceReport() =>

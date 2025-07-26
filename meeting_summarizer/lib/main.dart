@@ -5,9 +5,10 @@ import 'features/audio_recording/presentation/screens/recording_screen.dart';
 import 'features/transcription/presentation/screens/transcription_screen.dart';
 import 'features/summary/presentation/screens/summary_screen.dart';
 import 'features/search/presentation/screens/search_screen.dart';
-import 'features/settings/presentation/screens/api_configuration_screen.dart';
+import 'features/settings/presentation/screens/settings_screen.dart';
 import 'features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'features/onboarding/data/services/onboarding_service.dart';
+import 'features/feedback/presentation/widgets/feedback_integration_widget.dart';
 
 void main() {
   runApp(const MeetingSummarizerApp());
@@ -28,7 +29,7 @@ class MeetingSummarizerApp extends StatelessWidget {
           theme: themeService.lightTheme,
           darkTheme: themeService.darkTheme,
           themeMode: themeService.themeMode,
-          home: const AppWrapper(),
+          home: const FeedbackIntegrationWidget(child: AppWrapper()),
           debugShowCheckedModeBanner: false,
         );
       },
@@ -98,7 +99,7 @@ class _MainNavigationState extends State<MainNavigation> {
     const TranscriptionScreen(),
     const SummaryScreen(transcriptionId: ''), // Empty for navigation
     const SearchScreen(),
-    const ApiConfigurationScreen(),
+    const SettingsScreen(),
   ];
 
   @override
@@ -130,6 +131,7 @@ class _MainNavigationState extends State<MainNavigation> {
           ),
         ],
       ),
+      floatingActionButton: const FeedbackFloatingActionButton(),
     );
   }
 }

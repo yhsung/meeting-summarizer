@@ -25,6 +25,7 @@ import 'package:meeting_summarizer/core/services/platform_services/enhanced_noti
 import 'package:meeting_summarizer/core/services/platform_services/siri_shortcuts_service.dart';
 import 'package:meeting_summarizer/core/services/platform_services/android_auto_service.dart';
 import 'package:meeting_summarizer/core/services/platform_services/performance_optimization_service.dart';
+import 'package:meeting_summarizer/core/services/settings_service.dart';
 
 // Import comprehensive mock implementations
 // Note: These are commented out as they're not directly used in this file
@@ -57,6 +58,7 @@ import 'package:meeting_summarizer/core/services/platform_services/performance_o
   ThemeService,
   AdvancedSearchService,
   BatchProcessingService,
+  SettingsService,
 
   // Platform Services
   EnhancedNotificationsService,
