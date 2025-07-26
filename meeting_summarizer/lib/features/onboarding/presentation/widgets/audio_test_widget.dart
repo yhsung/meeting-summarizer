@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:record/record.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:audioplayers/audioplayers.dart';
 import 'dart:io';
 
 import '../../../../core/services/robust_permission_service.dart';
@@ -32,8 +33,9 @@ class _AudioTestWidgetState extends State<AudioTestWidget>
   late AnimationController _volumeAnimationController;
   late AnimationController _pulseAnimationController;
   
-  // Audio recording
+  // Audio recording and playback
   final AudioRecorder _audioRecorder = AudioRecorder();
+  final AudioPlayer _audioPlayer = AudioPlayer();
   File? _recordedFile;
 
   @override
@@ -50,6 +52,37 @@ class _AudioTestWidgetState extends State<AudioTestWidget>
 
     // Initialize the robust permission service if not already done
     _initializePermissionService();
+    
+    // Set up audio player listeners
+    _setupAudioPlayerListeners();
+  }
+
+  void _setupAudioPlayerListeners() {
+    // Listen for playback completion
+    _audioPlayer.onPlayerComplete.listen((_) {
+      if (mounted) {
+        setState(() {
+          _isPlaying = false;
+          _testComplete = true;
+        });
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Audio playback completed! Audio test successful.'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    });
+    
+    // Handle state changes
+    _audioPlayer.onPlayerStateChanged.listen((PlayerState state) {
+      if (mounted) {
+        setState(() {
+          _isPlaying = (state == PlayerState.playing);
+        });
+      }
+    });
   }
 
   Future<void> _initializePermissionService() async {
@@ -63,6 +96,7 @@ class _AudioTestWidgetState extends State<AudioTestWidget>
     _volumeAnimationController.dispose();
     _pulseAnimationController.dispose();
     _audioRecorder.dispose();
+    _audioPlayer.dispose();
     super.dispose();
   }
 
@@ -417,44 +451,42 @@ class _AudioTestWidgetState extends State<AudioTestWidget>
   Future<void> _togglePlayback() async {
     if (!_hasRecording || _recordedFile == null) return;
 
-    if (_isPlaying) {
-      // Stop simulated playback
-      setState(() {
-        _isPlaying = false;
-      });
-    } else {
-      // Start simulated playback
-      setState(() {
-        _isPlaying = true;
-      });
-      
-      // Simulate playback duration based on a reasonable length
-      // For this demo, we'll simulate 3-5 seconds of playback
-      final playbackDuration = Duration(seconds: 3);
-      
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Playing recorded audio... (${playbackDuration.inSeconds}s demo)'),
-            backgroundColor: Colors.blue,
-            duration: playbackDuration,
-          ),
-        );
+    try {
+      if (_isPlaying) {
+        // Stop real playback
+        await _audioPlayer.stop();
+        setState(() {
+          _isPlaying = false;
+        });
+      } else {
+        // Start real audio playback
+        setState(() {
+          _isPlaying = true;
+        });
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Playing recorded audio...'),
+              backgroundColor: Colors.blue,
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+        
+        // Play the recorded audio file
+        await _audioPlayer.play(DeviceFileSource(_recordedFile!.path));
       }
-      
-      // Simulate playback completion
-      await Future.delayed(playbackDuration);
-      
+    } catch (e) {
       if (mounted) {
         setState(() {
           _isPlaying = false;
-          _testComplete = true;
         });
         
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Audio playback completed! Audio test successful.'),
-            backgroundColor: Colors.green,
+          SnackBar(
+            content: Text('Failed to play audio: $e'),
+            backgroundColor: Colors.red,
           ),
         );
       }

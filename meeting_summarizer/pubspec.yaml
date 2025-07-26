@@ -91,6 +91,7 @@ dependencies:
   video_player: ^2.9.1                # Video tutorials in help system
   in_app_review: ^2.0.9               # User feedback and rating prompts
   package_info_plus: ^8.0.2           # App version and package information
+  audioplayers: ^6.1.0                # Audio playback for onboarding audio test
 
 dev_dependencies:
   flutter_test:
