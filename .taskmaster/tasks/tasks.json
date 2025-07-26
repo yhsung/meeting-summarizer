@@ -1,0 +1,740 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Implement iCloud Storage Provider",
+        "description": "Create complete iCloud integration using CloudKit framework for iOS/macOS native cloud sync",
+        "details": "Implement icloud_provider.dart with CloudKit framework integration. Include document picker and file provider extensions, iCloud Drive folder creation/management, conflict resolution with iOS file system, and background sync capabilities. Use CloudKit's CKContainer and CKDatabase APIs for data operations. Implement proper error handling for iCloud availability and user authentication status.",
+        "testStrategy": "Unit tests for CloudKit API integration, integration tests for file upload/download operations, UI tests for document picker functionality, and end-to-end tests for sync conflict resolution scenarios",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Setup CloudKit Container and Database Configuration",
+            "description": "Initialize CloudKit container, configure database schemas, and establish basic connectivity",
+            "dependencies": [],
+            "details": "Configure CloudKit container in Apple Developer Console, set up CKContainer and CKDatabase instances, define record types for meeting files and metadata, implement CloudKit availability checks, and establish basic authentication flow with iCloud account status verification.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Implement Document Picker Integration",
+            "description": "Create iOS/macOS document picker interface for iCloud file selection and import",
+            "dependencies": [
+              "1.1"
+            ],
+            "details": "Implement UIDocumentPickerViewController for iOS and NSOpenPanel for macOS, configure iCloud Drive access permissions, handle file selection callbacks, implement file metadata extraction, and provide user-friendly file browsing interface with iCloud-specific file type filtering.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Create File Provider Extensions",
+            "description": "Develop file provider extensions for seamless iCloud Drive integration",
+            "dependencies": [
+              "1.1"
+            ],
+            "details": "Create NSFileProviderExtension for macOS and FileProvider framework integration for iOS, implement file enumeration and thumbnailing, handle file modifications and version tracking, provide offline file access capabilities, and ensure proper sandbox permissions for file operations.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Implement Conflict Resolution System",
+            "description": "Build comprehensive conflict detection and resolution mechanisms for iCloud sync",
+            "dependencies": [
+              "1.2",
+              "1.3"
+            ],
+            "details": "Implement CKModifyRecordsOperation for atomic updates, detect conflicts using record change tags and modification dates, create conflict resolution UI with merge options, implement automatic resolution strategies for non-conflicting changes, and provide manual resolution workflow for complex conflicts.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Develop Background Sync Service",
+            "description": "Create background synchronization service for automatic iCloud data sync",
+            "dependencies": [
+              "1.3",
+              "1.4"
+            ],
+            "details": "Implement background app refresh capabilities, use CKSubscription for push notifications on data changes, create NSOperation-based sync queue for reliable operations, handle network connectivity changes, implement exponential backoff for failed operations, and ensure sync continues during app backgrounding.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "Implement Error Handling and Authentication Status Monitoring",
+            "description": "Create comprehensive error handling system with iCloud authentication status checks",
+            "dependencies": [
+              "1.1",
+              "1.5"
+            ],
+            "details": "Implement CKAccountStatus monitoring for iCloud account changes, handle CloudKit error codes (quota exceeded, network unavailable, authentication failures), create user-friendly error messages and recovery suggestions, implement retry mechanisms for transient errors, and provide fallback options when iCloud is unavailable.",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Implement OneDrive Storage Provider",
+        "description": "Create Microsoft Graph API integration for OneDrive cloud sync functionality",
+        "details": "Implement onedrive_provider.dart using Microsoft Graph API v1.0. Include OAuth2 authentication flow, file upload/download operations with resumable transfers, delta sync API for incremental updates, shared folder support, and handling of both business and personal accounts. Use Microsoft Graph SDK for Flutter if available, otherwise implement REST API calls directly.",
+        "testStrategy": "Unit tests for Graph API authentication and file operations, integration tests for delta sync functionality, mock tests for OAuth2 flow, and performance tests for large file transfers",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement OAuth2 Authentication Flow",
+            "description": "Set up Microsoft OAuth2 authentication with proper token management and refresh handling",
+            "dependencies": [],
+            "details": "Implement OAuth2 authentication flow using Microsoft Identity Platform. Include authorization code flow with PKCE, token storage and refresh mechanisms, proper scope handling for OneDrive access, and error handling for authentication failures. Use Microsoft Authentication Library (MSAL) if available for Flutter or implement OAuth2 flow directly.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Integrate Microsoft Graph API",
+            "description": "Create Microsoft Graph API client with core file operations and metadata handling",
+            "dependencies": [
+              "2.1"
+            ],
+            "details": "Implement Microsoft Graph API v1.0 integration with proper HTTP client setup, authentication header management, file and folder CRUD operations, metadata retrieval and updates, error handling for Graph API responses, and rate limiting compliance. Include support for both /me/drive and /drives/{drive-id} endpoints.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Build Resumable File Transfer System",
+            "description": "Implement chunked upload/download with resume capability for large files",
+            "dependencies": [
+              "2.2"
+            ],
+            "details": "Create resumable file transfer system using Microsoft Graph large file upload sessions. Implement chunked upload with configurable chunk sizes, progress tracking and callback mechanisms, resume capability for interrupted transfers, parallel chunk processing for performance, and proper cleanup of failed upload sessions.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Implement Delta Sync API Integration",
+            "description": "Create incremental sync system using OneDrive delta API for efficient updates",
+            "dependencies": [
+              "2.2"
+            ],
+            "details": "Implement delta sync functionality using Microsoft Graph delta API (/me/drive/root/delta). Include delta token management and persistence, change detection and conflict resolution, incremental update processing, deleted item handling, and sync state management. Support both full and partial sync operations.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Handle Business and Personal Account Types",
+            "description": "Implement account type detection and appropriate API endpoint routing",
+            "dependencies": [
+              "2.1"
+            ],
+            "details": "Create account type detection and handling for both personal Microsoft accounts and business/school accounts (Azure AD). Implement proper endpoint selection (/me/drive vs /sites/{site-id}/drive), tenant-specific configuration support, shared folder and site access for business accounts, permission handling differences between account types, and appropriate error messaging for unsupported features.",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Implement Dropbox Storage Provider",
+        "description": "Create Dropbox API v2 integration for complete cloud sync support",
+        "details": "Implement dropbox_provider.dart using Dropbox API v2. Include OAuth2 authentication, file operations with metadata handling, shared link creation and management, Paper integration for transcript sharing, and team folder support. Implement chunked upload for large files and proper error handling for rate limiting and network issues.",
+        "testStrategy": "Unit tests for Dropbox API endpoints, integration tests for file sync operations, tests for shared link functionality, and performance tests for concurrent file operations",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement OAuth2 authentication flow",
+            "description": "Set up Dropbox OAuth2 authentication with secure token management and refresh capabilities",
+            "dependencies": [],
+            "details": "Implement OAuth2 flow using Dropbox API v2 authentication endpoints. Handle authorization code exchange, token storage, refresh token logic, and proper error handling for authentication failures. Include secure storage of access tokens and implementation of token expiration handling.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Implement core file operations with metadata",
+            "description": "Create file upload, download, delete, and metadata retrieval operations with proper error handling",
+            "dependencies": [
+              "3.1"
+            ],
+            "details": "Implement basic file operations using Dropbox API v2 files endpoints. Include file upload/download with progress tracking, file deletion, folder creation, metadata retrieval, and proper handling of Dropbox-specific file properties. Add comprehensive error handling for network issues and API rate limits.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Implement chunked upload system with rate limiting",
+            "description": "Create chunked upload mechanism for large files with rate limiting and retry logic",
+            "dependencies": [
+              "3.2"
+            ],
+            "details": "Implement Dropbox's upload session API for large file handling. Include chunked upload with configurable chunk sizes, rate limiting compliance, exponential backoff retry logic, upload resume capabilities, and progress tracking. Handle network interruptions and implement proper cleanup of failed upload sessions.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Implement shared link management",
+            "description": "Create shared link creation, management, and access control functionality",
+            "dependencies": [
+              "3.2"
+            ],
+            "details": "Implement Dropbox sharing API for creating and managing shared links. Include link creation with configurable permissions, link expiration settings, password protection, download/view-only access controls, and link revocation. Add functionality to retrieve existing shared links and modify their settings.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Implement Paper integration for transcripts",
+            "description": "Create Paper document integration for sharing and collaborative editing of meeting transcripts",
+            "dependencies": [
+              "3.1"
+            ],
+            "details": "Implement Dropbox Paper API integration for transcript sharing. Include Paper document creation from transcript text, collaborative editing capabilities, comment and suggestion features, document sharing with permissions, and export options. Handle Paper-specific formatting and implement proper error handling for Paper API limitations.",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Implement iOS Platform Services",
+        "description": "Create comprehensive iOS-specific integrations including Siri Shortcuts, Apple Watch, and CallKit",
+        "details": "Implement ios_platform_service.dart with Siri Shortcuts for voice commands, Apple Watch companion app for remote control, CallKit integration for automatic call recording, iOS widgets for home screen controls, Spotlight Search integration, and Files app integration. Use NSUserActivity for Handoff support and implement proper permissions handling for microphone and CallKit access.",
+        "testStrategy": "Unit tests for each iOS integration component, UI tests for widget functionality, integration tests for Siri Shortcuts, and device tests for Apple Watch companion features",
+        "priority": "high",
+        "dependencies": [
+          1
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Siri Shortcuts Integration",
+            "description": "Create SiriKit shortcuts for voice-activated recording controls and meeting management",
+            "dependencies": [],
+            "details": "Implement INIntent subclasses for recording start/stop, meeting creation, and transcript access. Add Intents.intentdefinition file, configure shortcuts donation, and handle voice recognition parameters. Include proper intent handling in AppDelegate and background execution capabilities.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Develop Apple Watch Companion App",
+            "description": "Create WatchKit extension for remote recording control and meeting status monitoring",
+            "dependencies": [
+              "4.1"
+            ],
+            "details": "Build WatchOS app with WatchConnectivity framework for device communication. Implement complications for quick access, haptic feedback for recording states, and independent recording capabilities. Include watch face complications and background app refresh support.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Integrate CallKit Framework",
+            "description": "Implement CallKit for automatic call detection and recording integration",
+            "dependencies": [],
+            "details": "Configure CXProvider and CXCallController for call management. Implement automatic recording triggers for incoming/outgoing calls, call metadata extraction, and proper permission handling. Include call history integration and VoIP call support.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Create iOS Home Screen Widgets",
+            "description": "Develop WidgetKit widgets for quick recording access and meeting status display",
+            "dependencies": [
+              "4.1"
+            ],
+            "details": "Implement Widget Extension with multiple widget sizes (small, medium, large). Include timeline provider for dynamic content updates, deep linking to app features, and configuration options. Support iOS 14+ widget system with proper snapshot and timeline handling.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Implement Spotlight Search Integration",
+            "description": "Add Core Spotlight indexing for meetings, transcripts, and recordings searchability",
+            "dependencies": [],
+            "details": "Use CSSearchableIndex to index meeting content, transcripts, and metadata. Implement search result handling with proper attribution, thumbnail generation for search results, and dynamic indexing updates. Include spotlight search continuation handling.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "Add Files App Integration",
+            "description": "Create File Provider Extension for native Files app integration and document management",
+            "dependencies": [
+              "4.5"
+            ],
+            "details": "Implement NSFileProviderExtension for seamless Files app integration. Support file browsing, import/export operations, thumbnail generation, and metadata display. Include proper file coordination and background sync capabilities.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 7,
+            "title": "Implement NSUserActivity Handoff Support",
+            "description": "Add Handoff functionality for seamless meeting continuation across Apple devices",
+            "dependencies": [
+              "4.2",
+              "4.6"
+            ],
+            "details": "Configure NSUserActivity for meeting sessions with proper userInfo payload. Implement activity restoration, cross-device meeting synchronization, and state preservation. Include proper activity invalidation and continuation delegate handling for seamless device switching.",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Implement Android Platform Services",
+        "description": "Create Android-specific features including Auto integration, Quick Settings, and Google Assistant",
+        "details": "Implement android_platform_service.dart with Android Auto integration for vehicle use, Quick Settings tile for notification panel access, Android widgets for home screen, Google Assistant integration for voice activation, work profile support for enterprise security, and adaptive icons. Use Android's TileService for Quick Settings and implement proper foreground service for background recording.",
+        "testStrategy": "Unit tests for Android service components, UI tests for widgets and Quick Settings tile, integration tests for Android Auto functionality, and tests for work profile isolation",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Android Auto Integration",
+            "description": "Create Android Auto compatibility for vehicle-based meeting recording and control",
+            "dependencies": [],
+            "details": "Implement Android Auto integration using Automotive App Library. Create vehicle-optimized UI with voice controls, large touch targets, and distraction-free recording controls. Include support for Android Automotive OS and projection mode. Implement proper media session handling for recording state display and voice command processing through Android Auto's speech recognition.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Implement Quick Settings Tile",
+            "description": "Create Quick Settings tile for instant recording access from notification panel",
+            "dependencies": [],
+            "details": "Implement TileService subclass for Quick Settings integration. Create toggle tile that shows recording status and allows one-tap recording start/stop. Include proper state management, icon updates based on recording status, and deep linking to main app. Handle tile lifecycle and permission requirements for background recording access.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Implement Home Screen Widgets",
+            "description": "Create Android home screen widgets for recording controls and recent meetings",
+            "dependencies": [],
+            "details": "Implement AppWidgetProvider for home screen widgets. Create recording control widget with start/stop/pause buttons, recent meetings widget showing latest transcriptions, and status widget displaying current recording time. Support multiple widget sizes and Android 12+ dynamic theming. Include proper update mechanisms and click handling.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Implement Google Assistant Integration",
+            "description": "Create voice commands and Assistant Actions for hands-free meeting control",
+            "dependencies": [],
+            "details": "Implement Google Assistant integration using Actions SDK and App Actions. Create voice commands for 'start recording meeting', 'stop recording', 'pause recording', and 'show recent meetings'. Include proper intent handling, voice response generation, and deep linking. Support Assistant shortcuts and conversation actions for complex workflows.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Implement Work Profile Support",
+            "description": "Add enterprise work profile isolation and management support",
+            "dependencies": [],
+            "details": "Implement Android Enterprise work profile support using DevicePolicyManager APIs. Create separate data containers for personal and work recordings, implement managed configuration for enterprise policies, and support device administration features. Include work profile badge display, cross-profile data restrictions, and compliance with enterprise security requirements.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "Implement Foreground Service",
+            "description": "Create robust foreground service for background recording with proper lifecycle management",
+            "dependencies": [
+              "5.2",
+              "5.3"
+            ],
+            "details": "Implement foreground service for continuous background recording capability. Create persistent notification with recording controls, proper service lifecycle management, and battery optimization handling. Include service restart logic for system kills, proper permission handling for background execution, and integration with Quick Settings tile and widgets for unified control.",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Implement macOS Platform Services",
+        "description": "Create macOS desktop-specific features including menu bar integration and Spotlight search",
+        "details": "Implement macos_platform_service.dart with menu bar integration using NSStatusBar, Spotlight Search integration using Core Spotlight framework, drag & drop support for file import/export, Touch Bar support for MacBook Pro, Universal Control for cross-device recording, and system-wide hotkey support using Carbon framework or modern alternatives.",
+        "testStrategy": "Unit tests for menu bar functionality, integration tests for Spotlight indexing, UI tests for drag & drop operations, and system tests for hotkey registration",
+        "priority": "medium",
+        "dependencies": [
+          1
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Menu Bar Integration with NSStatusBar",
+            "description": "Create menu bar status item with recording controls and status indicators using NSStatusBar APIs",
+            "dependencies": [],
+            "details": "Implement NSStatusBar integration for menu bar presence, create status item with custom icon that changes based on recording state, add menu with recording controls (start/stop/pause), display current meeting status, and implement proper cleanup on app termination. Use method channels to communicate between Flutter and native macOS code.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Implement Spotlight Search Integration",
+            "description": "Integrate with Core Spotlight framework to make meeting transcripts searchable in macOS Spotlight",
+            "dependencies": [
+              "6.1"
+            ],
+            "details": "Use Core Spotlight framework (CSSearchableIndex) to index meeting transcripts and summaries, implement CSSearchableItem creation with proper metadata (title, content, keywords), handle Spotlight search result callbacks to open specific meetings, and implement proper indexing lifecycle management including updates and deletions.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Implement Drag & Drop Support",
+            "description": "Add native drag and drop functionality for importing audio files and exporting transcripts",
+            "dependencies": [
+              "6.2"
+            ],
+            "details": "Implement drag and drop zones in Flutter app using native macOS APIs, support dragging audio files (.mp3, .wav, .m4a) into the app for transcription, enable dragging transcripts/summaries out as text files, implement proper file type validation and error handling, and add visual feedback during drag operations.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Implement Touch Bar Support",
+            "description": "Create Touch Bar controls for MacBook Pro users with recording and playback functions",
+            "dependencies": [
+              "6.3"
+            ],
+            "details": "Implement NSTouchBar integration with recording controls (record, stop, pause buttons), add scrubber control for audio playback navigation, display recording time and status indicators, implement context-sensitive Touch Bar updates based on app state, and ensure proper fallback for non-Touch Bar Macs.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Implement System-wide Hotkey Registration",
+            "description": "Add global hotkey support for starting/stopping recordings from anywhere in macOS",
+            "dependencies": [
+              "6.4"
+            ],
+            "details": "Implement system-wide hotkey registration using modern macOS APIs (avoiding deprecated Carbon framework), create configurable hotkey combinations in app settings, handle hotkey conflicts and registration failures gracefully, implement proper permissions handling for accessibility access, and ensure hotkeys work when app is in background or minimized.",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Implement Windows Platform Services",
+        "description": "Create Windows-specific integrations including system tray, Windows Hello, and Cortana",
+        "details": "Implement windows_platform_service.dart with system tray integration using Win32 APIs, Windows Hello biometric authentication, Cortana integration for voice activation, Windows Timeline activity tracking, File Explorer context menu actions, and rich notification controls. Use Windows Runtime APIs where appropriate and implement proper UAC handling for system integrations.",
+        "testStrategy": "Unit tests for Win32 API integrations, integration tests for Windows Hello authentication, UI tests for system tray functionality, and tests for File Explorer integration",
+        "priority": "medium",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement System Tray Integration",
+            "description": "Create system tray icon and menu functionality using Win32 APIs",
+            "dependencies": [],
+            "details": "Implement system tray integration using Win32 Shell_NotifyIcon APIs. Create persistent tray icon with context menu for recording controls, show/hide main window, quick settings access, and exit option. Handle tray icon click events and provide visual feedback for recording status.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Implement Windows Hello Biometric Authentication",
+            "description": "Add Windows Hello support for secure access to recordings and settings",
+            "dependencies": [],
+            "details": "Integrate Windows Hello using Windows.Security.Credentials.UI APIs. Implement biometric authentication for accessing sensitive recordings, encrypting/decrypting data, and securing application settings. Handle fingerprint, face recognition, and PIN fallback options with proper error handling.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Implement Cortana Voice Integration",
+            "description": "Add Cortana integration for voice-activated recording controls",
+            "dependencies": [],
+            "details": "Implement Cortana integration using Windows.ApplicationModel.VoiceCommands APIs. Create voice commands for starting/stopping recordings, transcription requests, and meeting summaries. Register custom voice command definitions and handle speech recognition responses with proper activation handling.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Implement Windows Timeline Activity Tracking",
+            "description": "Add Windows Timeline integration for meeting history and activity tracking",
+            "dependencies": [],
+            "details": "Integrate with Windows Timeline using Windows.ApplicationModel.UserActivities APIs. Create user activities for recorded meetings, enable timeline history browsing, implement activity resumption, and provide rich activity metadata including meeting participants and duration.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Implement File Explorer Context Menus",
+            "description": "Add File Explorer integration with context menu actions for audio files",
+            "dependencies": [],
+            "details": "Create File Explorer shell extensions using IContextMenu interface. Add context menu options for audio files to open with Meeting Summarizer, quick transcription, and batch processing. Implement proper COM registration and handle file type associations for supported audio formats.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "Implement UAC Handling and Elevated Operations",
+            "description": "Add proper UAC handling for system-level integrations and elevated permissions",
+            "dependencies": [
+              "7.1",
+              "7.5"
+            ],
+            "details": "Implement UAC elevation handling for operations requiring administrator privileges. Create elevated helper processes for system tray registration, shell extension installation, and registry modifications. Implement proper privilege escalation with user consent and handle UAC bypass scenarios.",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Implement Content-Based Search Engine",
+        "description": "Create full-text transcript search with semantic understanding and vector embeddings",
+        "details": "Enhance existing search service with full-text search capabilities using Elasticsearch or similar engine. Implement semantic search with vector embeddings using sentence transformers, natural language query processing, fuzzy matching with typo tolerance, search result highlighting with context snippets, and real-time indexing of new transcripts. Consider using OpenAI embeddings or local models for vector generation.",
+        "testStrategy": "Unit tests for search indexing and querying, performance tests for search response times, accuracy tests for semantic search results, and integration tests for real-time indexing",
+        "priority": "medium",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Full-Text Indexing System",
+            "description": "Create comprehensive indexing infrastructure for transcript content with configurable analyzers and field mapping",
+            "dependencies": [],
+            "details": "Implement full-text indexing using Elasticsearch or similar engine. Create index schemas for transcript content with proper field mappings, text analyzers for different languages, and tokenization strategies. Include support for metadata indexing (timestamps, speakers, meeting details) and implement index lifecycle management with automatic cleanup policies.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Implement Vector Embedding Generation",
+            "description": "Create vector embedding pipeline for semantic search capabilities using transformer models",
+            "dependencies": [
+              "8.1"
+            ],
+            "details": "Implement vector embedding generation using sentence transformers or OpenAI embeddings API. Create embedding pipeline that processes transcript chunks and generates dense vector representations. Include support for both local models (all-MiniLM-L6-v2) and cloud-based models. Implement batching for efficient processing and caching mechanisms for generated embeddings.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Implement Semantic Search Implementation",
+            "description": "Create semantic search engine with vector similarity matching and hybrid search capabilities",
+            "dependencies": [
+              "8.2"
+            ],
+            "details": "Implement semantic search using vector similarity matching with cosine similarity or dot product scoring. Create hybrid search combining full-text and semantic results with configurable weighting. Include query expansion techniques and implement result re-ranking algorithms. Add support for semantic filters and contextual search within meeting sessions.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Implement Natural Language Query Processing",
+            "description": "Create intelligent query processing system that understands natural language search intents",
+            "dependencies": [],
+            "details": "Implement natural language query processing using NLP techniques for intent recognition and entity extraction. Create query preprocessing pipeline that handles stopwords, stemming, and lemmatization. Include support for temporal queries ('last week', 'yesterday'), participant queries ('from John'), and topic-based queries. Implement query suggestion and auto-completion features.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Implement Fuzzy Matching with Typo Tolerance",
+            "description": "Create robust fuzzy search system with intelligent typo correction and phonetic matching",
+            "dependencies": [
+              "8.4"
+            ],
+            "details": "Implement fuzzy matching using Levenshtein distance and phonetic algorithms (Soundex, Metaphone). Create typo tolerance system with edit distance scoring and context-aware corrections. Include support for partial word matching, transposition errors, and common misspellings. Implement configurable fuzziness levels and smart suggestion ranking.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "Implement Search Result Highlighting",
+            "description": "Create advanced result highlighting system with context snippets and relevance scoring",
+            "dependencies": [
+              "8.3",
+              "8.5"
+            ],
+            "details": "Implement search result highlighting with context snippet extraction and relevance-based ranking. Create highlighting system that shows matching terms in context with configurable snippet length. Include support for multiple highlight styles, proximity-based snippet selection, and speaker attribution in results. Implement result clustering by meeting sessions and timestamp navigation.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 7,
+            "title": "Implement Real-Time Indexing Pipeline",
+            "description": "Create efficient real-time indexing system for new transcripts with incremental updates",
+            "dependencies": [
+              "8.1",
+              "8.2"
+            ],
+            "details": "Implement real-time indexing pipeline that processes new transcripts as they are generated. Create incremental indexing system with change detection and delta updates. Include support for batch processing of pending items, error handling with retry mechanisms, and monitoring for indexing performance. Implement index optimization and background maintenance tasks.",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 9,
+        "title": "Implement Real-time AI Processing",
+        "description": "Create live transcription and summarization capabilities during meetings",
+        "details": "Extend existing AI services to support streaming transcription with incremental updates, real-time summary generation during meetings, live action item detection, speaker identification in real-time, and meeting flow analysis. Implement WebSocket connections for streaming APIs, efficient state management for live updates, and optimized UI rendering for real-time content updates.",
+        "testStrategy": "Unit tests for streaming API integration, performance tests for real-time processing latency, integration tests for live UI updates, and end-to-end tests for complete real-time workflow",
+        "priority": "medium",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Streaming Transcription Service",
+            "description": "Create real-time speech-to-text processing with streaming API integration",
+            "dependencies": [],
+            "details": "Implement streaming transcription service using Google Speech-to-Text streaming API or Azure Cognitive Services. Create audio chunking mechanism for optimal streaming performance, implement WebSocket connection management for continuous audio stream processing, add real-time transcript confidence scoring, and handle network interruption recovery. Include proper audio format conversion and sampling rate optimization for streaming APIs.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Implement Incremental Summary Generation",
+            "description": "Create live summary updates as transcription progresses during meetings",
+            "dependencies": [
+              "9.1"
+            ],
+            "details": "Develop incremental AI summarization that processes transcript chunks in real-time. Implement sliding window approach for context maintenance, create summary diff algorithms to show only new content, integrate with existing AI service for consistent summary quality, and implement summary versioning for rollback capabilities. Add configurable summary update intervals and context window size management.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Implement Live Action Item Detection",
+            "description": "Create real-time identification and tracking of action items during meetings",
+            "dependencies": [
+              "9.1"
+            ],
+            "details": "Build real-time action item detection using NLP processing on streaming transcripts. Implement keyword and phrase pattern matching for action item identification, create speaker assignment for detected action items, add priority scoring based on context and urgency indicators, and implement live action item list updates in UI. Include confidence scoring and manual confirmation workflows.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Implement Real-time Speaker Identification",
+            "description": "Create live speaker diarization and identification during meeting recording",
+            "dependencies": [
+              "9.1"
+            ],
+            "details": "Develop real-time speaker diarization using voice embeddings and clustering algorithms. Implement speaker enrollment for known participants, create voice signature matching for automatic identification, add manual speaker labeling with learning capabilities, and implement speaker change detection with timestamp accuracy. Include support for overlapping speech detection and speaker confidence scoring.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Implement WebSocket Connection Management",
+            "description": "Create robust WebSocket infrastructure for streaming API communications",
+            "dependencies": [],
+            "details": "Build comprehensive WebSocket connection management system for streaming AI services. Implement connection pooling and load balancing for multiple concurrent streams, add automatic reconnection with exponential backoff, create heartbeat mechanisms for connection health monitoring, and implement proper error handling and fallback strategies. Include connection state management and graceful degradation capabilities.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "Implement Optimized UI State Management",
+            "description": "Create efficient state management for real-time content updates and UI rendering",
+            "dependencies": [
+              "9.2",
+              "9.3",
+              "9.4",
+              "9.5"
+            ],
+            "details": "Develop optimized state management system for real-time UI updates using efficient reactive patterns. Implement selective widget rebuilding to minimize performance impact, create buffered update mechanisms to prevent UI flooding, add smooth animation transitions for live content changes, and implement virtual scrolling for large transcript displays. Include performance monitoring and adaptive update frequency based on device capabilities.",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 10,
+        "title": "Implement Calendar Integration System",
+        "description": "Create automatic meeting detection and scheduling integration with major calendar platforms",
+        "details": "Implement calendar_service.dart with Google Calendar, Outlook, and Apple Calendar integration using their respective APIs. Include automatic meeting detection and recording triggers, meeting context extraction (attendees, agenda, location), post-meeting summary distribution to attendees, and calendar-based organization and search. Implement OAuth2 flows for each calendar provider and handle calendar permissions properly.",
+        "testStrategy": "Unit tests for each calendar API integration, integration tests for automatic meeting detection, tests for summary distribution functionality, and end-to-end tests for complete calendar workflow",
+        "priority": "medium",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Multi-Provider OAuth2 Authentication System",
+            "description": "Create OAuth2 authentication flows for Google Calendar, Outlook, and Apple Calendar APIs with token management and refresh capabilities",
+            "dependencies": [],
+            "details": "Implement OAuth2ClientManager class to handle authentication flows for Google Calendar API (OAuth 2.0), Microsoft Graph API for Outlook, and Apple Calendar via EventKit framework. Include secure token storage, automatic token refresh, and proper error handling for authentication failures. Create provider-specific authentication classes: GoogleCalendarAuth, OutlookCalendarAuth, and AppleCalendarAuth.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Implement Automatic Meeting Detection System",
+            "description": "Create intelligent meeting detection algorithms that monitor calendar events and trigger recording actions automatically",
+            "dependencies": [
+              "10.1"
+            ],
+            "details": "Develop MeetingDetectionService with calendar event monitoring, meeting start/end detection based on calendar entries, intelligent filtering to distinguish meetings from other calendar events, and integration with recording triggers. Include support for recurring meetings, meeting cancellations, and timezone handling across different calendar providers.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Implement Meeting Context Extraction Service",
+            "description": "Extract comprehensive meeting metadata including attendees, agenda, location, and meeting details from calendar events",
+            "dependencies": [
+              "10.2"
+            ],
+            "details": "Create MeetingContextExtractor to parse calendar event data and extract attendee lists, meeting agendas from descriptions, location information (physical and virtual), meeting organizer details, and meeting duration. Handle different calendar event formats and implement data normalization across calendar providers for consistent meeting context structure.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Implement Summary Distribution Service",
+            "description": "Create automated system to distribute meeting summaries to attendees via email with proper permission handling",
+            "dependencies": [
+              "10.3"
+            ],
+            "details": "Develop SummaryDistributionService with email template generation, attendee notification system, permission-based sharing controls, and integration with email providers. Include opt-out mechanisms, summary formatting for different audiences, attachment handling for transcripts, and delivery confirmation tracking. Implement proper GDPR compliance for data sharing.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Implement Calendar-Based Organization and Search Features",
+            "description": "Create calendar-driven organization system with advanced search capabilities and meeting-based file management",
+            "dependencies": [
+              "10.4"
+            ],
+            "details": "Implement CalendarOrganizationService with meeting-based file categorization, calendar search integration, date-range filtering for recordings, attendee-based search functionality, and calendar sync for meeting metadata. Include calendar view widgets, meeting timeline visualization, and integration with existing search infrastructure for comprehensive meeting discovery.",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "created": "2025-07-26T11:43:46.716Z",
+      "updated": "2025-07-26T11:43:46.716Z",
+      "description": "Tasks for master context"
+    }
+  }
+}
