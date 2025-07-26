@@ -48,5 +48,86 @@
 	<!-- Microphone usage description for permission_handler -->
 	<key>NSMicrophoneUsageDescription</key>
 	<string>This app needs access to your microphone to record meetings and conversations for transcription and summarization.</string>
+	
+	<!-- iCloud capabilities -->
+	<key>NSUbiquitousContainers</key>
+	<dict>
+		<key>iCloud.$(CFBundleIdentifier)</key>
+		<dict>
+			<key>NSUbiquitousContainerIsDocumentScopePublic</key>
+			<true/>
+			<key>NSUbiquitousContainerName</key>
+			<string>Meeting Summarizer</string>
+			<key>NSUbiquitousContainerSupportedFolderLevels</key>
+			<string>Any</string>
+		</dict>
+	</dict>
+	
+	<!-- Document types for document picker -->
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>Audio Files</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>public.audio</string>
+				<string>public.mp3</string>
+				<string>public.wav</string>
+				<string>public.aiff</string>
+				<string>public.m4a</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>Meeting Summary Files</string>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>public.json</string>
+				<string>public.plain-text</string>
+				<string>public.utf8-plain-text</string>
+			</array>
+		</dict>
+	</array>
+	
+	<!-- Exported type identifiers -->
+	<key>UTExportedTypeDeclarations</key>
+	<array>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.data</string>
+				<string>public.content</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>Meeting Summary</string>
+			<key>UTTypeIdentifier</key>
+			<string>com.meetingsummarizer.summary</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>summary</string>
+					<string>msum</string>
+				</array>
+				<key>public.mime-type</key>
+				<array>
+					<string>application/json</string>
+				</array>
+			</dict>
+		</dict>
+	</array>
+	
+	<!-- File sharing and document support -->
+	<key>UIFileSharingEnabled</key>
+	<true/>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<true/>
+	<key>UISupportsDocumentBrowser</key>
+	<true/>
 </dict>
 </plist>

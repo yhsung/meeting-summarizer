@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- iCloud capabilities for development -->
+	<key>com.apple.developer.icloud-container-identifiers</key>
+	<array>
+		<string>iCloud.$(CFBundleIdentifier)</string>
+	</array>
+	
+	<key>com.apple.developer.icloud-services</key>
+	<array>
+		<string>CloudDocuments</string>
+		<string>CloudKit</string>
+	</array>
+	
+	<key>com.apple.developer.ubiquity-container-identifiers</key>
+	<array>
+		<string>iCloud.$(CFBundleIdentifier)</string>
+	</array>
+	
+	<!-- CloudKit development environment -->
+	<key>com.apple.developer.icloud-container-development-container-identifiers</key>
+	<array>
+		<string>iCloud.$(CFBundleIdentifier)</string>
+	</array>
+	
+	<!-- Document-based app support -->
+	<key>com.apple.security.application-groups</key>
+	<array>
+		<string>group.$(CFBundleIdentifier)</string>
+	</array>
+	
+	<!-- Background processing for sync -->
+	<key>com.apple.developer.background-processing</key>
+	<true/>
+	
+	<!-- Network access for cloud sync -->
+	<key>com.apple.security.network.client</key>
+	<true/>
+	
+	<!-- Additional debug capabilities -->
+	<key>get-task-allow</key>
+	<true/>
+</dict>
+</plist>

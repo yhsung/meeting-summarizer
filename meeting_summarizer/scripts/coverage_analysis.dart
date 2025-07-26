@@ -1,4 +1,5 @@
 #!/usr/bin/env dart
+// ignore_for_file: avoid_print
 
 import 'dart:convert';
 import 'dart:io';
@@ -171,15 +172,13 @@ class CoverageAnalyzer {
     buffer.writeln('');
     buffer.writeln('## Quality Assessment');
 
-    final lowCoverageFiles = sortedFiles
-        .where((f) => f.lineCoverage < 60)
-        .length;
+    final lowCoverageFiles =
+        sortedFiles.where((f) => f.lineCoverage < 60).length;
     final mediumCoverageFiles = sortedFiles
         .where((f) => f.lineCoverage >= 60 && f.lineCoverage < 80)
         .length;
-    final highCoverageFiles = sortedFiles
-        .where((f) => f.lineCoverage >= 80)
-        .length;
+    final highCoverageFiles =
+        sortedFiles.where((f) => f.lineCoverage >= 80).length;
 
     buffer.writeln('- 🔴 Low coverage files (<60%): $lowCoverageFiles');
     buffer.writeln('- 🟡 Medium coverage files (60-80%): $mediumCoverageFiles');
@@ -258,11 +257,9 @@ class CoverageAnalyzer {
       'quality_gates': {
         'minimum_threshold': config['coverage']?['minimum_threshold'] ?? 80.0,
         'target_threshold': config['coverage']?['target_threshold'] ?? 90.0,
-        'passes_minimum':
-            coverageData.overallLineCoverage >=
+        'passes_minimum': coverageData.overallLineCoverage >=
             (config['coverage']?['minimum_threshold'] ?? 80.0),
-        'passes_target':
-            coverageData.overallLineCoverage >=
+        'passes_target': coverageData.overallLineCoverage >=
             (config['coverage']?['target_threshold'] ?? 90.0),
       },
     };
@@ -377,11 +374,10 @@ class CoverageAnalyzer {
   Future<void> _generateLowCoverageReport() async {
     final lowCoverageThreshold =
         config['analysis']?['low_coverage_threshold'] ?? 60.0;
-    final lowCoverageFiles =
-        coverageData.sourceFiles.values
-            .where((file) => file.lineCoverage < lowCoverageThreshold)
-            .toList()
-          ..sort((a, b) => a.lineCoverage.compareTo(b.lineCoverage));
+    final lowCoverageFiles = coverageData.sourceFiles.values
+        .where((file) => file.lineCoverage < lowCoverageThreshold)
+        .toList()
+      ..sort((a, b) => a.lineCoverage.compareTo(b.lineCoverage));
 
     if (lowCoverageFiles.isEmpty) {
       print('🎉 No files with low coverage found!');
@@ -408,11 +404,7 @@ class CoverageAnalyzer {
         '- **Branch Coverage**: ${file.branchCoverage.toStringAsFixed(2)}%',
       );
       buffer.writeln(
-        '- **Priority**: ${file.lineCoverage < 30
-            ? 'HIGH'
-            : file.lineCoverage < 50
-            ? 'MEDIUM'
-            : 'LOW'}',
+        '- **Priority**: ${file.lineCoverage < 30 ? 'HIGH' : file.lineCoverage < 50 ? 'MEDIUM' : 'LOW'}',
       );
       buffer.writeln('');
 
@@ -561,17 +553,16 @@ class CoverageAnalyzer {
     final color = coverage >= 90
         ? 'brightgreen'
         : coverage >= 80
-        ? 'green'
-        : coverage >= 70
-        ? 'yellow'
-        : coverage >= 60
-        ? 'orange'
-        : 'red';
+            ? 'green'
+            : coverage >= 70
+                ? 'yellow'
+                : coverage >= 60
+                    ? 'orange'
+                    : 'red';
 
     final badgeText = '${coverage.toStringAsFixed(1)}%';
 
-    final svg =
-        '''<?xml version="1.0" encoding="UTF-8"?>
+    final svg = '''<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="104" height="20">
   <linearGradient id="b" x2="0" y2="100%">
     <stop offset="0" stop-color="#bbb" stop-opacity=".1"/>
