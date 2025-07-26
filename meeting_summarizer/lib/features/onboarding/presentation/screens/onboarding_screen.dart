@@ -106,8 +106,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   PageViewModel _buildPermissionSetupPage() {
     return PageViewModel(
       title: "Permission Setup",
-      body: "We need some permissions to provide the best experience:",
-      bodyWidget: const PermissionSetupWidget(),
+      bodyWidget: Column(
+        children: [
+          const Text(
+            "We need some permissions to provide the best experience:",
+            style: TextStyle(fontSize: 16),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 20),
+          const PermissionSetupWidget(),
+        ],
+      ),
       image: _buildPageImage(Icons.security, Colors.green),
       decoration: _getPageDecoration(),
     );
@@ -116,9 +125,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   PageViewModel _buildCloudSetupPage() {
     return PageViewModel(
       title: "Cloud Storage (Optional)",
-      body:
-          "Connect your preferred cloud service for automatic backup and sync:",
-      bodyWidget: const CloudSetupWidget(),
+      bodyWidget: Column(
+        children: [
+          const Text(
+            "Connect your preferred cloud service for automatic backup and sync:",
+            style: TextStyle(fontSize: 16),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 20),
+          const CloudSetupWidget(),
+        ],
+      ),
       image: _buildPageImage(Icons.cloud_sync, Colors.orange),
       decoration: _getPageDecoration(),
     );
@@ -127,8 +144,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   PageViewModel _buildAudioTestPage() {
     return PageViewModel(
       title: "Audio Quality Test",
-      body: "Let's test your audio setup to ensure the best recording quality:",
-      bodyWidget: const AudioTestWidget(),
+      bodyWidget: Column(
+        children: [
+          const Text(
+            "Let's test your audio setup to ensure the best recording quality:",
+            style: TextStyle(fontSize: 16),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 20),
+          const AudioTestWidget(),
+        ],
+      ),
       image: _buildPageImage(Icons.volume_up, Colors.red),
       decoration: _getPageDecoration(),
     );
