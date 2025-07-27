@@ -96,7 +96,14 @@ dependencies:
   video_player: ^2.9.1                # Video tutorials in help system
   in_app_review: ^2.0.9               # User feedback and rating prompts
   package_info_plus: ^8.0.2           # App version and package information
-  audioplayers: ^6.1.0                # Audio playback for onboarding audio test
+  audioplayers: ^6.1.0                # Audio playbook for onboarding audio test
+
+  # Calendar integration dependencies for Task 10
+  device_calendar: ^4.3.2             # Device calendar access and manipulation
+  timezone: ^0.9.4                    # Timezone handling for calendar events
+  microsoft_graph_api: ^0.0.12         # Microsoft Graph API for Outlook integration
+  rrule: ^0.2.15                      # Recurrence rule parsing for recurring events
+  mailer: ^6.1.0                      # Email sending for summary distribution
 
 dev_dependencies:
   flutter_test:

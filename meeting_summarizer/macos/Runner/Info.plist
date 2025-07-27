@@ -31,5 +31,168 @@
 	<!-- Microphone usage description for macOS -->
 	<key>NSMicrophoneUsageDescription</key>
 	<string>This app needs access to your microphone to record meetings and conversations for transcription and summarization.</string>
+	
+	<!-- File type associations for audio files -->
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>mp3</string>
+				<string>MP3</string>
+			</array>
+			<key>CFBundleTypeIconFile</key>
+			<string></string>
+			<key>CFBundleTypeName</key>
+			<string>MP3 Audio File</string>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>LSTypeIsPackage</key>
+			<false/>
+		</dict>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>wav</string>
+				<string>WAV</string>
+			</array>
+			<key>CFBundleTypeIconFile</key>
+			<string></string>
+			<key>CFBundleTypeName</key>
+			<string>WAV Audio File</string>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>LSTypeIsPackage</key>
+			<false/>
+		</dict>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>m4a</string>
+				<string>M4A</string>
+			</array>
+			<key>CFBundleTypeIconFile</key>
+			<string></string>
+			<key>CFBundleTypeName</key>
+			<string>M4A Audio File</string>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>LSTypeIsPackage</key>
+			<false/>
+		</dict>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>aac</string>
+				<string>AAC</string>
+			</array>
+			<key>CFBundleTypeIconFile</key>
+			<string></string>
+			<key>CFBundleTypeName</key>
+			<string>AAC Audio File</string>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>LSTypeIsPackage</key>
+			<false/>
+		</dict>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>flac</string>
+				<string>FLAC</string>
+			</array>
+			<key>CFBundleTypeIconFile</key>
+			<string></string>
+			<key>CFBundleTypeName</key>
+			<string>FLAC Audio File</string>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>LSTypeIsPackage</key>
+			<false/>
+		</dict>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>ogg</string>
+				<string>OGG</string>
+			</array>
+			<key>CFBundleTypeIconFile</key>
+			<string></string>
+			<key>CFBundleTypeName</key>
+			<string>OGG Audio File</string>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>LSTypeIsPackage</key>
+			<false/>
+		</dict>
+	</array>
+	
+	<!-- Services menu integration -->
+	<key>NSServices</key>
+	<array>
+		<dict>
+			<key>NSMenuItem</key>
+			<dict>
+				<key>default</key>
+				<string>Transcribe with Meeting Summarizer</string>
+			</dict>
+			<key>NSMessage</key>
+			<string>transcribeSelectedAudio</string>
+			<key>NSPortName</key>
+			<string>Meeting Summarizer</string>
+			<key>NSSendFileTypes</key>
+			<array>
+				<string>public.audio</string>
+			</array>
+		</dict>
+		<dict>
+			<key>NSMenuItem</key>
+			<dict>
+				<key>default</key>
+				<string>Summarize Text with Meeting Summarizer</string>
+			</dict>
+			<key>NSMessage</key>
+			<string>summarizeSelectedText</string>
+			<key>NSPortName</key>
+			<string>Meeting Summarizer</string>
+			<key>NSSendTypes</key>
+			<array>
+				<string>public.plain-text</string>
+				<string>public.utf8-plain-text</string>
+			</array>
+		</dict>
+	</array>
+	
+	<!-- Spotlight Search integration -->
+	<key>CoreSpotlightContinuation</key>
+	<true/>
+	
+	<!-- URL scheme for Spotlight and deep linking -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.yhsung.meeting_summarizer.spotlight</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>meeting-summarizer</string>
+			</array>
+		</dict>
+	</array>
+	
+	<!-- Background modes for notifications -->
+	<key>LSUIElement</key>
+	<false/>
+	
+	<!-- Allow app to run without dock icon when minimized -->
+	<key>LSUIElement</key>
+	<false/>
+	
+	<!-- User notification permissions -->
+	<key>NSUserNotificationCenter</key>
+	<dict>
+		<key>NSUserNotificationDefaultSoundName</key>
+		<string>NSUserNotificationDefaultSoundName</string>
+	</dict>
 </dict>
 </plist>

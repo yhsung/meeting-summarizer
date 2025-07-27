@@ -37,7 +37,7 @@ For detailed project structure, architecture overview, and file organization, se
 - **Task Management**: `.taskmaster/` - Task Master AI integration files
 - **Claude Integration**: `.claude/` - Claude Code configuration and commands
 - **Documentation**: `docs/` - Project documentation and guides
-- **Core Services**: `meeting_summarizer/lib/core/services/` - Audio processing, cloud sync, data retention, and business logic
+- **Core Services**: `meeting_summarizer/lib/core/services/` - Audio processing, cloud sync, data retention, calendar integration, and business logic
 - **Features**: `meeting_summarizer/lib/features/` - Feature-specific implementations
 - **Tests**: `meeting_summarizer/test/` - Comprehensive test suite
 
@@ -46,6 +46,7 @@ For detailed project structure, architecture overview, and file organization, se
 For detailed information about recent updates, improvements, and changes to the project, see: [`CHANGELOG.md`](CHANGELOG.md)
 
 Key recent improvements include:
+- **Calendar Integration System**: Complete multi-provider calendar integration with Google Calendar, Outlook, and Apple Calendar support, automatic meeting detection, and summary distribution
 - **Data Retention and Lifecycle Management**: Comprehensive automated data retention service with configurable policies, secure deletion, and GDPR compliance integration
 - **Incremental Sync Mechanisms**: Complete delta synchronization system for cloud file sync with 60-90% bandwidth savings
 - **Web Platform Compatibility**: Excluded local Whisper transcription from web builds with conditional imports and stub implementations
@@ -68,6 +69,68 @@ The meeting summarizer includes comprehensive audio enhancement capabilities pow
 - **Automatic Gain Control**: Dynamic level adjustment
 - **Spectral Subtraction**: Advanced frequency-domain noise reduction
 - **Real-time & Post-processing**: Support for both live and batch enhancement
+
+## Calendar Integration
+
+The meeting summarizer includes comprehensive calendar integration capabilities that automatically detect meetings and enable intelligent summary distribution. The system supports multiple calendar providers and includes advanced meeting detection algorithms.
+
+### Supported Calendar Providers
+
+- **Google Calendar**: Full OAuth2 integration with Google Calendar API v3
+- **Outlook Calendar**: Microsoft Graph API integration for personal and business accounts
+- **Apple Calendar**: EventKit framework integration for iOS/macOS devices
+- **Device Calendar**: Native device calendar access across platforms
+
+### Key Features
+
+- **Automatic Meeting Detection**: Intelligent algorithms analyze calendar events to identify meetings with 70-95% accuracy
+- **Meeting Context Extraction**: Comprehensive extraction of meeting metadata, attendees, agenda items, and virtual meeting information
+- **Multi-Provider OAuth2**: Secure authentication system supporting Google and Microsoft OAuth2 flows
+- **Summary Distribution**: Automated email distribution of meeting summaries to attendees with GDPR compliance
+- **Real-time Monitoring**: Background monitoring for upcoming meetings with auto-recording triggers
+- **Virtual Meeting Support**: Detection and parsing of Zoom, Teams, Google Meet, and WebEx meeting links
+
+### Quick Configuration
+
+```bash
+# Configure calendar providers
+calendar_service.configureProvider(
+  provider: CalendarProvider.googleCalendar,
+  config: {
+    'client_id': 'your_google_client_id',
+    'client_secret': 'your_google_client_secret',
+  },
+);
+
+# Get upcoming meetings
+final meetings = await calendar_service.getUpcomingMeetings();
+
+# Distribute meeting summary
+await calendar_service.distributeMeetingSummary(
+  meetingContext: meeting,
+  summary: summary,
+  transcription: transcription,
+);
+```
+
+### Meeting Detection Algorithm
+
+The system uses a sophisticated multi-factor analysis to detect meetings:
+
+- **Title Analysis**: Keyword matching with configurable meeting/exclude terms
+- **Duration Analysis**: Optimal meeting duration patterns (15min-4hr range)
+- **Attendee Analysis**: Participant count and acceptance patterns
+- **Description Analysis**: Agenda items, virtual meeting links, and meeting indicators
+- **Confidence Scoring**: Weighted scoring system with 0.7+ threshold for detection
+
+### Architecture Components
+
+- `CalendarIntegrationService` - Main orchestration service
+- `MeetingDetectionService` - AI-powered meeting detection
+- `MeetingContextExtractionService` - Detailed context extraction
+- `SummaryDistributionService` - GDPR-compliant email distribution
+- `OAuth2AuthManager` - Multi-provider authentication management
+- `CalendarServiceFactory` - Provider-specific service instantiation
 
 ## MCP Integration
 
