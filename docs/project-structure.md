@@ -55,7 +55,8 @@ project/                   # absolute path /Volumes/Samsung970EVOPlus/dev-projec
 │   │   │   ├── interfaces/
 │   │   │   │   ├── storage_organization_interface.dart # Storage organization service interface
 │   │   │   │   ├── export_service_interface.dart      # Export service interface with multi-format support
-│   │   │   │   └── cloud_sync_interface.dart          # Cloud synchronization service interface with incremental sync
+│   │   │   │   ├── cloud_sync_interface.dart          # Cloud synchronization service interface with incremental sync
+│   │   │   │   └── calendar_service_interface.dart    # Calendar service interface with provider abstraction and meeting detection
 │   │   │   ├── enums/
 │   │   │   │   ├── audio_format.dart      # Audio format definitions with compression ratios
 │   │   │   │   ├── audio_quality.dart     # Quality levels with detailed properties
@@ -63,7 +64,8 @@ project/                   # absolute path /Volumes/Samsung970EVOPlus/dev-projec
 │   │   │   │   ├── summary_type.dart      # AI summary type definitions (brief, detailed, executive, etc.)
 │   │   │   │   ├── export_format.dart     # Export format definitions (JSON, CSV, XML, PDF, HTML, ZIP, TAR)
 │   │   │   │   ├── compression_level.dart # Compression level options for export operations
-│   │   │   │   └── user_rights_enums.dart # User rights system enums (status, actions, roles, permissions)
+│   │   │   │   ├── user_rights_enums.dart # User rights system enums (status, actions, roles, permissions)
+│   │   │   │   └── calendar_provider.dart # Calendar provider enumeration with OAuth requirements and scope definitions
 │   │   │   ├── models/
 │   │   │   │   ├── audio_configuration.dart  # Enhanced audio config with serialization
 │   │   │   │   ├── recording_session.dart     # Recording session management
@@ -100,9 +102,12 @@ project/                   # absolute path /Volumes/Samsung970EVOPlus/dev-projec
 │   │   │   │   │   ├── faq_item.dart          # FAQ item model with voting and view tracking
 │   │   │   │   │   ├── contextual_help.dart   # Context-aware tooltip and guided help model
 │   │   │   │   │   └── help_tour.dart         # Multi-step guided tour model with navigation
-│   │   │   │   └── feedback/
-│   │   │   │       ├── feedback_item.dart     # Feedback data model with type categorization
-│   │   │   │       └── feedback_analytics.dart # Analytics model for feedback insights
+│   │   │   │   ├── feedback/
+│   │   │   │   │   ├── feedback_item.dart     # Feedback data model with type categorization
+│   │   │   │   │   └── feedback_analytics.dart # Analytics model for feedback insights
+│   │   │   │   └── calendar/
+│   │   │   │       ├── calendar_event.dart     # Normalized calendar event model with multi-provider support and JSON serialization
+│   │   │   │       └── meeting_context.dart    # Comprehensive meeting context with participant analysis, agenda extraction, and auto-recording preferences
 │   │   │   └── services/
 │   │   │       ├── audio_service_interface.dart           # Service interface definition
 │   │   │       ├── audio_format_manager.dart              # Platform-aware format selection
@@ -164,7 +169,15 @@ project/                   # absolute path /Volumes/Samsung970EVOPlus/dev-projec
 │   │   │       ├── settings_service.dart                  # Comprehensive settings management with SharedPreferences persistence
 │   │   │       ├── settings_backup_service.dart           # Settings backup and migration with cloud sync and encryption
 │   │   │       ├── help_service.dart                      # In-app help system with articles, FAQ, contextual help and tours
-│   │   │       └── feedback_service.dart                  # User feedback collection with smart rating prompts and analytics
+│   │   │       ├── feedback_service.dart                  # User feedback collection with smart rating prompts and analytics
+│   │   │       ├── calendar_integration_service.dart      # Main calendar integration orchestration service with multi-provider support and meeting detection
+│   │   │       └── calendar_services/
+│   │   │           ├── oauth2_auth_manager.dart            # Multi-provider OAuth2 authentication manager with secure token storage
+│   │   │           ├── calendar_service_factory.dart       # Calendar service factory with provider-specific instantiation
+│   │   │           ├── google_calendar_service.dart        # Google Calendar API v3 integration with full OAuth2 flow
+│   │   │           ├── meeting_detection_service.dart      # AI-powered meeting detection with configurable rules and confidence scoring
+│   │   │           ├── meeting_context_extraction_service.dart # Comprehensive meeting context extraction with agenda and participant analysis
+│   │   │           └── summary_distribution_service.dart   # GDPR-compliant email distribution with template generation and delivery tracking
 │   │   ├── features/
 │   │   │   ├── audio_recording/
 │   │   │   │   ├── data/
@@ -241,6 +254,13 @@ project/                   # absolute path /Volumes/Samsung970EVOPlus/dev-projec
 │   │   │               ├── summary_controls.dart            # Summary interaction controls
 │   │   │               ├── summary_type_selector.dart       # Summary type selection
 │   │   │               └── action_items_list.dart           # Action items display
+│   │   │   ├── calendar/
+│   │   │   │   └── presentation/
+│   │   │   │       ├── screens/
+│   │   │   │       │   └── calendar_screen.dart             # Calendar integration management screen with tabs for meetings, settings, and analytics
+│   │   │   │       └── widgets/
+│   │   │   │           ├── calendar_settings_widget.dart    # Multi-provider calendar configuration and authentication management
+│   │   │   │           └── upcoming_meetings_widget.dart    # Upcoming meetings display with meeting detection and recording controls
 │   │   │   └── sync/
 │   │   │       └── presentation/
 │   │   │           └── widgets/
