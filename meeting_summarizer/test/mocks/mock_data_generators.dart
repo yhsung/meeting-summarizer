@@ -99,8 +99,7 @@ class MockDataGenerators {
     bool? enableAutoGainControl,
   }) {
     return AudioConfiguration(
-      format:
-          format ??
+      format: format ??
           AudioFormat.values[_random.nextInt(AudioFormat.values.length)],
       sampleRate: sampleRate ?? [44100, 48000][_random.nextInt(2)],
       channels: _random.nextBool() ? 1 : 2, // mono or stereo
@@ -123,20 +122,17 @@ class MockDataGenerators {
     String? errorMessage,
   }) {
     final now = DateTime.now();
-    final sessionDuration =
-        duration ??
+    final sessionDuration = duration ??
         Duration(
           minutes: _random.nextInt(120) + 5, // 5-125 minutes
           seconds: _random.nextInt(60),
         );
 
     return RecordingSession(
-      id:
-          id ??
+      id: id ??
           'session_${now.millisecondsSinceEpoch}_${_random.nextInt(1000)}',
       startTime: now.subtract(sessionDuration),
-      state:
-          state ??
+      state: state ??
           RecordingState.values[_random.nextInt(RecordingState.values.length)],
       duration: sessionDuration,
       configuration: configuration ?? generateAudioConfiguration(),
@@ -147,8 +143,8 @@ class MockDataGenerators {
       waveformData: generateWaveformData(points: 50),
       endTime:
           (state == RecordingState.stopped || state == RecordingState.error)
-          ? now
-          : null,
+              ? now
+              : null,
       errorMessage: errorMessage,
     );
   }
@@ -187,8 +183,7 @@ class MockDataGenerators {
 
     return TranscriptionRequest(
       language: language ?? languages[_random.nextInt(languages.length)],
-      prompt:
-          prompt ??
+      prompt: prompt ??
           (_random.nextBool()
               ? 'Please transcribe this meeting recording'
               : null),
@@ -199,12 +194,10 @@ class MockDataGenerators {
       enableWordTimestamps: _random.nextBool(),
       enableSpeakerDiarization: enableSpeakerDiarization ?? _random.nextBool(),
       maxAlternatives: _random.nextInt(3) + 1, // 1-3 alternatives
-      maxSpeakers: _random.nextBool()
-          ? _random.nextInt(5) + 2
-          : null, // 2-6 speakers
-      customVocabulary: _random.nextBool()
-          ? ['API', 'deployment', 'user story']
-          : null,
+      maxSpeakers:
+          _random.nextBool() ? _random.nextInt(5) + 2 : null, // 2-6 speakers
+      customVocabulary:
+          _random.nextBool() ? ['API', 'deployment', 'user story'] : null,
     );
   }
 
@@ -217,8 +210,7 @@ class MockDataGenerators {
     Duration? processingTime,
     Duration? audioDuration,
   }) {
-    final resultText =
-        text ??
+    final resultText = text ??
         _transcriptionTexts[_random.nextInt(_transcriptionTexts.length)];
     final wordCount = resultText.split(' ').length;
     final effectiveAudioDuration =
@@ -239,8 +231,7 @@ class MockDataGenerators {
       audioDurationMs: effectiveAudioDuration.inMilliseconds,
       segments: segments,
       words: words,
-      provider:
-          provider ??
+      provider: provider ??
           ['openai_whisper', 'google_speech', 'local_whisper'][_random.nextInt(
             3,
           )],
@@ -275,9 +266,8 @@ class MockDataGenerators {
           start: currentTime,
           end: currentTime + duration,
           confidence: 0.8 + _random.nextDouble() * 0.2,
-          speakerId: _random.nextBool()
-              ? 'Speaker ${_random.nextInt(3) + 1}'
-              : null,
+          speakerId:
+              _random.nextBool() ? 'Speaker ${_random.nextInt(3) + 1}' : null,
         ),
       );
 
@@ -321,13 +311,11 @@ class MockDataGenerators {
     SyncOperationStatus? status,
     double? progress,
   }) {
-    final operationType =
-        type ??
+    final operationType = type ??
         SyncOperationType.values[_random.nextInt(
           SyncOperationType.values.length,
         )];
-    final operationStatus =
-        status ??
+    final operationStatus = status ??
         SyncOperationStatus.values[_random.nextInt(
           SyncOperationStatus.values.length,
         )];
@@ -339,15 +327,12 @@ class MockDataGenerators {
       type: operationType,
       localFilePath:
           localPath ?? _filePaths[_random.nextInt(_filePaths.length)],
-      remoteFilePath:
-          remotePath ??
+      remoteFilePath: remotePath ??
           '/cloud${_filePaths[_random.nextInt(_filePaths.length)]}',
-      provider:
-          provider ??
+      provider: provider ??
           CloudProvider.values[_random.nextInt(CloudProvider.values.length)],
       status: operationStatus,
-      progressPercentage:
-          progress ??
+      progressPercentage: progress ??
           (operationStatus == SyncOperationStatus.completed
               ? 1.0
               : _random.nextDouble()),
@@ -381,15 +366,12 @@ class MockDataGenerators {
     );
 
     return conflict_models.SyncConflict(
-      id:
-          id ??
+      id: id ??
           'conflict_${now.millisecondsSinceEpoch}_${_random.nextInt(1000)}',
       filePath: localPath ?? _filePaths[_random.nextInt(_filePaths.length)],
-      provider:
-          provider ??
+      provider: provider ??
           CloudProvider.values[_random.nextInt(CloudProvider.values.length)],
-      type:
-          conflictType ??
+      type: conflictType ??
           conflict_models.ConflictType.values[_random.nextInt(
             conflict_models.ConflictType.values.length,
           )],
@@ -399,17 +381,15 @@ class MockDataGenerators {
         modifiedAt: localModified,
       ),
       remoteVersion: conflict_models.FileVersion(
-        path:
-            remotePath ??
+        path: remotePath ??
             '/cloud${_filePaths[_random.nextInt(_filePaths.length)]}',
         size: _random.nextInt(2000000) + 500000,
         modifiedAt: remoteModified,
       ),
       detectedAt: now,
-      severity:
-          conflict_models.ConflictSeverity.values[_random.nextInt(
-            conflict_models.ConflictSeverity.values.length,
-          )],
+      severity: conflict_models.ConflictSeverity.values[_random.nextInt(
+        conflict_models.ConflictSeverity.values.length,
+      )],
       description:
           'Mock conflict: File modified on both local and remote storage',
     );
@@ -422,14 +402,12 @@ class MockDataGenerators {
     for (int i = 0; i < samples; i++) {
       // Generate realistic audio signal with multiple frequencies
       final time = i / 44100.0; // Assume 44.1kHz sample rate
-      final signal =
-          0.1 *
+      final signal = 0.1 *
           (math.sin(2 * math.pi * 440 * time) + // 440 Hz base tone
               0.5 * math.sin(2 * math.pi * 880 * time) + // 880 Hz harmonic
               0.25 * math.sin(2 * math.pi * 1320 * time) + // 1320 Hz harmonic
-              0.1 *
-                  (_random.nextDouble() - 0.5) // White noise
-                  );
+              0.1 * (_random.nextDouble() - 0.5) // White noise
+          );
       audioData[i] = signal;
     }
 

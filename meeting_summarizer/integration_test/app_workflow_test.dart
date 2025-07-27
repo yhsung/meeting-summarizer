@@ -62,9 +62,9 @@ void main() {
 
       final transcription =
           await IntegrationTestHelpers.createTestTranscription(
-            recordingId: recording.id,
-            content: 'This is an integration test transcription.',
-          );
+        recordingId: recording.id,
+        content: 'This is an integration test transcription.',
+      );
 
       await IntegrationTestHelpers.createTestSummary(
         transcriptionId: transcription.id,

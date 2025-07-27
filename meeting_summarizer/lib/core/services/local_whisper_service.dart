@@ -144,22 +144,21 @@ class LocalWhisperService implements TranscriptionServiceInterface {
         try {
           await downloadModel(
             _defaultModel,
-            onProgress:
-                (
-                  progress, {
-                  String? status,
-                  int? downloadedBytes,
-                  int? totalBytes,
-                }) {
-                  // Convert download progress to overall initialization progress
-                  // Download takes 80% of initialization (0.1 to 0.9)
-                  final overallProgress = 0.1 + (progress * 0.8);
-                  onProgress?.call(
-                    overallProgress,
-                    status ??
-                        'Downloading model: ${(progress * 100).toStringAsFixed(1)}%',
-                  );
-                },
+            onProgress: (
+              progress, {
+              String? status,
+              int? downloadedBytes,
+              int? totalBytes,
+            }) {
+              // Convert download progress to overall initialization progress
+              // Download takes 80% of initialization (0.1 to 0.9)
+              final overallProgress = 0.1 + (progress * 0.8);
+              onProgress?.call(
+                overallProgress,
+                status ??
+                    'Downloading model: ${(progress * 100).toStringAsFixed(1)}%',
+              );
+            },
           );
           log('LocalWhisperService: Default model downloaded successfully');
           onProgress?.call(0.9, 'Model download completed');
@@ -765,8 +764,7 @@ class LocalWhisperService implements TranscriptionServiceInterface {
       String? status,
       int? downloadedBytes,
       int? totalBytes,
-    })?
-    onProgress,
+    })? onProgress,
   }) async {
     if (!_isInitialized) {
       throw TranscriptionError(

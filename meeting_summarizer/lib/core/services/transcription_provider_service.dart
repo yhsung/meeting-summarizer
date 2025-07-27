@@ -16,7 +16,7 @@ class TranscriptionProviderService {
   final FlutterSecureStorage _secureStorage;
 
   TranscriptionProviderService({FlutterSecureStorage? secureStorage})
-    : _secureStorage = secureStorage ?? const FlutterSecureStorage();
+      : _secureStorage = secureStorage ?? const FlutterSecureStorage();
 
   /// Get the currently selected transcription provider
   Future<TranscriptionProvider> getSelectedProvider() async {

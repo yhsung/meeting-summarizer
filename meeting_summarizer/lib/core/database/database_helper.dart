@@ -27,7 +27,7 @@ class DatabaseHelper {
   final String? _customDatabaseName;
 
   DatabaseHelper._internal({String? customDatabaseName})
-    : _customDatabaseName = customDatabaseName;
+      : _customDatabaseName = customDatabaseName;
 
   /// Get singleton instance of DatabaseHelper
   factory DatabaseHelper({String? customDatabaseName}) {
@@ -667,28 +667,24 @@ class DatabaseHelper {
   Future<Map<String, int>> getDatabaseStats() async {
     final db = await database;
     try {
-      final recordingsCount =
-          Sqflite.firstIntValue(
+      final recordingsCount = Sqflite.firstIntValue(
             await db.rawQuery(
               'SELECT COUNT(*) FROM recordings WHERE is_deleted = 0',
             ),
           ) ??
           0;
 
-      final transcriptionsCount =
-          Sqflite.firstIntValue(
+      final transcriptionsCount = Sqflite.firstIntValue(
             await db.rawQuery('SELECT COUNT(*) FROM transcriptions'),
           ) ??
           0;
 
-      final summariesCount =
-          Sqflite.firstIntValue(
+      final summariesCount = Sqflite.firstIntValue(
             await db.rawQuery('SELECT COUNT(*) FROM summaries'),
           ) ??
           0;
 
-      final settingsCount =
-          Sqflite.firstIntValue(
+      final settingsCount = Sqflite.firstIntValue(
             await db.rawQuery('SELECT COUNT(*) FROM settings'),
           ) ??
           0;
@@ -869,9 +865,8 @@ class DatabaseHelper {
       for (final query in testQueries) {
         try {
           final plan = await db.rawQuery('EXPLAIN QUERY PLAN $query');
-          queryPlans[query] = plan
-              .map((row) => row.values.join(' '))
-              .join('\n');
+          queryPlans[query] =
+              plan.map((row) => row.values.join(' ')).join('\n');
         } catch (e) {
           queryPlans[query] = 'Analysis failed: $e';
         }
@@ -994,9 +989,8 @@ class DatabaseHelper {
       }
 
       final endTime = DateTime.now();
-      optimizations['optimization_time_ms'] = endTime
-          .difference(startTime)
-          .inMilliseconds;
+      optimizations['optimization_time_ms'] =
+          endTime.difference(startTime).inMilliseconds;
       optimizations['success'] = true;
 
       log(

@@ -333,8 +333,8 @@ class BatchProcessingService implements BatchProcessingInterface {
       // Default estimates based on operation type
       final baseTimePerFile = _getBaseTimeEstimate(operation);
       return Duration(
-        microseconds: (baseTimePerFile.inMicroseconds * config.fileCount)
-            .round(),
+        microseconds:
+            (baseTimePerFile.inMicroseconds * config.fileCount).round(),
       );
     }
 
@@ -742,8 +742,7 @@ class BatchProcessingService implements BatchProcessingInterface {
     final currentCount = _operationCounts[operation]!;
 
     final newAverage = Duration(
-      microseconds:
-          ((currentAverage.inMicroseconds * (currentCount - 1)) +
+      microseconds: ((currentAverage.inMicroseconds * (currentCount - 1)) +
               result.processingTime.inMicroseconds) ~/
           currentCount,
     );

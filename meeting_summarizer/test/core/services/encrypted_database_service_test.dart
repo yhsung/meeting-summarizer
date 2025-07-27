@@ -21,31 +21,31 @@ void main() {
       // Mock the secure storage since it won't work in tests
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(
-            const MethodChannel('plugins.it_nomads.com/flutter_secure_storage'),
-            (MethodCall methodCall) async {
-              switch (methodCall.method) {
-                case 'read':
-                  final key = methodCall.arguments['key'] as String;
-                  return mockStorage[key];
-                case 'write':
-                  final key = methodCall.arguments['key'] as String;
-                  final value = methodCall.arguments['value'] as String;
-                  mockStorage[key] = value;
-                  return null;
-                case 'delete':
-                  final key = methodCall.arguments['key'] as String;
-                  mockStorage.remove(key);
-                  return null;
-                case 'readAll':
-                  return Map<String, String>.from(mockStorage);
-                case 'deleteAll':
-                  mockStorage.clear();
-                  return null;
-                default:
-                  return null;
-              }
-            },
-          );
+        const MethodChannel('plugins.it_nomads.com/flutter_secure_storage'),
+        (MethodCall methodCall) async {
+          switch (methodCall.method) {
+            case 'read':
+              final key = methodCall.arguments['key'] as String;
+              return mockStorage[key];
+            case 'write':
+              final key = methodCall.arguments['key'] as String;
+              final value = methodCall.arguments['value'] as String;
+              mockStorage[key] = value;
+              return null;
+            case 'delete':
+              final key = methodCall.arguments['key'] as String;
+              mockStorage.remove(key);
+              return null;
+            case 'readAll':
+              return Map<String, String>.from(mockStorage);
+            case 'deleteAll':
+              mockStorage.clear();
+              return null;
+            default:
+              return null;
+          }
+        },
+      );
 
       // Initialize sqflite for testing
       sqfliteFfiInit();
@@ -269,8 +269,8 @@ void main() {
           expect(insertedId, equals(transcription.id));
 
           // Retrieve transcription (should be automatically decrypted)
-          final retrievedTranscription = await encryptedDbService
-              .getTranscription(transcription.id);
+          final retrievedTranscription =
+              await encryptedDbService.getTranscription(transcription.id);
           expect(retrievedTranscription, isNotNull);
           expect(retrievedTranscription!.id, equals(transcription.id));
           expect(retrievedTranscription.text, equals(transcription.text));
@@ -339,8 +339,8 @@ void main() {
         expect(updateResult, isTrue);
 
         // Retrieve and verify update
-        final retrievedTranscription = await encryptedDbService
-            .getTranscription(transcription.id);
+        final retrievedTranscription =
+            await encryptedDbService.getTranscription(transcription.id);
         expect(retrievedTranscription, isNotNull);
         expect(
           retrievedTranscription!.text,
@@ -377,8 +377,8 @@ void main() {
         expect(retrievedRecording, isNotNull);
         expect(retrievedRecording!.description, equals(recording.description));
 
-        final retrievedTranscription = await encryptedDbService
-            .getTranscription(transcription.id);
+        final retrievedTranscription =
+            await encryptedDbService.getTranscription(transcription.id);
         expect(retrievedTranscription, isNotNull);
         expect(retrievedTranscription!.text, equals(transcription.text));
       });

@@ -218,7 +218,6 @@ class _TranscriptionViewerState extends State<TranscriptionViewer> {
                   ),
                 ),
               ),
-
               if (_searchMatches.isNotEmpty) ...[
                 IconButton(
                   onPressed: _previousSearchResult,
@@ -294,7 +293,6 @@ class _TranscriptionViewerState extends State<TranscriptionViewer> {
                         ),
                       ),
                     ),
-
                   if (widget.showSpeakers && segment.speakerId != null) ...[
                     const SizedBox(width: 8),
                     Container(
@@ -317,7 +315,6 @@ class _TranscriptionViewerState extends State<TranscriptionViewer> {
                       ),
                     ),
                   ],
-
                   if (widget.showConfidence) ...[
                     const SizedBox(width: 8),
                     Container(

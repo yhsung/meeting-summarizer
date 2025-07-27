@@ -261,9 +261,8 @@ class MockAudioRecordingService implements AudioServiceInterface {
       throw StateError('No active recording session');
     }
 
-    final effectiveSampleRate = sampleRate > 0
-        ? sampleRate
-        : _defaultSampleRate;
+    final effectiveSampleRate =
+        sampleRate > 0 ? sampleRate : _defaultSampleRate;
     const chunkSize = 1024;
     const chunkDuration = Duration(milliseconds: 50);
 
@@ -421,13 +420,11 @@ class MockAudioRecordingService implements AudioServiceInterface {
     for (int i = 0; i < chunkSize; i++) {
       // Generate test signal with controlled amplitude
       final t = (now + i) / 1000.0;
-      final signal =
-          _mockAmplitude *
+      final signal = _mockAmplitude *
           0.1 *
           (math.sin(2 * math.pi * 440 * t) + // 440 Hz tone
-              0.05 *
-                  (math.Random().nextDouble() - 0.5) // Some noise
-                  );
+              0.05 * (math.Random().nextDouble() - 0.5) // Some noise
+          );
       audioChunk[i] = signal;
     }
 

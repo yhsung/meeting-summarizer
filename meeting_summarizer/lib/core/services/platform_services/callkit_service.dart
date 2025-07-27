@@ -95,7 +95,7 @@ class CallKitService {
   void Function(CallInfo call)? onCallStarted;
   void Function(CallInfo call)? onCallEnded;
   void Function(CallInfo call, CallRecordingState state)?
-  onRecordingStateChanged;
+      onRecordingStateChanged;
   void Function(String error)? onError;
 
   /// Initialize CallKit service

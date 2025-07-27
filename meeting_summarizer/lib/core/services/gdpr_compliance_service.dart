@@ -182,9 +182,8 @@ class GDPRComplianceService {
         pendingRequests: allRequests.where((r) => r.status.isActive).length,
         overdueRequests: allRequests.where((r) => r.isOverdue).length,
         totalProcessingRecords: processingRecords.length,
-        highRiskProcessing: processingRecords
-            .where((r) => r.complianceRiskLevel >= 2)
-            .length,
+        highRiskProcessing:
+            processingRecords.where((r) => r.complianceRiskLevel >= 2).length,
         complianceIssues: _identifyComplianceIssues(
           allConsents,
           allRequests,
@@ -271,9 +270,8 @@ class GDPRComplianceService {
     }
 
     // Check for high-risk processing
-    final highRiskProcessing = processing
-        .where((p) => p.complianceRiskLevel >= 2)
-        .length;
+    final highRiskProcessing =
+        processing.where((p) => p.complianceRiskLevel >= 2).length;
     if (highRiskProcessing > 0) {
       issues.add(
         ComplianceIssue(
@@ -315,10 +313,10 @@ class GDPRComplianceService {
     // User rights recommendations
     final avgProcessingTime = requests.isNotEmpty
         ? requests
-                  .where((r) => r.processingDuration != null)
-                  .map((r) => r.processingDuration!.inDays)
-                  .fold(0, (sum, days) => sum + days) /
-              requests.length
+                .where((r) => r.processingDuration != null)
+                .map((r) => r.processingDuration!.inDays)
+                .fold(0, (sum, days) => sum + days) /
+            requests.length
         : 0;
 
     if (avgProcessingTime > 14) {
@@ -328,9 +326,8 @@ class GDPRComplianceService {
     }
 
     // Data processing recommendations
-    final processingWithoutSecurityMeasures = processing
-        .where((p) => p.securityMeasures.isEmpty)
-        .length;
+    final processingWithoutSecurityMeasures =
+        processing.where((p) => p.securityMeasures.isEmpty).length;
     if (processingWithoutSecurityMeasures > 0) {
       recommendations.add(
         'Implement security measures for all data processing activities',
@@ -524,9 +521,8 @@ class ComplianceAuditReport {
       'overdueRequests': overdueRequests,
       'totalProcessingRecords': totalProcessingRecords,
       'highRiskProcessing': highRiskProcessing,
-      'complianceIssues': complianceIssues
-          .map((issue) => issue.toJson())
-          .toList(),
+      'complianceIssues':
+          complianceIssues.map((issue) => issue.toJson()).toList(),
       'recommendations': recommendations,
       'auditScore': auditScore,
       'auditGrade': auditGrade,

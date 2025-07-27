@@ -153,8 +153,8 @@ class _RealtimeWaveformControllerState
               Text(
                 _isActive ? 'Recording...' : 'Not recording',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: _isActive ? Colors.red : Colors.grey,
-                ),
+                      color: _isActive ? Colors.red : Colors.grey,
+                    ),
               ),
               const SizedBox(width: 8),
               Text(

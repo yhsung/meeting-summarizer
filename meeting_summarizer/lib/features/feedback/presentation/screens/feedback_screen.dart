@@ -115,7 +115,6 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
               ),
             ),
             const SizedBox(height: 16),
-
             Row(
               children: [
                 Expanded(
@@ -137,7 +136,6 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
               ],
             ),
             const SizedBox(height: 12),
-
             Row(
               children: [
                 Expanded(
@@ -156,7 +154,6 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                 ),
               ],
             ),
-
             if (_analytics.ratingDistribution.isNotEmpty) ...[
               const SizedBox(height: 16),
               Text(
@@ -260,7 +257,6 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
               ),
             ),
             const SizedBox(height: 16),
-
             Row(
               children: [
                 Expanded(
@@ -283,7 +279,6 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
               ],
             ),
             const SizedBox(height: 12),
-
             Row(
               children: [
                 Expanded(
@@ -368,7 +363,6 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
               ],
             ),
             const SizedBox(height: 16),
-
             if (recentFeedback.isEmpty)
               Center(
                 child: Padding(

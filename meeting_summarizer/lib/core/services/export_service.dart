@@ -21,9 +21,9 @@ class ExportService implements ExportServiceInterface {
   ExportService._({
     required EnhancedStorageOrganizationService storageService,
     required Map<ExportFormat, FormatExporter> formatExporters,
-  }) : _storageService = storageService,
-       _formatExporters = formatExporters,
-       _activeExports = {};
+  })  : _storageService = storageService,
+        _formatExporters = formatExporters,
+        _activeExports = {};
 
   /// Create export service with all format exporters
   static Future<ExportService> create({
@@ -598,15 +598,13 @@ class CsvExporter extends FormatExporter {
 
     // Add data rows
     for (final item in data) {
-      final row = csvKeys
-          .map((key) {
-            final value = item[key];
-            if (key == 'tags' && value is List) {
-              return _escapeCsvValue(value.join(';'));
-            }
-            return _escapeCsvValue(value?.toString() ?? '');
-          })
-          .join(',');
+      final row = csvKeys.map((key) {
+        final value = item[key];
+        if (key == 'tags' && value is List) {
+          return _escapeCsvValue(value.join(';'));
+        }
+        return _escapeCsvValue(value?.toString() ?? '');
+      }).join(',');
       csvLines.add(row);
     }
 

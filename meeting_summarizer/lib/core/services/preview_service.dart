@@ -19,15 +19,15 @@ import '../enums/thumbnail_size.dart';
 class PreviewService implements PreviewServiceInterface {
   final String _cacheDirectory;
   final Map<String, StreamController<PreviewGenerationProgress>>
-  _activeGenerations;
+      _activeGenerations;
   final Map<String, PreviewResult> _memoryCache;
   final int _memoryCacheLimit;
 
   PreviewService._({required String cacheDirectory, int memoryCacheLimit = 50})
-    : _cacheDirectory = cacheDirectory,
-      _activeGenerations = {},
-      _memoryCache = {},
-      _memoryCacheLimit = memoryCacheLimit;
+      : _cacheDirectory = cacheDirectory,
+        _activeGenerations = {},
+        _memoryCache = {},
+        _memoryCacheLimit = memoryCacheLimit;
 
   /// Create preview service instance
   static Future<PreviewService> create({
@@ -264,9 +264,9 @@ class PreviewService implements PreviewServiceInterface {
         if (parts.length >= 3) {
           final sizeStr = parts[1];
           final size = ThumbnailSize.values.cast<ThumbnailSize?>().firstWhere(
-            (s) => s?.size.toString() == sizeStr,
-            orElse: () => null,
-          );
+                (s) => s?.size.toString() == sizeStr,
+                orElse: () => null,
+              );
           if (size != null) {
             sizeDistribution[size] = (sizeDistribution[size] ?? 0) + 1;
           }

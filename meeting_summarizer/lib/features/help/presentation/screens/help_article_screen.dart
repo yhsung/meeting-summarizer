@@ -222,9 +222,9 @@ class _HelpArticleScreenState extends State<HelpArticleScreen> {
                   Text(
                     widget.article.category.name,
                     style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      color: widget.article.category.color,
-                      fontWeight: FontWeight.w600,
-                    ),
+                          color: widget.article.category.color,
+                          fontWeight: FontWeight.w600,
+                        ),
                   ),
                 ],
               ),
@@ -245,9 +245,9 @@ class _HelpArticleScreenState extends State<HelpArticleScreen> {
                     Text(
                       'Featured',
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                      ),
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
                     ),
                   ],
                 ),
@@ -270,10 +270,10 @@ class _HelpArticleScreenState extends State<HelpArticleScreen> {
         Text(
           widget.article.excerpt,
           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-            color: Theme.of(
-              context,
-            ).colorScheme.onSurface.withValues(alpha: 0.7),
-          ),
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.7),
+              ),
         ),
         const SizedBox(height: 16),
 
@@ -291,10 +291,10 @@ class _HelpArticleScreenState extends State<HelpArticleScreen> {
             Text(
               'Updated ${_formatDate(widget.article.updatedAt)}',
               style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                color: Theme.of(
-                  context,
-                ).colorScheme.onSurface.withValues(alpha: 0.5),
-              ),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.5),
+                  ),
             ),
             if (widget.article.viewCount > 0) ...[
               const SizedBox(width: 16),
@@ -309,10 +309,10 @@ class _HelpArticleScreenState extends State<HelpArticleScreen> {
               Text(
                 '${widget.article.viewCount} views',
                 style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.onSurface.withValues(alpha: 0.5),
-                ),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.5),
+                    ),
               ),
             ],
           ],
@@ -363,8 +363,8 @@ class _HelpArticleScreenState extends State<HelpArticleScreen> {
               child: Text(
                 tag,
                 style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSecondaryContainer,
-                ),
+                      color: Theme.of(context).colorScheme.onSecondaryContainer,
+                    ),
               ),
             );
           }).toList(),
@@ -461,8 +461,8 @@ class _HelpArticleScreenState extends State<HelpArticleScreen> {
                 Text(
                   'No related articles found',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.outline,
-                  ),
+                        color: Theme.of(context).colorScheme.outline,
+                      ),
                 ),
               ],
             ),

@@ -146,10 +146,10 @@ class ThemeService extends ChangeNotifier {
 
   /// Get available theme modes
   List<ThemeMode> get availableThemeModes => [
-    ThemeMode.light,
-    ThemeMode.dark,
-    ThemeMode.system,
-  ];
+        ThemeMode.light,
+        ThemeMode.dark,
+        ThemeMode.system,
+      ];
 
   /// Reset to default theme settings
   Future<void> resetToDefaults() async {

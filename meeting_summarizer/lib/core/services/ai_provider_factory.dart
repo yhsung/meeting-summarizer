@@ -225,11 +225,9 @@ class AIProviderConfig {
 
 /// Factory for creating AI summarization service instances
 class AIProviderFactory {
-  static final Map<
-    AIProvider,
-    AISummarizationServiceInterface Function(AIProviderConfig)
-  >
-  _providers = {};
+  static final Map<AIProvider,
+          AISummarizationServiceInterface Function(AIProviderConfig)>
+      _providers = {};
 
   /// Register a provider implementation
   static void registerProvider(

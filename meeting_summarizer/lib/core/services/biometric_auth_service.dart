@@ -21,13 +21,13 @@ class BiometricAuthResult {
   });
 
   const BiometricAuthResult.success(this.method)
-    : isSuccess = true,
-      errorMessage = null;
+      : isSuccess = true,
+        errorMessage = null;
 
   const BiometricAuthResult.failure(String error)
-    : isSuccess = false,
-      errorMessage = error,
-      method = null;
+      : isSuccess = false,
+        errorMessage = error,
+        method = null;
 }
 
 /// Available biometric authentication methods
@@ -116,8 +116,8 @@ class BiometricAuthService {
   BiometricAuthService({
     LocalAuthentication? localAuth,
     SharedPreferences? preferences,
-  }) : _localAuth = localAuth ?? LocalAuthentication(),
-       _prefs = preferences;
+  })  : _localAuth = localAuth ?? LocalAuthentication(),
+        _prefs = preferences;
 
   /// Check if biometric authentication is available on this device
   Future<bool> isAvailable() async {

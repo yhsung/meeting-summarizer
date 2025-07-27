@@ -16,52 +16,52 @@ void main() {
   setUpAll(() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
-          const MethodChannel('com.meeting_summarizer/background_audio'),
-          (call) async {
-            switch (call.method) {
-              case 'initialize':
-              case 'enableBackground':
-              case 'disableBackground':
-              case 'startForegroundService':
-              case 'stopForegroundService':
-              case 'dispose':
-                return true;
-              default:
-                return null;
-            }
-          },
-        );
+      const MethodChannel('com.meeting_summarizer/background_audio'),
+      (call) async {
+        switch (call.method) {
+          case 'initialize':
+          case 'enableBackground':
+          case 'disableBackground':
+          case 'startForegroundService':
+          case 'stopForegroundService':
+          case 'dispose':
+            return true;
+          default:
+            return null;
+        }
+      },
+    );
 
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
-          const MethodChannel('com.meeting_summarizer/background_session'),
-          (call) async {
-            switch (call.method) {
-              case 'initialize':
-              case 'enableBackgroundSession':
-              case 'disableBackgroundSession':
-              case 'startBackgroundTask':
-              case 'endBackgroundTask':
-              case 'dispose':
-                return true;
-              default:
-                return null;
-            }
-          },
-        );
+      const MethodChannel('com.meeting_summarizer/background_session'),
+      (call) async {
+        switch (call.method) {
+          case 'initialize':
+          case 'enableBackgroundSession':
+          case 'disableBackgroundSession':
+          case 'startBackgroundTask':
+          case 'endBackgroundTask':
+          case 'dispose':
+            return true;
+          default:
+            return null;
+        }
+      },
+    );
   });
 
   tearDownAll(() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
-          const MethodChannel('com.meeting_summarizer/background_audio'),
-          null,
-        );
+      const MethodChannel('com.meeting_summarizer/background_audio'),
+      null,
+    );
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
-          const MethodChannel('com.meeting_summarizer/background_session'),
-          null,
-        );
+      const MethodChannel('com.meeting_summarizer/background_session'),
+      null,
+    );
   });
   group('BackgroundAudioService', () {
     late BackgroundAudioService service;

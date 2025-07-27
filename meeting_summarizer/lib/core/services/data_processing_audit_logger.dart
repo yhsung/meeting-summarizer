@@ -103,8 +103,7 @@ class DataProcessingAuditLogger {
 
     try {
       final now = DateTime.now();
-      final effectiveRetentionPeriod =
-          retentionPeriod ??
+      final effectiveRetentionPeriod = retentionPeriod ??
           _defaultRetentionPolicies[dataCategory] ??
           RetentionPeriod.oneYear;
 
@@ -408,9 +407,8 @@ class DataProcessingAuditLogger {
         totalRecords: records.length,
         ongoingActivities: records.where((r) => r.isOngoing).length,
         completedActivities: records.where((r) => r.isCompleted).length,
-        highRiskActivities: records
-            .where((r) => r.complianceRiskLevel >= 2)
-            .length,
+        highRiskActivities:
+            records.where((r) => r.complianceRiskLevel >= 2).length,
         overdueRetention: records.where((r) => r.isOverdue).length,
         records: records,
         categoryBreakdown: _generateCategoryBreakdown(records),

@@ -112,9 +112,8 @@ class Recording {
       'description': description,
       'tags': tags != null ? _encodeJsonList(tags!) : null,
       'location': location,
-      'waveform_data': waveformData != null
-          ? _encodeJsonList(waveformData!)
-          : null,
+      'waveform_data':
+          waveformData != null ? _encodeJsonList(waveformData!) : null,
       'created_at': createdAt.millisecondsSinceEpoch,
       'updated_at': updatedAt.millisecondsSinceEpoch,
       'is_deleted': isDeleted ? 1 : 0,

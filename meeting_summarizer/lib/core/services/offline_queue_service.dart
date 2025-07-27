@@ -464,9 +464,8 @@ class OfflineQueueService {
         await _database!.update(
           'queue_operations',
           {
-            'scheduled_at': DateTime.now()
-                .add(retryDelay)
-                .millisecondsSinceEpoch,
+            'scheduled_at':
+                DateTime.now().add(retryDelay).millisecondsSinceEpoch,
             'status': QueueOperationStatus.pending.name,
           },
           where: 'id = ?',
@@ -856,11 +855,11 @@ class PriorityStatistics {
 
   /// Get the distribution as a map
   Map<String, int> get distributionMap => {
-    'Critical': criticalCount,
-    'High': highCount,
-    'Normal': normalCount,
-    'Low': lowCount,
-  };
+        'Critical': criticalCount,
+        'High': highCount,
+        'Normal': normalCount,
+        'Low': lowCount,
+      };
 
   @override
   String toString() {

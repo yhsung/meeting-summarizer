@@ -144,9 +144,9 @@ class _FaqListItem extends StatelessWidget {
               child: Text(
                 'Popular',
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w500,
-                ),
+                      color: Colors.white,
+                      fontWeight: FontWeight.w500,
+                    ),
               ),
             ),
         ],
@@ -185,10 +185,10 @@ class _FaqListItem extends StatelessWidget {
             Text(
               '${faq.viewCount} views',
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: Theme.of(
-                  context,
-                ).colorScheme.onSurface.withValues(alpha: 0.5),
-              ),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.5),
+                  ),
             ),
             const SizedBox(width: 12),
           ],
@@ -210,10 +210,10 @@ class _FaqListItem extends StatelessWidget {
                     child: Text(
                       tag,
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.onSecondaryContainer,
-                      ),
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSecondaryContainer,
+                          ),
                     ),
                   );
                 }).toList(),
@@ -279,10 +279,10 @@ class _FaqListItem extends StatelessWidget {
                 Text(
                   '${faq.helpfulnessPercent.toStringAsFixed(0)}% helpful (${faq.totalVotes} votes)',
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.onSurface.withValues(alpha: 0.6),
-                  ),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: 0.6),
+                      ),
                 ),
             ],
           ),
@@ -317,9 +317,9 @@ class _FaqListItem extends StatelessWidget {
                     child: Text(
                       'Related question #$questionId',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.primary,
-                        decoration: TextDecoration.underline,
-                      ),
+                            color: Theme.of(context).colorScheme.primary,
+                            decoration: TextDecoration.underline,
+                          ),
                     ),
                   ),
                 ],

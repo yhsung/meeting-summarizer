@@ -281,9 +281,8 @@ class DataAnonymizationService {
   }
 
   String hashData(String data, {String? salt}) {
-    final saltBytes = salt != null
-        ? utf8.encode(salt)
-        : utf8.encode(_anonymousUserId);
+    final saltBytes =
+        salt != null ? utf8.encode(salt) : utf8.encode(_anonymousUserId);
     final dataBytes = utf8.encode(data);
     final combined = Uint8List.fromList([...saltBytes, ...dataBytes]);
 
@@ -391,8 +390,8 @@ class DataAnonymizationService {
   Future<void> _purgeDataOlderThan(DateTime cutoffDate) async {
     // Get all retention keys
     final keys = _prefs.getKeys().where(
-      (key) => key.startsWith(_dataRetentionKey),
-    );
+          (key) => key.startsWith(_dataRetentionKey),
+        );
 
     for (final key in keys) {
       final dataJson = _prefs.getString(key);
@@ -435,8 +434,8 @@ class DataAnonymizationService {
     // Export anonymized data if requested
     if (request.includeAnonymizedData) {
       final keys = _prefs.getKeys().where(
-        (key) => key.startsWith(_dataRetentionKey),
-      );
+            (key) => key.startsWith(_dataRetentionKey),
+          );
 
       for (final key in keys) {
         final dataJson = _prefs.getString(key);
@@ -478,8 +477,8 @@ class DataAnonymizationService {
 
       // Clear all anonymized data
       final keys = _prefs.getKeys().where(
-        (key) => key.startsWith(_dataRetentionKey),
-      );
+            (key) => key.startsWith(_dataRetentionKey),
+          );
       for (final key in keys) {
         await _prefs.remove(key);
       }
@@ -518,8 +517,8 @@ class DataAnonymizationService {
         await _prefs.setString(_privacySettingsKey, random);
 
         final keys = _prefs.getKeys().where(
-          (key) => key.startsWith(_dataRetentionKey),
-        );
+              (key) => key.startsWith(_dataRetentionKey),
+            );
         for (final key in keys) {
           await _prefs.setString(key, random);
         }

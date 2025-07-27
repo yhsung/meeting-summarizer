@@ -390,8 +390,7 @@ class SiriShortcutsService {
       // Request notification permissions as proxy for Siri integration
       final result = await _notificationsPlugin
           .resolvePlatformSpecificImplementation<
-            IOSFlutterLocalNotificationsPlugin
-          >()
+              IOSFlutterLocalNotificationsPlugin>()
           ?.requestPermissions(alert: true, badge: true, sound: true);
 
       log(

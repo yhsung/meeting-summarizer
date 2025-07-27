@@ -304,8 +304,8 @@ class StorageOrganizationService implements StorageOrganizationInterface {
       if (query != null && query.isNotEmpty) {
         final queryLower = query.toLowerCase();
         final matchesFileName = metadata.fileName.toLowerCase().contains(
-          queryLower,
-        );
+              queryLower,
+            );
         final matchesDescription =
             metadata.description?.toLowerCase().contains(queryLower) ?? false;
 
@@ -431,19 +431,18 @@ class StorageOrganizationService implements StorageOrganizationInterface {
         totalSize: currentStats.totalSize + metadata.fileSize,
         archivedCount:
             currentStats.archivedCount + (metadata.isArchived ? 1 : 0),
-        archivedSize:
-            currentStats.archivedSize +
+        archivedSize: currentStats.archivedSize +
             (metadata.isArchived ? metadata.fileSize : 0),
         oldestFile: currentStats.oldestFile == null
             ? metadata.createdAt
             : (metadata.createdAt.isBefore(currentStats.oldestFile!)
-                  ? metadata.createdAt
-                  : currentStats.oldestFile),
+                ? metadata.createdAt
+                : currentStats.oldestFile),
         newestFile: currentStats.newestFile == null
             ? metadata.createdAt
             : (metadata.createdAt.isAfter(currentStats.newestFile!)
-                  ? metadata.createdAt
-                  : currentStats.newestFile),
+                ? metadata.createdAt
+                : currentStats.newestFile),
         commonExtensions: _updateCommonExtensions(
           currentStats.commonExtensions,
           metadata.extension,

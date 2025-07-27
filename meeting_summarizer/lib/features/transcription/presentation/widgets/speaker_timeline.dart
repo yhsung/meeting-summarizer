@@ -177,10 +177,10 @@ class SpeakerTimeline extends StatelessWidget {
                                     ),
                                     child: Text(
                                       '${_formatTimestamp(entry.start)} - ${_formatTimestamp(entry.end)}',
-                                      style: theme.textTheme.bodySmall
-                                          ?.copyWith(
-                                            color: theme.colorScheme.outline,
-                                          ),
+                                      style:
+                                          theme.textTheme.bodySmall?.copyWith(
+                                        color: theme.colorScheme.outline,
+                                      ),
                                     ),
                                   ),
                               ],

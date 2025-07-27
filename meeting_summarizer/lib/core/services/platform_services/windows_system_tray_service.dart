@@ -58,7 +58,7 @@ class WindowsSystemTrayService {
 
   /// Callbacks for tray actions
   void Function(TrayAction action, Map<String, dynamic>? parameters)?
-  onTrayAction;
+      onTrayAction;
   void Function(String filePath, FileAssociationType type)? onFileOpened;
 
   /// Initialize Windows System Tray service

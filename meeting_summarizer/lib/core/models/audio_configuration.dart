@@ -40,8 +40,8 @@ class AudioConfiguration {
     this.outputDirectory,
     this.maxFileSizeMB,
     this.adaptiveQuality = false,
-  }) : sampleRate = sampleRate ?? quality.sampleRate,
-       bitDepth = bitDepth ?? quality.bitDepth;
+  })  : sampleRate = sampleRate ?? quality.sampleRate,
+        bitDepth = bitDepth ?? quality.bitDepth;
 
   const AudioConfiguration.raw({
     required this.format,

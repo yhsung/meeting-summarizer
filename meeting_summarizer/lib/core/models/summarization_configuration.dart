@@ -193,26 +193,26 @@ class SummarizationConfiguration {
 
   /// Get tone options
   static List<String> get toneOptions => [
-    'professional',
-    'casual',
-    'formal',
-    'technical',
-    'conversational',
-    'academic',
-  ];
+        'professional',
+        'casual',
+        'formal',
+        'technical',
+        'conversational',
+        'academic',
+      ];
 
   /// Get language options
   static List<String> get languageOptions => [
-    'en', // English
-    'es', // Spanish
-    'fr', // French
-    'de', // German
-    'it', // Italian
-    'pt', // Portuguese
-    'ja', // Japanese
-    'ko', // Korean
-    'zh', // Chinese
-  ];
+        'en', // English
+        'es', // Spanish
+        'fr', // French
+        'de', // German
+        'it', // Italian
+        'pt', // Portuguese
+        'ja', // Japanese
+        'ko', // Korean
+        'zh', // Chinese
+      ];
 
   /// Create default configuration for meeting summaries
   factory SummarizationConfiguration.meetingDefault() {

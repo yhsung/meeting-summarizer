@@ -21,7 +21,7 @@ void main() {
     group('Initialization', () {
       test('should initialize with required credentials', () async {
         final testProvider = OneDriveProvider();
-        
+
         await testProvider.initialize({
           'client_id': 'test_client_id',
           'access_token': 'test_access_token',
@@ -32,7 +32,7 @@ void main() {
 
       test('should throw ArgumentError when client_id is missing', () async {
         final testProvider = OneDriveProvider();
-        
+
         expect(
           () => testProvider.initialize({'access_token': 'test_token'}),
           throwsA(isA<ArgumentError>()),
@@ -41,13 +41,14 @@ void main() {
 
       test('should handle optional credentials correctly', () async {
         final testProvider = OneDriveProvider();
-        
+
         await testProvider.initialize({
           'client_id': 'test_client_id',
           'access_token': 'test_access_token',
           'refresh_token': 'test_refresh_token',
           'account_type': 'work',
-          'expires_at': DateTime.now().add(Duration(hours: 1)).toIso8601String(),
+          'expires_at':
+              DateTime.now().add(Duration(hours: 1)).toIso8601String(),
         });
 
         expect(testProvider.accountType, equals('work'));
@@ -59,7 +60,7 @@ void main() {
         await provider.initialize({
           'client_id': 'test_client_id',
         });
-        
+
         final authUrl = provider.generateAuthUrl(
           redirectUri: 'http://localhost:8080/callback',
           scopes: ['Files.ReadWrite.All', 'offline_access'],
@@ -68,10 +69,13 @@ void main() {
         expect(authUrl, contains('login.microsoftonline.com'));
         expect(authUrl, contains('client_id=test_client_id'));
         expect(authUrl, contains('response_type=code'));
-        expect(authUrl, contains('redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Fcallback'));
+        expect(authUrl,
+            contains('redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Fcallback'));
       });
 
-      test('should generate different tenant URLs for personal vs work accounts', () async {
+      test(
+          'should generate different tenant URLs for personal vs work accounts',
+          () async {
         // Test personal account
         await provider.initialize({
           'client_id': 'test_client_id',
@@ -121,10 +125,10 @@ void main() {
 
       test('should handle delta token correctly', () {
         expect(provider.deltaToken, isNull);
-        
+
         provider.deltaToken = 'test_token_123';
         expect(provider.deltaToken, equals('test_token_123'));
-        
+
         provider.resetDeltaToken();
         expect(provider.deltaToken, isNull);
       });
@@ -159,7 +163,8 @@ void main() {
         expect(provider.getLastError(), isNull);
       });
 
-      test('should handle connection test gracefully when not initialized', () async {
+      test('should handle connection test gracefully when not initialized',
+          () async {
         final connected = await provider.testConnection();
         expect(connected, isFalse);
       });
@@ -185,7 +190,7 @@ void main() {
         await provider.initialize({
           'client_id': 'test_client_id',
         });
-        
+
         final config = provider.getConfiguration();
         expect(config, isA<Map<String, dynamic>>());
         expect(config.containsKey('client_id'), isTrue);

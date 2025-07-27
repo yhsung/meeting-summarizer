@@ -18,15 +18,15 @@ class DropboxProvider implements CloudProviderInterface {
   static const String _apiBaseUrl = 'https://api.dropboxapi.com/2';
   static const String _contentBaseUrl = 'https://content.dropboxapi.com/2';
   static const String _oauthBaseUrl = 'https://www.dropbox.com/oauth2';
-  
+
   // Rate limiting constants
   static const int _burstRequestLimit = 100;
   static const Duration _rateLimitWindow = Duration(seconds: 1);
-  
+
   // Chunked upload constants
   static const int _chunkSize = 8 * 1024 * 1024; // 8MB chunks
   static const int _maxRetries = 3;
-  
+
   Map<String, String> _credentials = {};
   bool _isConnected = false;
   String? _lastError;
@@ -34,15 +34,15 @@ class DropboxProvider implements CloudProviderInterface {
   String? _refreshToken;
   DateTime? _tokenExpiryTime;
   http.Client? _httpClient;
-  
+
   // OAuth2 configuration
   String? _clientId;
   String? _clientSecret;
   String? _redirectUri;
-  
+
   // Rate limiting state
   final List<DateTime> _requestTimes = [];
-  
+
   // Paper integration constants
   static const String _paperBaseUrl = 'https://api.dropboxapi.com/2/paper';
 
@@ -51,16 +51,18 @@ class DropboxProvider implements CloudProviderInterface {
     _credentials = Map.from(credentials);
 
     // Support both OAuth2 flow and direct access token
-    if (credentials.containsKey('client_id') && credentials.containsKey('client_secret')) {
+    if (credentials.containsKey('client_id') &&
+        credentials.containsKey('client_secret')) {
       // OAuth2 flow setup
       _clientId = credentials['client_id'];
       _clientSecret = credentials['client_secret'];
-      _redirectUri = credentials['redirect_uri'] ?? 'http://localhost:8080/auth/callback';
-      
+      _redirectUri =
+          credentials['redirect_uri'] ?? 'http://localhost:8080/auth/callback';
+
       // Check for existing tokens
       _accessToken = credentials['access_token'];
       _refreshToken = credentials['refresh_token'];
-      
+
       if (credentials.containsKey('token_expiry')) {
         _tokenExpiryTime = DateTime.parse(credentials['token_expiry']!);
       }
@@ -69,8 +71,7 @@ class DropboxProvider implements CloudProviderInterface {
       _accessToken = credentials['access_token'];
     } else {
       throw ArgumentError(
-        'Dropbox requires either (client_id + client_secret) for OAuth2 or access_token for direct access'
-      );
+          'Dropbox requires either (client_id + client_secret) for OAuth2 or access_token for direct access');
     }
 
     _httpClient = http.Client();
@@ -140,7 +141,7 @@ class DropboxProvider implements CloudProviderInterface {
           log('DropboxProvider: Failed to revoke token: $e');
         }
       }
-      
+
       _httpClient?.close();
       _httpClient = null;
       _accessToken = null;
@@ -177,9 +178,8 @@ class DropboxProvider implements CloudProviderInterface {
       }
 
       final fileSize = await localFile.length();
-      final cleanPath = remoteFilePath.startsWith('/')
-          ? remoteFilePath
-          : '/$remoteFilePath';
+      final cleanPath =
+          remoteFilePath.startsWith('/') ? remoteFilePath : '/$remoteFilePath';
 
       // Use chunked upload for large files (>8MB)
       if (fileSize > _chunkSize) {
@@ -215,9 +215,8 @@ class DropboxProvider implements CloudProviderInterface {
         throw StateError('Not connected to Dropbox');
       }
 
-      final cleanPath = remoteFilePath.startsWith('/')
-          ? remoteFilePath
-          : '/$remoteFilePath';
+      final cleanPath =
+          remoteFilePath.startsWith('/') ? remoteFilePath : '/$remoteFilePath';
 
       log('DropboxProvider: Downloading $remoteFilePath to $localFilePath');
 
@@ -238,16 +237,16 @@ class DropboxProvider implements CloudProviderInterface {
       if (response.statusCode == 200) {
         final localFile = File(localFilePath);
         await localFile.parent.create(recursive: true);
-        
+
         // For large files, write in chunks to show progress
         if (fileSize > _chunkSize && onProgress != null) {
           final bytes = response.bodyBytes;
           final sink = localFile.openWrite();
-          
+
           try {
             const chunkSize = 64 * 1024; // 64KB write chunks
             int written = 0;
-            
+
             for (int i = 0; i < bytes.length; i += chunkSize) {
               final end = math.min(i + chunkSize, bytes.length);
               sink.add(bytes.sublist(i, end));
@@ -265,7 +264,8 @@ class DropboxProvider implements CloudProviderInterface {
         log('DropboxProvider: Successfully downloaded $remoteFilePath');
         return true;
       } else {
-        throw Exception('Download failed: ${response.statusCode} ${response.body}');
+        throw Exception(
+            'Download failed: ${response.statusCode} ${response.body}');
       }
     } catch (e) {
       _lastError = e.toString();
@@ -281,9 +281,8 @@ class DropboxProvider implements CloudProviderInterface {
         throw StateError('Not connected to Dropbox');
       }
 
-      final cleanPath = remoteFilePath.startsWith('/')
-          ? remoteFilePath
-          : '/$remoteFilePath';
+      final cleanPath =
+          remoteFilePath.startsWith('/') ? remoteFilePath : '/$remoteFilePath';
 
       log('DropboxProvider: Deleting $remoteFilePath');
 
@@ -320,9 +319,8 @@ class DropboxProvider implements CloudProviderInterface {
     try {
       if (!_isConnected || _httpClient == null) return null;
 
-      final cleanPath = remoteFilePath.startsWith('/')
-          ? remoteFilePath
-          : '/$remoteFilePath';
+      final cleanPath =
+          remoteFilePath.startsWith('/') ? remoteFilePath : '/$remoteFilePath';
 
       final response = await _makeRateLimitedRequest(() async {
         return await _httpClient!.post(
@@ -371,9 +369,8 @@ class DropboxProvider implements CloudProviderInterface {
       if (!_isConnected || _httpClient == null) return [];
 
       final path = directoryPath ?? '';
-      final cleanPath = path.isEmpty
-          ? ''
-          : (path.startsWith('/') ? path : '/$path');
+      final cleanPath =
+          path.isEmpty ? '' : (path.startsWith('/') ? path : '/$path');
 
       log('DropboxProvider: Listing files in $cleanPath (recursive: $recursive)');
 
@@ -477,7 +474,7 @@ class DropboxProvider implements CloudProviderInterface {
         final data = json.decode(response.body);
         final used = data['used'] ?? 0;
         final allocation = data['allocation'];
-        
+
         int total;
         if (allocation['.tag'] == 'individual') {
           total = allocation['allocated'] ?? 2 * 1024 * 1024 * 1024;
@@ -527,9 +524,8 @@ class DropboxProvider implements CloudProviderInterface {
     try {
       if (!_isConnected || _httpClient == null) return false;
 
-      final cleanPath = directoryPath.startsWith('/')
-          ? directoryPath
-          : '/$directoryPath';
+      final cleanPath =
+          directoryPath.startsWith('/') ? directoryPath : '/$directoryPath';
 
       log('DropboxProvider: Creating directory $cleanPath');
 
@@ -650,9 +646,8 @@ class DropboxProvider implements CloudProviderInterface {
     try {
       if (!_isConnected || _httpClient == null) return null;
 
-      final cleanPath = remoteFilePath.startsWith('/')
-          ? remoteFilePath
-          : '/$remoteFilePath';
+      final cleanPath =
+          remoteFilePath.startsWith('/') ? remoteFilePath : '/$remoteFilePath';
 
       log('DropboxProvider: Creating shareable link for $cleanPath');
 
@@ -729,14 +724,15 @@ class DropboxProvider implements CloudProviderInterface {
       );
 
       final changes = <CloudFileChange>[];
-      
+
       for (final file in files) {
         // If we have a since date, only include files modified after that date
         if (since == null || file.modifiedAt.isAfter(since)) {
           changes.add(
             CloudFileChange(
               path: file.path,
-              type: CloudChangeType.modified, // We can't distinguish between created/modified without more context
+              type: CloudChangeType
+                  .modified, // We can't distinguish between created/modified without more context
               timestamp: file.modifiedAt,
               fileInfo: file,
             ),
@@ -756,7 +752,7 @@ class DropboxProvider implements CloudProviderInterface {
   @override
   Map<String, dynamic> getConfiguration() {
     final config = Map<String, dynamic>.from(_credentials);
-    
+
     // Add current token information
     if (_accessToken != null) {
       config['access_token'] = _accessToken;
@@ -767,24 +763,24 @@ class DropboxProvider implements CloudProviderInterface {
     if (_tokenExpiryTime != null) {
       config['token_expiry'] = _tokenExpiryTime!.toIso8601String();
     }
-    
+
     return config;
   }
 
   @override
   Future<void> updateConfiguration(Map<String, dynamic> config) async {
     _credentials = Map<String, String>.from(config);
-    
+
     _accessToken = _credentials['access_token'];
     _refreshToken = _credentials['refresh_token'];
     _clientId = _credentials['client_id'];
     _clientSecret = _credentials['client_secret'];
     _redirectUri = _credentials['redirect_uri'];
-    
+
     if (_credentials.containsKey('token_expiry')) {
       _tokenExpiryTime = DateTime.parse(_credentials['token_expiry']!);
     }
-    
+
     log('DropboxProvider: Configuration updated');
   }
 
@@ -797,16 +793,16 @@ class DropboxProvider implements CloudProviderInterface {
   String? getLastError() => _lastError;
 
   // OAuth2 Methods
-  
+
   /// Generate OAuth2 authorization URL for user consent
   String getAuthorizationUrl({List<String>? scopes}) {
     if (_clientId == null || _redirectUri == null) {
       throw StateError('OAuth2 not properly configured');
     }
-    
+
     final scopeString = scopes?.join(' ') ?? '';
     final state = _generateRandomString(32);
-    
+
     final params = {
       'client_id': _clientId!,
       'response_type': 'code',
@@ -814,23 +810,24 @@ class DropboxProvider implements CloudProviderInterface {
       'state': state,
       if (scopeString.isNotEmpty) 'scope': scopeString,
     };
-    
+
     final query = params.entries
-        .map((e) => '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}')
+        .map((e) =>
+            '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}')
         .join('&');
-    
+
     return '$_oauthBaseUrl/authorize?$query';
   }
-  
+
   /// Exchange authorization code for access token
   Future<bool> exchangeAuthorizationCode(String code) async {
     try {
       if (_clientId == null || _clientSecret == null || _redirectUri == null) {
         throw StateError('OAuth2 not properly configured');
       }
-      
+
       log('DropboxProvider: Exchanging authorization code for tokens');
-      
+
       final response = await _httpClient!.post(
         Uri.parse('$_oauthBaseUrl/token'),
         headers: {
@@ -844,17 +841,17 @@ class DropboxProvider implements CloudProviderInterface {
           'redirect_uri': _redirectUri!,
         },
       );
-      
+
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         _accessToken = data['access_token'];
         _refreshToken = data['refresh_token'];
-        
+
         if (data.containsKey('expires_in')) {
           final expiresIn = data['expires_in'] as int;
           _tokenExpiryTime = DateTime.now().add(Duration(seconds: expiresIn));
         }
-        
+
         // Update credentials
         _credentials['access_token'] = _accessToken!;
         if (_refreshToken != null) {
@@ -863,11 +860,12 @@ class DropboxProvider implements CloudProviderInterface {
         if (_tokenExpiryTime != null) {
           _credentials['token_expiry'] = _tokenExpiryTime!.toIso8601String();
         }
-        
+
         log('DropboxProvider: Successfully obtained access token');
         return true;
       } else {
-        throw Exception('Token exchange failed: ${response.statusCode} ${response.body}');
+        throw Exception(
+            'Token exchange failed: ${response.statusCode} ${response.body}');
       }
     } catch (e) {
       _lastError = e.toString();
@@ -875,26 +873,26 @@ class DropboxProvider implements CloudProviderInterface {
       return false;
     }
   }
-  
+
   /// Check if token should be refreshed
   bool _shouldRefreshToken() {
     if (_tokenExpiryTime == null || _refreshToken == null) {
       return false;
     }
-    
+
     // Refresh if token expires within 5 minutes
     return DateTime.now().add(Duration(minutes: 5)).isAfter(_tokenExpiryTime!);
   }
-  
+
   /// Refresh access token using refresh token
   Future<bool> _refreshAccessToken() async {
     try {
       if (_refreshToken == null || _clientId == null || _clientSecret == null) {
         return false;
       }
-      
+
       log('DropboxProvider: Refreshing access token');
-      
+
       final response = await _httpClient!.post(
         Uri.parse('$_oauthBaseUrl/token'),
         headers: {
@@ -907,20 +905,20 @@ class DropboxProvider implements CloudProviderInterface {
           'client_secret': _clientSecret!,
         },
       );
-      
+
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         _accessToken = data['access_token'];
-        
+
         if (data.containsKey('refresh_token')) {
           _refreshToken = data['refresh_token'];
         }
-        
+
         if (data.containsKey('expires_in')) {
           final expiresIn = data['expires_in'] as int;
           _tokenExpiryTime = DateTime.now().add(Duration(seconds: expiresIn));
         }
-        
+
         // Update credentials
         _credentials['access_token'] = _accessToken!;
         if (_refreshToken != null) {
@@ -929,7 +927,7 @@ class DropboxProvider implements CloudProviderInterface {
         if (_tokenExpiryTime != null) {
           _credentials['token_expiry'] = _tokenExpiryTime!.toIso8601String();
         }
-        
+
         log('DropboxProvider: Successfully refreshed access token');
         return true;
       } else {
@@ -942,18 +940,17 @@ class DropboxProvider implements CloudProviderInterface {
       return false;
     }
   }
-  
+
   // Rate Limiting Methods
-  
+
   /// Make a rate-limited HTTP request
   Future<http.Response> _makeRateLimitedRequest(
-    Future<http.Response> Function() requestFunction
-  ) async {
+      Future<http.Response> Function() requestFunction) async {
     await _waitForRateLimit();
-    
+
     final response = await requestFunction();
     _recordRequest();
-    
+
     // Handle rate limit response
     if (response.statusCode == 429) {
       final retryAfter = response.headers['retry-after'];
@@ -964,42 +961,41 @@ class DropboxProvider implements CloudProviderInterface {
         return await _makeRateLimitedRequest(requestFunction);
       }
     }
-    
+
     return response;
   }
-  
+
   /// Wait if we're approaching rate limits
   Future<void> _waitForRateLimit() async {
     final now = DateTime.now();
-    
+
     // Remove old requests outside the window
-    _requestTimes.removeWhere(
-      (time) => now.difference(time) > _rateLimitWindow
-    );
-    
+    _requestTimes
+        .removeWhere((time) => now.difference(time) > _rateLimitWindow);
+
     // Check if we need to wait
     if (_requestTimes.length >= _burstRequestLimit) {
       final oldestRequest = _requestTimes.first;
       final waitTime = _rateLimitWindow - now.difference(oldestRequest);
-      
+
       if (waitTime.inMilliseconds > 0) {
         log('DropboxProvider: Rate limit approaching, waiting ${waitTime.inMilliseconds}ms');
         await Future.delayed(waitTime);
       }
     }
   }
-  
+
   /// Record a request for rate limiting
   void _recordRequest() {
     _requestTimes.add(DateTime.now());
-    
+
     // Keep only recent requests
     final cutoff = DateTime.now().subtract(_rateLimitWindow);
     _requestTimes.removeWhere((time) => time.isBefore(cutoff));
   }
-  
+
   // Chunked Upload Methods
-  
+
   /// Upload file using simple upload (for small files)
   Future<bool> _uploadFileSimple(
     File localFile,
@@ -1008,7 +1004,7 @@ class DropboxProvider implements CloudProviderInterface {
     Function(double progress)? onProgress,
   ) async {
     final fileContent = await localFile.readAsBytes();
-    
+
     final uploadArgs = {
       'path': remotePath,
       'mode': 'overwrite',
@@ -1016,20 +1012,22 @@ class DropboxProvider implements CloudProviderInterface {
       'mute': false,
       'strict_conflict': false,
     };
-    
+
     // Add custom metadata if provided
     if (metadata.isNotEmpty) {
       uploadArgs['property_groups'] = [
         {
           'template_id': 'meeting_summarizer_metadata',
-          'fields': metadata.entries.map((e) => {
-            'name': e.key,
-            'value': e.value.toString(),
-          }).toList(),
+          'fields': metadata.entries
+              .map((e) => {
+                    'name': e.key,
+                    'value': e.value.toString(),
+                  })
+              .toList(),
         }
       ];
     }
-    
+
     final response = await _makeRateLimitedRequest(() async {
       return await _httpClient!.post(
         Uri.parse('$_contentBaseUrl/files/upload'),
@@ -1041,7 +1039,7 @@ class DropboxProvider implements CloudProviderInterface {
         body: fileContent,
       );
     });
-    
+
     if (response.statusCode == 200) {
       if (onProgress != null) onProgress(1.0);
       log('DropboxProvider: Successfully uploaded $remotePath');
@@ -1052,7 +1050,7 @@ class DropboxProvider implements CloudProviderInterface {
       );
     }
   }
-  
+
   /// Upload file using chunked upload (for large files)
   Future<bool> _uploadFileChunked(
     File localFile,
@@ -1063,18 +1061,18 @@ class DropboxProvider implements CloudProviderInterface {
     try {
       final fileSize = await localFile.length();
       log('DropboxProvider: Starting chunked upload for $remotePath ($fileSize bytes)');
-      
+
       String? sessionId;
       int offset = 0;
       int retries = 0;
-      
+
       while (offset < fileSize && retries < _maxRetries) {
         try {
           final chunkEnd = math.min(offset + _chunkSize, fileSize);
           final chunkSize = chunkEnd - offset;
-          
+
           final chunk = await _readFileChunk(localFile, offset, chunkSize);
-          
+
           if (offset == 0) {
             // Start session
             sessionId = await _startUploadSession(chunk);
@@ -1083,7 +1081,8 @@ class DropboxProvider implements CloudProviderInterface {
             }
           } else if (chunkEnd < fileSize) {
             // Append chunk
-            final success = await _appendToUploadSession(sessionId!, chunk, offset);
+            final success =
+                await _appendToUploadSession(sessionId!, chunk, offset);
             if (!success) {
               throw Exception('Failed to append chunk at offset $offset');
             }
@@ -1100,28 +1099,28 @@ class DropboxProvider implements CloudProviderInterface {
               throw Exception('Failed to finish upload session');
             }
           }
-          
+
           offset = chunkEnd;
           retries = 0; // Reset retries on success
-          
+
           if (onProgress != null) {
             onProgress(offset / fileSize);
           }
-          
+
           log('DropboxProvider: Uploaded chunk $offset/$fileSize bytes');
         } catch (e) {
           retries++;
           log('DropboxProvider: Chunk upload failed (retry $retries/$_maxRetries): $e');
-          
+
           if (retries >= _maxRetries) {
             rethrow;
           }
-          
+
           // Exponential backoff
           await Future.delayed(Duration(seconds: math.pow(2, retries).toInt()));
         }
       }
-      
+
       log('DropboxProvider: Successfully completed chunked upload for $remotePath');
       return true;
     } catch (e) {
@@ -1129,7 +1128,7 @@ class DropboxProvider implements CloudProviderInterface {
       return false;
     }
   }
-  
+
   /// Read a chunk of file data
   Future<Uint8List> _readFileChunk(File file, int offset, int length) async {
     final randomAccessFile = await file.open();
@@ -1140,7 +1139,7 @@ class DropboxProvider implements CloudProviderInterface {
       await randomAccessFile.close();
     }
   }
-  
+
   /// Start an upload session
   Future<String?> _startUploadSession(Uint8List chunk) async {
     final response = await _makeRateLimitedRequest(() async {
@@ -1154,15 +1153,15 @@ class DropboxProvider implements CloudProviderInterface {
         body: chunk,
       );
     });
-    
+
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
       return data['session_id'];
     }
-    
+
     return null;
   }
-  
+
   /// Append data to an upload session
   Future<bool> _appendToUploadSession(
     String sessionId,
@@ -1186,10 +1185,10 @@ class DropboxProvider implements CloudProviderInterface {
         body: chunk,
       );
     });
-    
+
     return response.statusCode == 200;
   }
-  
+
   /// Finish an upload session
   Future<bool> _finishUploadSession(
     String sessionId,
@@ -1211,21 +1210,23 @@ class DropboxProvider implements CloudProviderInterface {
         'strict_conflict': false,
       },
     };
-    
+
     // Add custom metadata if provided
     if (metadata.isNotEmpty) {
       final commit = commitArgs['commit'] as Map<String, dynamic>;
       commit['property_groups'] = [
         {
           'template_id': 'meeting_summarizer_metadata',
-          'fields': metadata.entries.map((e) => {
-            'name': e.key,
-            'value': e.value.toString(),
-          }).toList(),
+          'fields': metadata.entries
+              .map((e) => {
+                    'name': e.key,
+                    'value': e.value.toString(),
+                  })
+              .toList(),
         }
       ];
     }
-    
+
     final response = await _makeRateLimitedRequest(() async {
       return await _httpClient!.post(
         Uri.parse('$_contentBaseUrl/files/upload_session/finish'),
@@ -1237,12 +1238,12 @@ class DropboxProvider implements CloudProviderInterface {
         body: chunk,
       );
     });
-    
+
     return response.statusCode == 200;
   }
-  
+
   // Paper Integration Methods
-  
+
   /// Create a Paper document from transcript
   Future<String?> createPaperDocument({
     required String title,
@@ -1251,11 +1252,11 @@ class DropboxProvider implements CloudProviderInterface {
   }) async {
     try {
       if (!_isConnected || _httpClient == null) return null;
-      
+
       log('DropboxProvider: Creating Paper document: $title');
-      
+
       final paperContent = _formatContentForPaper(content);
-      
+
       final response = await _makeRateLimitedRequest(() async {
         return await _httpClient!.post(
           Uri.parse('$_paperBaseUrl/docs/create'),
@@ -1266,11 +1267,11 @@ class DropboxProvider implements CloudProviderInterface {
           }),
         );
       });
-      
+
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         final docId = data['doc_id'];
-        
+
         // Update the document with content
         final updated = await _updatePaperDocument(docId, title, paperContent);
         if (updated) {
@@ -1278,7 +1279,7 @@ class DropboxProvider implements CloudProviderInterface {
           return docId;
         }
       }
-      
+
       return null;
     } catch (e) {
       _lastError = e.toString();
@@ -1286,7 +1287,7 @@ class DropboxProvider implements CloudProviderInterface {
       return null;
     }
   }
-  
+
   /// Update a Paper document
   Future<bool> _updatePaperDocument(
     String docId,
@@ -1306,19 +1307,19 @@ class DropboxProvider implements CloudProviderInterface {
           }),
         );
       });
-      
+
       return response.statusCode == 200;
     } catch (e) {
       log('DropboxProvider: Failed to update Paper document: $e');
       return false;
     }
   }
-  
+
   /// Get Paper document content
   Future<String?> getPaperDocumentContent(String docId) async {
     try {
       if (!_isConnected || _httpClient == null) return null;
-      
+
       final response = await _makeRateLimitedRequest(() async {
         return await _httpClient!.post(
           Uri.parse('$_paperBaseUrl/docs/download'),
@@ -1329,11 +1330,11 @@ class DropboxProvider implements CloudProviderInterface {
           }),
         );
       });
-      
+
       if (response.statusCode == 200) {
         return response.body;
       }
-      
+
       return null;
     } catch (e) {
       _lastError = e.toString();
@@ -1341,7 +1342,7 @@ class DropboxProvider implements CloudProviderInterface {
       return null;
     }
   }
-  
+
   /// List Paper documents
   Future<List<Map<String, dynamic>>> listPaperDocuments({
     String? folderId,
@@ -1349,7 +1350,7 @@ class DropboxProvider implements CloudProviderInterface {
   }) async {
     try {
       if (!_isConnected || _httpClient == null) return [];
-      
+
       final response = await _makeRateLimitedRequest(() async {
         return await _httpClient!.post(
           Uri.parse('$_paperBaseUrl/docs/list'),
@@ -1362,12 +1363,12 @@ class DropboxProvider implements CloudProviderInterface {
           }),
         );
       });
-      
+
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         return List<Map<String, dynamic>>.from(data['doc_ids'] ?? []);
       }
-      
+
       return [];
     } catch (e) {
       _lastError = e.toString();
@@ -1375,19 +1376,19 @@ class DropboxProvider implements CloudProviderInterface {
       return [];
     }
   }
-  
+
   /// Format content for Paper (Markdown)
   String _formatContentForPaper(String content) {
     // Basic formatting for Paper documents
     final lines = content.split('\n');
     final formatted = StringBuffer();
-    
+
     for (final line in lines) {
       if (line.trim().isEmpty) {
         formatted.writeln();
         continue;
       }
-      
+
       // Convert timestamps to bold
       if (RegExp(r'^\d{2}:\d{2}').hasMatch(line.trim())) {
         formatted.writeln('**${line.trim()}**');
@@ -1395,22 +1396,23 @@ class DropboxProvider implements CloudProviderInterface {
         formatted.writeln(line);
       }
     }
-    
+
     return formatted.toString();
   }
-  
+
   // Helper Methods
-  
+
   Map<String, String> _getAuthHeaders() {
     return {
       'Authorization': 'Bearer $_accessToken',
       'Content-Type': 'application/json',
     };
   }
-  
+
   /// Generate a random string for OAuth2 state parameter
   String _generateRandomString(int length) {
-    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const chars =
+        'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     final random = math.Random();
     return String.fromCharCodes(
       Iterable.generate(
@@ -1419,11 +1421,11 @@ class DropboxProvider implements CloudProviderInterface {
       ),
     );
   }
-  
+
   /// Get MIME type from file extension
   String? _getMimeTypeFromExtension(String fileName) {
     final extension = fileName.split('.').last.toLowerCase();
-    
+
     final mimeTypes = {
       'txt': 'text/plain',
       'md': 'text/markdown',
@@ -1433,36 +1435,37 @@ class DropboxProvider implements CloudProviderInterface {
       'mp4': 'video/mp4',
       'pdf': 'application/pdf',
       'doc': 'application/msword',
-      'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'docx':
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
       'jpg': 'image/jpeg',
       'jpeg': 'image/jpeg',
       'png': 'image/png',
       'gif': 'image/gif',
     };
-    
+
     return mimeTypes[extension];
   }
-  
+
   // Public methods for external OAuth2 management
-  
+
   /// Check if OAuth2 is configured
   bool get isOAuth2Configured => _clientId != null && _clientSecret != null;
-  
+
   /// Get current access token
   String? get accessToken => _accessToken;
-  
+
   /// Get current refresh token
   String? get refreshToken => _refreshToken;
-  
+
   /// Get token expiry time
   DateTime? get tokenExpiryTime => _tokenExpiryTime;
-  
+
   /// Check if token is expired
   bool get isTokenExpired {
     if (_tokenExpiryTime == null) return false;
     return DateTime.now().isAfter(_tokenExpiryTime!);
   }
-  
+
   /// Manually refresh token (public method)
   Future<bool> refreshAccessToken() => _refreshAccessToken();
 }

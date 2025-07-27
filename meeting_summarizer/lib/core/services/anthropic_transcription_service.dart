@@ -19,7 +19,7 @@ class AnthropicTranscriptionService implements TranscriptionServiceInterface {
   bool _isDisposed = false;
 
   AnthropicTranscriptionService({ApiKeyService? apiKeyService})
-    : _apiKeyService = apiKeyService ?? ApiKeyService();
+      : _apiKeyService = apiKeyService ?? ApiKeyService();
 
   @override
   Future<void> initialize() async {

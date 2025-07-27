@@ -149,9 +149,8 @@ class DatabasePerformanceService {
       results['new_performance_score'] = _calculatePerformanceScore(newStats);
 
       final endTime = DateTime.now();
-      results['total_optimization_time_ms'] = endTime
-          .difference(startTime)
-          .inMilliseconds;
+      results['total_optimization_time_ms'] =
+          endTime.difference(startTime).inMilliseconds;
       results['success'] = true;
 
       log('DatabasePerformanceService: Optimization completed successfully');
@@ -199,9 +198,8 @@ class DatabasePerformanceService {
 
       // Benchmark metadata
       final endTime = DateTime.now();
-      benchmarkResults['benchmark_duration_ms'] = endTime
-          .difference(startTime)
-          .inMilliseconds;
+      benchmarkResults['benchmark_duration_ms'] =
+          endTime.difference(startTime).inMilliseconds;
       benchmarkResults['iterations'] = iterations;
       benchmarkResults['timestamp'] = endTime.toIso8601String();
       benchmarkResults['success'] = true;
@@ -630,9 +628,8 @@ class DatabasePerformanceService {
       await Future.wait(futures);
 
       final endTime = DateTime.now();
-      stressResults['concurrent_queries_duration_ms'] = endTime
-          .difference(startTime)
-          .inMilliseconds;
+      stressResults['concurrent_queries_duration_ms'] =
+          endTime.difference(startTime).inMilliseconds;
       stressResults['success'] = true;
 
       return stressResults;

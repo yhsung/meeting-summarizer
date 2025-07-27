@@ -39,8 +39,7 @@ class AudioFormatManager {
     int? maxFileSizeMB,
     Duration? expectedDuration,
   }) {
-    final isSpeech =
-        recordingType.toLowerCase().contains('speech') ||
+    final isSpeech = recordingType.toLowerCase().contains('speech') ||
         recordingType.toLowerCase().contains('voice') ||
         recordingType.toLowerCase().contains('meeting');
 
@@ -102,8 +101,7 @@ class AudioFormatManager {
     required String recordingType,
     required AudioFormat format,
   }) {
-    final isSpeech =
-        recordingType.toLowerCase().contains('speech') ||
+    final isSpeech = recordingType.toLowerCase().contains('speech') ||
         recordingType.toLowerCase().contains('voice') ||
         recordingType.toLowerCase().contains('meeting');
 
@@ -119,8 +117,7 @@ class AudioFormatManager {
     required AudioQuality quality,
     required String recordingType,
   }) {
-    final isSpeech =
-        recordingType.toLowerCase().contains('speech') ||
+    final isSpeech = recordingType.toLowerCase().contains('speech') ||
         recordingType.toLowerCase().contains('voice') ||
         recordingType.toLowerCase().contains('meeting');
 

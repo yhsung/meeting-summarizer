@@ -107,7 +107,6 @@ class FeedbackUIHelper {
               ),
             ),
             const SizedBox(height: 16),
-
             ListTile(
               leading: const Icon(Icons.star_outline),
               title: const Text('Rate This App'),
@@ -118,9 +117,7 @@ class FeedbackUIHelper {
                 await provider.checkAndShowRatingPrompt(context);
               },
             ),
-
             const Divider(),
-
             ListTile(
               leading: const Icon(Icons.bug_report_outlined),
               title: const Text('Report a Bug'),
@@ -130,9 +127,7 @@ class FeedbackUIHelper {
                 _navigateToFeedbackForm(context, FeedbackType.bugReport);
               },
             ),
-
             const Divider(),
-
             ListTile(
               leading: const Icon(Icons.lightbulb_outline),
               title: const Text('Request a Feature'),
@@ -142,9 +137,7 @@ class FeedbackUIHelper {
                 _navigateToFeedbackForm(context, FeedbackType.featureRequest);
               },
             ),
-
             const Divider(),
-
             ListTile(
               leading: const Icon(Icons.feedback_outlined),
               title: const Text('General Feedback'),

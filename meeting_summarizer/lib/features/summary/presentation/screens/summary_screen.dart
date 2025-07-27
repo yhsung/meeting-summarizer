@@ -109,8 +109,8 @@ class _SummaryScreenState extends State<SummaryScreen>
 
     _slideAnimation =
         Tween<Offset>(begin: const Offset(0.0, 0.3), end: Offset.zero).animate(
-          CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic),
-        );
+      CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic),
+    );
   }
 
   Future<void> _initializeAndLoadData() async {
@@ -532,9 +532,8 @@ class _SummaryScreenState extends State<SummaryScreen>
                           Text(
                             summary.type.displayName,
                             style: TextStyle(
-                              color: isSelected
-                                  ? Colors.white
-                                  : Colors.grey[600],
+                              color:
+                                  isSelected ? Colors.white : Colors.grey[600],
                               fontSize: 12,
                             ),
                             textAlign: TextAlign.center,

@@ -61,7 +61,7 @@ class EnhancedNotificationsService {
 
   /// Callbacks for notification actions
   void Function(NotificationActionType action, Map<String, dynamic>? data)?
-  onNotificationAction;
+      onNotificationAction;
   void Function(int id, String? payload)? onNotificationTapped;
 
   /// Initialize the enhanced notifications service
@@ -130,10 +130,9 @@ class EnhancedNotificationsService {
     if (!Platform.isAndroid) return;
 
     try {
-      final androidPlugin = _notificationsPlugin
-          .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin
-          >();
+      final androidPlugin =
+          _notificationsPlugin.resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin>();
 
       if (androidPlugin == null) return;
 
@@ -170,16 +169,14 @@ class EnhancedNotificationsService {
       bool? granted = false;
 
       if (Platform.isAndroid) {
-        final androidPlugin = _notificationsPlugin
-            .resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin
-            >();
+        final androidPlugin =
+            _notificationsPlugin.resolvePlatformSpecificImplementation<
+                AndroidFlutterLocalNotificationsPlugin>();
         granted = await androidPlugin?.requestNotificationsPermission();
       } else if (Platform.isIOS) {
-        final iosPlugin = _notificationsPlugin
-            .resolvePlatformSpecificImplementation<
-              IOSFlutterLocalNotificationsPlugin
-            >();
+        final iosPlugin =
+            _notificationsPlugin.resolvePlatformSpecificImplementation<
+                IOSFlutterLocalNotificationsPlugin>();
         granted = await iosPlugin?.requestPermissions(
           alert: true,
           badge: true,
@@ -187,10 +184,9 @@ class EnhancedNotificationsService {
           critical: false,
         );
       } else if (Platform.isMacOS) {
-        final macosPlugin = _notificationsPlugin
-            .resolvePlatformSpecificImplementation<
-              MacOSFlutterLocalNotificationsPlugin
-            >();
+        final macosPlugin =
+            _notificationsPlugin.resolvePlatformSpecificImplementation<
+                MacOSFlutterLocalNotificationsPlugin>();
         granted = await macosPlugin?.requestPermissions(
           alert: true,
           badge: true,
@@ -230,8 +226,8 @@ class EnhancedNotificationsService {
       final body = meetingTitle != null
           ? '$meetingTitle${duration != null ? ' • ${_formatDuration(duration)}' : ''}'
           : duration != null
-          ? 'Duration: ${_formatDuration(duration)}'
-          : 'Meeting recording';
+              ? 'Duration: ${_formatDuration(duration)}'
+              : 'Meeting recording';
 
       final actions = _getRecordingActions(isRecording, isPaused);
 
@@ -266,15 +262,14 @@ class EnhancedNotificationsService {
     if (!isAvailable) return;
 
     try {
-      final title = isTranscribing
-          ? 'Transcribing Audio'
-          : 'Transcription Complete';
+      final title =
+          isTranscribing ? 'Transcribing Audio' : 'Transcription Complete';
 
       final body = isTranscribing
           ? '${(progress * 100).toInt()}% • ${status ?? 'Processing...'}'
           : fileName != null
-          ? 'Transcription ready for $fileName'
-          : 'Transcription completed successfully';
+              ? 'Transcription ready for $fileName'
+              : 'Transcription completed successfully';
 
       final actions = isTranscribing
           ? <NotificationActionType>[]
@@ -320,14 +315,14 @@ class EnhancedNotificationsService {
       final title = isGenerating
           ? 'Generating Summary'
           : completed
-          ? 'Summary Ready'
-          : 'Summary Generation Failed';
+              ? 'Summary Ready'
+              : 'Summary Generation Failed';
 
       final body = isGenerating
           ? 'Creating ${summaryType ?? 'summary'} for ${fileName ?? 'recording'}'
           : completed
-          ? 'AI summary generated successfully'
-          : 'Failed to generate summary';
+              ? 'AI summary generated successfully'
+              : 'Failed to generate summary';
 
       final actions = completed
           ? [

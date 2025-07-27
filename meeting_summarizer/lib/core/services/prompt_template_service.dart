@@ -50,8 +50,7 @@ Your summaries should be professional, concise, and actionable.''';
 
   /// Get base prompt instructions
   static String _getBasePrompt(SummarizationConfiguration configuration) {
-    final wordRange =
-        configuration.summaryLength == SummaryLength.custom &&
+    final wordRange = configuration.summaryLength == SummaryLength.custom &&
             configuration.customWordCount != null
         ? '${configuration.customWordCount} words'
         : configuration.summaryLength.wordCountRange;

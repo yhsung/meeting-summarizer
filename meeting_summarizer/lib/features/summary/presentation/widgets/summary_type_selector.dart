@@ -67,9 +67,8 @@ class SummaryTypeSelector extends StatelessWidget {
                           }
                         }
                       : null,
-                  backgroundColor: isSelected
-                      ? Theme.of(context).primaryColor
-                      : null,
+                  backgroundColor:
+                      isSelected ? Theme.of(context).primaryColor : null,
                   selectedColor: Theme.of(context).primaryColor,
                   checkmarkColor: Theme.of(context).colorScheme.onPrimary,
                 );
@@ -79,9 +78,9 @@ class SummaryTypeSelector extends StatelessWidget {
             Text(
               _getDescriptionForType(selectedType),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Colors.grey[600],
-                fontStyle: FontStyle.italic,
-              ),
+                    color: Colors.grey[600],
+                    fontStyle: FontStyle.italic,
+                  ),
             ),
           ],
         ),

@@ -15,12 +15,12 @@ class AdvancedSearchService {
   final Map<String, List<String>> _savedSearches = {};
 
   AdvancedSearchService.basic(StorageOrganizationService service)
-    : _basicService = service,
-      _enhancedService = null;
+      : _basicService = service,
+        _enhancedService = null;
 
   AdvancedSearchService.enhanced(EnhancedStorageOrganizationService service)
-    : _basicService = null,
-      _enhancedService = service;
+      : _basicService = null,
+        _enhancedService = service;
 
   /// Perform comprehensive search with ranking and advanced filtering
   Future<SearchResult> search(SearchQuery query) async {
@@ -92,9 +92,9 @@ class AdvancedSearchService {
     // Add suggestions from file categorization service
     final categoryBasedSuggestions =
         FileCategorizationService.getSearchSuggestions(
-          allFiles,
-          currentQuery: currentQuery,
-        );
+      allFiles,
+      currentQuery: currentQuery,
+    );
     suggestions.addAll(categoryBasedSuggestions);
 
     // Add suggestions from search history
@@ -149,9 +149,9 @@ class AdvancedSearchService {
       text: data[0].isNotEmpty ? data[0] : null,
       categories: data[1].isNotEmpty
           ? data[1]
-                .split(',')
-                .map((c) => FileCategory.values.byName(c))
-                .toList()
+              .split(',')
+              .map((c) => FileCategory.values.byName(c))
+              .toList()
           : null,
       tags: data[2].isNotEmpty ? data[2].split(',') : null,
       dateRange: data[3].isNotEmpty && data[4].isNotEmpty
@@ -251,9 +251,8 @@ class AdvancedSearchService {
     }
 
     // Boost score for newer files
-    final daysSinceCreation = DateTime.now()
-        .difference(metadata.createdAt)
-        .inDays;
+    final daysSinceCreation =
+        DateTime.now().difference(metadata.createdAt).inDays;
     if (daysSinceCreation < 7) {
       score += 10.0;
     } else if (daysSinceCreation < 30) {
@@ -380,9 +379,8 @@ class AdvancedSearchService {
     suggestions.addAll(popularTags);
 
     // Add category suggestions
-    final categories = results
-        .map((r) => r.category.displayName.toLowerCase())
-        .toSet();
+    final categories =
+        results.map((r) => r.category.displayName.toLowerCase()).toSet();
     suggestions.addAll(categories.take(3));
 
     return suggestions.toList();

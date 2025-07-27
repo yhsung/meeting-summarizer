@@ -72,8 +72,8 @@ class _SummaryViewerState extends State<SummaryViewer> {
                 Text(
                   widget.summary.type.displayName,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
                 Text(
                   'Generated on ${_formatDate(widget.summary.createdAt)}',
@@ -185,9 +185,9 @@ class _SummaryViewerState extends State<SummaryViewer> {
         Text(
           'Summary',
           style: Theme.of(context).textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: Theme.of(context).primaryColor,
-          ),
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).primaryColor,
+              ),
         ),
         const SizedBox(height: 8),
         Container(
@@ -217,9 +217,9 @@ class _SummaryViewerState extends State<SummaryViewer> {
         Text(
           'Key Points',
           style: Theme.of(context).textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: Theme.of(context).primaryColor,
-          ),
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).primaryColor,
+              ),
         ),
         const SizedBox(height: 8),
         Container(
@@ -294,9 +294,9 @@ class _SummaryViewerState extends State<SummaryViewer> {
           Text(
             'Sentiment: $sentimentText',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: sentimentColor,
-              fontWeight: FontWeight.w500,
-            ),
+                  color: sentimentColor,
+                  fontWeight: FontWeight.w500,
+                ),
           ),
         ],
       ),
@@ -377,9 +377,9 @@ class _SummaryViewerState extends State<SummaryViewer> {
                 Text(
                   label,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.grey[600],
-                    fontSize: 11,
-                  ),
+                        color: Colors.grey[600],
+                        fontSize: 11,
+                      ),
                 ),
                 Text(
                   value,

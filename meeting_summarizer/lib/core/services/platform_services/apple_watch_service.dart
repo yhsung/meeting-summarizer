@@ -41,7 +41,7 @@ class AppleWatchService {
 
   /// Callback for handling watch actions
   void Function(WatchAction action, Map<String, dynamic>? parameters)?
-  onWatchAction;
+      onWatchAction;
 
   /// Initialize the Apple Watch service
   Future<bool> initialize() async {

@@ -102,7 +102,7 @@ void main() {
     group('Configuration Tests', () {
       test('should store and retrieve configuration', () async {
         await provider.initialize(testCredentials);
-        
+
         final config = provider.getConfiguration();
         expect(config['containerId'], equals(testCredentials['containerId']));
         expect(config['enableBackgroundSync'], equals('true'));
@@ -110,14 +110,14 @@ void main() {
 
       test('should update configuration', () async {
         await provider.initialize(testCredentials);
-        
+
         final newConfig = {
           'containerId': 'iCloud.com.example.newapp',
           'enableBackgroundSync': 'false',
         };
-        
+
         await provider.updateConfiguration(newConfig);
-        
+
         final updatedConfig = provider.getConfiguration();
         expect(updatedConfig['containerId'], equals(newConfig['containerId']));
         expect(updatedConfig['enableBackgroundSync'], equals('false'));
@@ -127,14 +127,14 @@ void main() {
     group('Background Sync Tests', () {
       test('should handle background sync enable/disable', () async {
         await provider.initialize(testCredentials);
-        
+
         // Background sync should be enabled by default based on credentials
         expect(provider.isBackgroundSyncEnabled(), isTrue);
-        
+
         // Disable background sync
         await provider.setBackgroundSyncEnabled(false);
         expect(provider.isBackgroundSyncEnabled(), isFalse);
-        
+
         // Re-enable background sync
         await provider.setBackgroundSyncEnabled(true);
         expect(provider.isBackgroundSyncEnabled(), isTrue);
@@ -142,14 +142,14 @@ void main() {
 
       test('should track pending operations', () async {
         await provider.initialize(testCredentials);
-        
+
         // Initially no pending operations
         expect(provider.getPendingOperationsCount(), equals(0));
       });
 
       test('should track conflicted files', () async {
         await provider.initialize(testCredentials);
-        
+
         // Initially no conflicted files
         expect(provider.getConflictedFiles(), isEmpty);
       });
@@ -158,7 +158,7 @@ void main() {
     group('Storage Quota Tests', () {
       test('should return default quota when disconnected', () async {
         final quota = await provider.getStorageQuota();
-        
+
         expect(quota.provider, equals(CloudProvider.icloud));
         expect(quota.totalBytes, equals(5 * 1024 * 1024 * 1024)); // 5GB
         expect(quota.usedBytes, equals(0));
@@ -169,7 +169,7 @@ void main() {
     group('File Operations Tests', () {
       test('should fail operations when not connected', () async {
         await provider.initialize(testCredentials);
-        
+
         expect(
           await provider.uploadFile(
             localFilePath: '/test/file.txt',
@@ -177,7 +177,7 @@ void main() {
           ),
           isFalse,
         );
-        
+
         expect(
           await provider.downloadFile(
             remoteFilePath: 'remote/file.txt',
@@ -185,7 +185,7 @@ void main() {
           ),
           isFalse,
         );
-        
+
         expect(await provider.deleteFile('remote/file.txt'), isFalse);
         expect(await provider.fileExists('remote/file.txt'), isFalse);
       });
@@ -194,23 +194,23 @@ void main() {
     group('Document Picker Integration Tests', () {
       test('should handle document picker methods when disconnected', () async {
         await provider.initialize(testCredentials);
-        
+
         // These methods should handle disconnected state gracefully
         expect(
           await provider.importFilesToiCloud(),
           isNull,
         );
-        
+
         expect(
           await provider.exportFilesFromiCloud(),
           isNull,
         );
-        
+
         expect(
           await provider.browseICloudDrive(),
           isNull,
         );
-        
+
         expect(
           await provider.createICloudFolder('test-folder'),
           isFalse,
@@ -219,8 +219,9 @@ void main() {
 
       test('should return empty sync status when disconnected', () async {
         await provider.initialize(testCredentials);
-        
-        final syncStatus = await provider.getICloudSyncStatus(['file1.txt', 'file2.txt']);
+
+        final syncStatus =
+            await provider.getICloudSyncStatus(['file1.txt', 'file2.txt']);
         expect(syncStatus, isEmpty);
       });
     });
@@ -228,7 +229,7 @@ void main() {
     group('Error Handling Tests', () {
       test('should handle connection failures gracefully', () async {
         await provider.initialize(testCredentials);
-        
+
         // Connection should fail in test environment (no actual iCloud)
         final connected = await provider.connect();
         expect(connected, isFalse);
@@ -237,7 +238,7 @@ void main() {
 
       test('should handle test connection', () async {
         await provider.initialize(testCredentials);
-        
+
         // Test connection should fail in test environment
         final testResult = await provider.testConnection();
         expect(testResult, isFalse);
@@ -247,9 +248,9 @@ void main() {
     group('Disconnect and Cleanup Tests', () {
       test('should clean up resources on disconnect', () async {
         await provider.initialize(testCredentials);
-        
+
         await provider.disconnect();
-        
+
         expect(await provider.isConnected(), isFalse);
         expect(provider.getPendingOperationsCount(), equals(0));
         expect(provider.getConflictedFiles(), isEmpty);
@@ -269,7 +270,7 @@ void main() {
         expect(syncStatus.isUploaded, isTrue);
         expect(syncStatus.isSyncing, isFalse);
         expect(syncStatus.statusDescription, equals('Synced'));
-        
+
         final json = syncStatus.toJson();
         expect(json['isUploaded'], isTrue);
         expect(json['statusDescription'], equals('Synced'));
@@ -316,26 +317,26 @@ void main() {
     group('Integration Tests', () {
       test('should handle complete workflow simulation', () async {
         await provider.initialize(testCredentials);
-        
+
         // Verify initial state
         expect(await provider.isConnected(), isFalse);
         expect(provider.isBackgroundSyncEnabled(), isTrue);
-        
+
         // Try to connect (will fail in test environment)
         final connected = await provider.connect();
         expect(connected, isFalse);
-        
+
         // Verify error handling
         expect(provider.getLastError(), isNotNull);
-        
+
         // Test configuration management
         final originalConfig = provider.getConfiguration();
         expect(originalConfig['containerId'], isNotNull);
-        
+
         // Test background sync controls
         await provider.setBackgroundSyncEnabled(false);
         expect(provider.isBackgroundSyncEnabled(), isFalse);
-        
+
         // Clean up
         await provider.disconnect();
         expect(await provider.isConnected(), isFalse);

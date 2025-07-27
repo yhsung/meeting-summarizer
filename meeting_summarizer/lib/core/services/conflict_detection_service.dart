@@ -137,9 +137,8 @@ class ConflictDetectionService {
 
       // Check each unique file path for conflicts
       for (final filePath in allFilePaths) {
-        final localFilePath = localDirectory != null
-            ? '$localDirectory/$filePath'
-            : null;
+        final localFilePath =
+            localDirectory != null ? '$localDirectory/$filePath' : null;
 
         final fileConflicts = await detectFileConflicts(
           filePath: filePath,
@@ -358,10 +357,9 @@ class ConflictDetectionService {
     if (local.size != remote.size) return false;
 
     // Consider files identical if modified within 1 second of each other
-    final timeDifference =
-        (local.modifiedAt.millisecondsSinceEpoch -
-                remote.modifiedAt.millisecondsSinceEpoch)
-            .abs();
+    final timeDifference = (local.modifiedAt.millisecondsSinceEpoch -
+            remote.modifiedAt.millisecondsSinceEpoch)
+        .abs();
     if (timeDifference > 1000) return false;
 
     // Compare checksums if available
@@ -400,10 +398,9 @@ class ConflictDetectionService {
     FileVersion local,
     FileVersion remote,
   ) {
-    final timeDifference =
-        (local.modifiedAt.millisecondsSinceEpoch -
-                remote.modifiedAt.millisecondsSinceEpoch)
-            .abs();
+    final timeDifference = (local.modifiedAt.millisecondsSinceEpoch -
+            remote.modifiedAt.millisecondsSinceEpoch)
+        .abs();
 
     // Recent simultaneous modifications are high severity
     if (timeDifference < Duration(minutes: 5).inMilliseconds) {

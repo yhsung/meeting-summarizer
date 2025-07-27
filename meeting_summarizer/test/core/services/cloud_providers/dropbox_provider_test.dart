@@ -93,7 +93,8 @@ void main() {
           scopes: ['files.metadata.read', 'files.content.read'],
         );
 
-        expect(authUrl, contains('scope=files.metadata.read%20files.content.read'));
+        expect(authUrl,
+            contains('scope=files.metadata.read%20files.content.read'));
       });
 
       test('should handle OAuth2 configuration check', () {
@@ -195,7 +196,7 @@ void main() {
     group('Error State Management', () {
       test('should track last error', () {
         expect(dropboxProvider.getLastError(), isNull);
-        
+
         // After an error occurs, getLastError should return the error message
         // This would require simulating an actual error condition
       });
@@ -203,7 +204,7 @@ void main() {
       test('should handle disconnection', () async {
         final credentials = {'access_token': 'test_token'};
         await dropboxProvider.initialize(credentials);
-        
+
         await dropboxProvider.disconnect();
         expect(await dropboxProvider.isConnected(), isFalse);
         expect(dropboxProvider.accessToken, isNull);
@@ -230,7 +231,8 @@ void main() {
         await dropboxProvider.initialize(credentials);
       }
 
-      test('should handle file existence check with disconnected state', () async {
+      test('should handle file existence check with disconnected state',
+          () async {
         // When not connected, operations should fail gracefully
         final exists = await dropboxProvider.fileExists('/test.txt');
         expect(exists, isFalse);
@@ -246,7 +248,8 @@ void main() {
         expect(files, isEmpty);
       });
 
-      test('should handle shareable link creation with disconnected state', () async {
+      test('should handle shareable link creation with disconnected state',
+          () async {
         final link = await dropboxProvider.getShareableLink('/test.txt');
         expect(link, isNull);
       });
@@ -263,7 +266,8 @@ void main() {
         await dropboxProvider.initialize(credentials);
       }
 
-      test('should handle Paper document creation with disconnected state', () async {
+      test('should handle Paper document creation with disconnected state',
+          () async {
         final docId = await dropboxProvider.createPaperDocument(
           title: 'Test Document',
           content: 'Test content',
@@ -271,12 +275,16 @@ void main() {
         expect(docId, isNull);
       });
 
-      test('should handle Paper document content retrieval with disconnected state', () async {
-        final content = await dropboxProvider.getPaperDocumentContent('doc_123');
+      test(
+          'should handle Paper document content retrieval with disconnected state',
+          () async {
+        final content =
+            await dropboxProvider.getPaperDocumentContent('doc_123');
         expect(content, isNull);
       });
 
-      test('should handle Paper document listing with disconnected state', () async {
+      test('should handle Paper document listing with disconnected state',
+          () async {
         final docs = await dropboxProvider.listPaperDocuments();
         expect(docs, isEmpty);
       });
@@ -292,7 +300,8 @@ void main() {
 
       test('should validate OAuth2 token exchange requirements', () async {
         // The method returns false for invalid configurations rather than throwing
-        final result = await dropboxProvider.exchangeAuthorizationCode('test_code');
+        final result =
+            await dropboxProvider.exchangeAuthorizationCode('test_code');
         expect(result, isFalse);
       });
     });

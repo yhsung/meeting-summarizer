@@ -143,8 +143,7 @@ class PrivacyControlService extends ChangeNotifier {
         type: PrivacyControlType.dataDeletion,
         enabled: true,
         timestamp: DateTime.now(),
-        reason:
-            reason ??
+        reason: reason ??
             'Data retention period changed from $oldPeriod to $period',
       ),
     );

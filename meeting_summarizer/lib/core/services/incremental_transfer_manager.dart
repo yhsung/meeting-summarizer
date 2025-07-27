@@ -401,8 +401,8 @@ class IncrementalTransferManager {
               provider: transferOp.provider,
               direction: transferOp.direction,
               progressPercentage: progress * 100,
-              bytesTransferred: (transferOp.fileChange!.changeSize * progress)
-                  .round(),
+              bytesTransferred:
+                  (transferOp.fileChange!.changeSize * progress).round(),
               totalBytes: transferOp.fileChange!.changeSize,
               transferSpeed: _calculateTransferSpeed(transferOp),
               estimatedTimeRemaining: _calculateETA([transferOp]),

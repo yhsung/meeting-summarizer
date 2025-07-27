@@ -26,7 +26,7 @@ enum TranscriptionProvider {
 /// Factory for creating transcription service instances
 class TranscriptionServiceFactory {
   static final Map<TranscriptionProvider, TranscriptionServiceInterface>
-  _instances = {};
+      _instances = {};
   static final ApiKeyService _apiKeyService = ApiKeyService();
 
   /// Get a transcription service instance
@@ -114,7 +114,7 @@ class TranscriptionServiceFactory {
   ///
   /// Returns a map of providers to their availability status
   static Future<Map<TranscriptionProvider, bool>>
-  checkServiceAvailability() async {
+      checkServiceAvailability() async {
     final availability = <TranscriptionProvider, bool>{};
 
     for (final provider in TranscriptionProvider.values) {
@@ -298,7 +298,7 @@ class ServiceCapabilities {
   final int supportedLanguages;
   final List<String> qualityLevels;
   final double
-  averageProcessingSpeed; // Multiplier of real-time (1.0 = real-time)
+      averageProcessingSpeed; // Multiplier of real-time (1.0 = real-time)
   final double costPerMinute; // Cost in USD per minute
 
   const ServiceCapabilities({

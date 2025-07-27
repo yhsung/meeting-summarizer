@@ -84,8 +84,7 @@ class TopicalSummaryProcessor extends SummaryTypeProcessor {
         createdAt: DateTime.now(),
         sourceTranscriptionId: sessionId ?? _uuid.v4(),
         metadata: SummarizationMetadata(
-          totalTokens:
-              (transcriptionText.length / 4).ceil() +
+          totalTokens: (transcriptionText.length / 4).ceil() +
               (summaryContent.length / 4).ceil(),
           promptTokens: (transcriptionText.length / 4).ceil(),
           completionTokens: (summaryContent.length / 4).ceil(),
@@ -96,7 +95,7 @@ class TopicalSummaryProcessor extends SummaryTypeProcessor {
             'topic_hierarchy': topicHierarchy,
             'avg_topic_relevance': topics.isNotEmpty
                 ? topics.map((t) => t.relevance).reduce((a, b) => a + b) /
-                      topics.length
+                    topics.length
                 : 0.0,
           },
         ),
@@ -315,8 +314,7 @@ Return decisions organized by topic with clear context.''';
     score += topicCoverage * 0.2;
 
     // Structure quality score
-    final hasStructure =
-        summary.contains('##') ||
+    final hasStructure = summary.contains('##') ||
         summary.contains('#') ||
         summary.contains('**');
     if (hasStructure) score += 0.05;

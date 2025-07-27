@@ -172,8 +172,7 @@ class HighContrastWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
-    final isHighContrast =
-        forceHighContrast ||
+    final isHighContrast = forceHighContrast ||
         mediaQuery.highContrast ||
         mediaQuery.accessibleNavigation;
 
@@ -237,8 +236,7 @@ class MotionReducedWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
-    final isMotionReduced =
-        forceMotionReduction ||
+    final isMotionReduced = forceMotionReduction ||
         mediaQuery.disableAnimations ||
         mediaQuery.accessibleNavigation;
 

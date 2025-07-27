@@ -14,31 +14,31 @@ void main() {
       // Mock the secure storage since it won't work in tests
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(
-            const MethodChannel('plugins.it_nomads.com/flutter_secure_storage'),
-            (MethodCall methodCall) async {
-              switch (methodCall.method) {
-                case 'read':
-                  final key = methodCall.arguments['key'] as String;
-                  return mockStorage[key];
-                case 'write':
-                  final key = methodCall.arguments['key'] as String;
-                  final value = methodCall.arguments['value'] as String;
-                  mockStorage[key] = value;
-                  return null;
-                case 'delete':
-                  final key = methodCall.arguments['key'] as String;
-                  mockStorage.remove(key);
-                  return null;
-                case 'readAll':
-                  return Map<String, String>.from(mockStorage);
-                case 'deleteAll':
-                  mockStorage.clear();
-                  return null;
-                default:
-                  return null;
-              }
-            },
-          );
+        const MethodChannel('plugins.it_nomads.com/flutter_secure_storage'),
+        (MethodCall methodCall) async {
+          switch (methodCall.method) {
+            case 'read':
+              final key = methodCall.arguments['key'] as String;
+              return mockStorage[key];
+            case 'write':
+              final key = methodCall.arguments['key'] as String;
+              final value = methodCall.arguments['value'] as String;
+              mockStorage[key] = value;
+              return null;
+            case 'delete':
+              final key = methodCall.arguments['key'] as String;
+              mockStorage.remove(key);
+              return null;
+            case 'readAll':
+              return Map<String, String>.from(mockStorage);
+            case 'deleteAll':
+              mockStorage.clear();
+              return null;
+            default:
+              return null;
+          }
+        },
+      );
 
       // Initialize encryption service for testing
       await EncryptionService.initialize();

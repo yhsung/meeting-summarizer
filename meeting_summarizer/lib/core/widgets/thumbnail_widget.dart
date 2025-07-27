@@ -239,10 +239,8 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
 
   Widget _buildFallbackIcon(BuildContext context) {
     final theme = Theme.of(context);
-    final extension = widget.fileMetadata.fileName
-        .split('.')
-        .last
-        .toLowerCase();
+    final extension =
+        widget.fileMetadata.fileName.split('.').last.toLowerCase();
 
     return Container(
       color: theme.colorScheme.surfaceContainerHighest.withAlpha(26),

@@ -127,8 +127,8 @@ void main() {
 
         // Verify all data exists and relationships are intact
         final retrievedRecording = await dbHelper.getRecording(recordingId);
-        final retrievedTranscriptions = await dbHelper
-            .getTranscriptionsByRecording(recordingId);
+        final retrievedTranscriptions =
+            await dbHelper.getTranscriptionsByRecording(recordingId);
         final retrievedSummaries = await dbHelper.getSummariesByTranscription(
           transcriptionId,
         );

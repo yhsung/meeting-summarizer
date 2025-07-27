@@ -87,8 +87,8 @@ class _ApiConfigurationScreenState extends State<ApiConfigurationScreen> {
     try {
       final infos = await _apiKeyService.getAllApiKeyInfo();
       final selectedProvider = await _providerService.getSelectedProvider();
-      final providerAvailability = await _providerService
-          .getAvailableProviders();
+      final providerAvailability =
+          await _providerService.getAvailableProviders();
       setState(() {
         _apiKeyInfos = infos;
         _selectedProvider = selectedProvider;
@@ -112,8 +112,8 @@ class _ApiConfigurationScreenState extends State<ApiConfigurationScreen> {
 
   Future<void> _updateProviderAvailability() async {
     try {
-      final providerAvailability = await _providerService
-          .getAvailableProviders();
+      final providerAvailability =
+          await _providerService.getAvailableProviders();
       log('Updated provider availability: $providerAvailability');
       setState(() {
         _providerAvailability = providerAvailability;
@@ -442,13 +442,13 @@ class _ApiConfigurationScreenState extends State<ApiConfigurationScreen> {
                   _isWhisperInitialized
                       ? Icons.check_circle
                       : _isWhisperInitializing
-                      ? Icons.hourglass_empty
-                      : Icons.download,
+                          ? Icons.hourglass_empty
+                          : Icons.download,
                   color: _isWhisperInitialized
                       ? Colors.green
                       : _isWhisperInitializing
-                      ? Colors.orange
-                      : theme.colorScheme.primary,
+                          ? Colors.orange
+                          : theme.colorScheme.primary,
                 ),
                 const SizedBox(width: 8),
                 Text(
@@ -958,8 +958,8 @@ class _ApiConfigurationScreenState extends State<ApiConfigurationScreen> {
                                     onPressed: () async {
                                       final clipboardData =
                                           await Clipboard.getData(
-                                            Clipboard.kTextPlain,
-                                          );
+                                        Clipboard.kTextPlain,
+                                      );
                                       if (clipboardData?.text != null) {
                                         controller.text = clipboardData!.text!;
                                       }

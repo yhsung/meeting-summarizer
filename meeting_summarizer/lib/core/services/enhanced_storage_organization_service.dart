@@ -25,7 +25,7 @@ class EnhancedStorageOrganizationService
   bool _isInitialized = false;
 
   EnhancedStorageOrganizationService(DatabaseHelper databaseHelper)
-    : _metadataDao = FileMetadataDao(databaseHelper);
+      : _metadataDao = FileMetadataDao(databaseHelper);
 
   @override
   Future<void> initialize() async {

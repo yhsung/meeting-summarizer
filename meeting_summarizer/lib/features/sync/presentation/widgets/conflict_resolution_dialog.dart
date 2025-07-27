@@ -82,14 +82,14 @@ class _ConflictResolutionDialogState extends State<ConflictResolutionDialog> {
               Text(
                 'Synchronization Conflict',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
               Text(
                 widget.conflict.provider.displayName,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
               ),
             ],
           ),
@@ -122,8 +122,8 @@ class _ConflictResolutionDialogState extends State<ConflictResolutionDialog> {
                   child: Text(
                     widget.conflict.filePath,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w500,
-                    ),
+                          fontWeight: FontWeight.w500,
+                        ),
                   ),
                 ),
               ],
@@ -141,8 +141,8 @@ class _ConflictResolutionDialogState extends State<ConflictResolutionDialog> {
                 Text(
                   'Detected ${_formatTimeSince(widget.conflict.timeSinceDetected)}',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                 ),
               ],
             ),
@@ -202,9 +202,9 @@ class _ConflictResolutionDialogState extends State<ConflictResolutionDialog> {
         Text(
           label,
           style: Theme.of(context).textTheme.labelLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: Theme.of(context).colorScheme.primary,
-          ),
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.primary,
+              ),
         ),
         const SizedBox(height: 8),
         if (version.exists) ...[
@@ -224,9 +224,9 @@ class _ConflictResolutionDialogState extends State<ConflictResolutionDialog> {
           Text(
             'File does not exist',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              fontStyle: FontStyle.italic,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
+                  fontStyle: FontStyle.italic,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
           ),
       ],
     );
@@ -243,8 +243,8 @@ class _ConflictResolutionDialogState extends State<ConflictResolutionDialog> {
             child: Text(
               '$label:',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
             ),
           ),
           Expanded(
@@ -309,8 +309,8 @@ class _ConflictResolutionDialogState extends State<ConflictResolutionDialog> {
                 child: Text(
                   'Recommended',
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onPrimaryContainer,
-                  ),
+                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      ),
                 ),
               ),
             ],
@@ -339,8 +339,8 @@ class _ConflictResolutionDialogState extends State<ConflictResolutionDialog> {
             Text(
               'Enter the merged content or leave empty for automatic merge.',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
             ),
             const SizedBox(height: 12),
             TextField(
@@ -382,9 +382,9 @@ class _ConflictResolutionDialogState extends State<ConflictResolutionDialog> {
       child: Text(
         widget.conflict.severity.name.toUpperCase(),
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-          color: _getSeverityColor(),
-          fontWeight: FontWeight.bold,
-        ),
+              color: _getSeverityColor(),
+              fontWeight: FontWeight.bold,
+            ),
       ),
     );
   }

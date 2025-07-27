@@ -55,34 +55,34 @@ enum BatchOperation {
 
   /// Operations that modify file content
   static List<BatchOperation> get contentModifyingOperations => [
-    convert,
-    archive,
-    extract,
-  ];
+        convert,
+        archive,
+        extract,
+      ];
 
   /// Operations that modify file location
   static List<BatchOperation> get locationModifyingOperations => [move, copy];
 
   /// Operations that modify file metadata
   static List<BatchOperation> get metadataModifyingOperations => [
-    rename,
-    updateMetadata,
-    tag,
-    categorize,
-  ];
+        rename,
+        updateMetadata,
+        tag,
+        categorize,
+      ];
 
   /// Operations that are destructive and need confirmation
   static List<BatchOperation> get destructiveOperations => [delete];
 
   /// Operations that can be undone
   static List<BatchOperation> get undoableOperations => [
-    rename,
-    move,
-    copy,
-    updateMetadata,
-    tag,
-    categorize,
-  ];
+        rename,
+        move,
+        copy,
+        updateMetadata,
+        tag,
+        categorize,
+      ];
 
   /// Check if this operation is content-modifying
   bool get modifiesContent => contentModifyingOperations.contains(this);

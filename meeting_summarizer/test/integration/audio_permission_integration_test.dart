@@ -237,8 +237,8 @@ void main() {
         final hasAllRequired = await audioService.hasAllRequiredPermissions();
         expect(hasAllRequired, isA<bool>());
 
-        final missingPermissions = await audioService
-            .getMissingRequiredPermissions();
+        final missingPermissions =
+            await audioService.getMissingRequiredPermissions();
         expect(missingPermissions, isA<List<PermissionType>>());
       });
     });

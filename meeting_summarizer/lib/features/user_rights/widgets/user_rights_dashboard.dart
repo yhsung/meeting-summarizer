@@ -95,16 +95,16 @@ class _UserRightsDashboardState extends State<UserRightsDashboard>
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _error != null
-          ? _buildErrorWidget()
-          : TabBarView(
-              controller: _tabController,
-              children: [
-                _buildProfileTab(),
-                _buildPermissionsTab(),
-                _buildAccessHistoryTab(),
-                _buildDelegationsTab(),
-              ],
-            ),
+              ? _buildErrorWidget()
+              : TabBarView(
+                  controller: _tabController,
+                  children: [
+                    _buildProfileTab(),
+                    _buildPermissionsTab(),
+                    _buildAccessHistoryTab(),
+                    _buildDelegationsTab(),
+                  ],
+                ),
       floatingActionButton: FloatingActionButton(
         onPressed: _loadUserRightsData,
         child: const Icon(Icons.refresh),

@@ -45,8 +45,8 @@ class TestHelpers {
 
     for (int i = 0; i < samples; i++) {
       final time = i / sampleRate;
-      final sample = (amplitude * sin(2 * pi * frequency * time) * 32767)
-          .round();
+      final sample =
+          (amplitude * sin(2 * pi * frequency * time) * 32767).round();
 
       // Convert to 16-bit little-endian
       data[i * 2] = sample & 0xFF;
@@ -105,8 +105,7 @@ class TestHelpers {
       filename:
           filename ?? '${_faker.conference.name().replaceAll(' ', '_')}.wav',
       filePath: filePath ?? '/test/recordings/${_faker.guid.guid()}.wav',
-      duration:
-          duration ??
+      duration: duration ??
           (_random.nextInt(7200) + 60) * 1000, // 1-120 minutes in milliseconds
       fileSize: _random.nextInt(50000000) + 1000000, // 1-50MB
       format: 'wav',
@@ -175,8 +174,7 @@ class TestHelpers {
       id: id ?? _faker.guid.guid(),
       transcriptionId: transcriptionId ?? _faker.guid.guid(),
       content: summaryContent,
-      type:
-          type ??
+      type: type ??
           SummaryType.values[_random.nextInt(SummaryType.values.length)],
       provider: ['openai', 'anthropic'][_random.nextInt(2)],
       model: 'gpt-4',
@@ -286,10 +284,10 @@ class TestHelpers {
   ) {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(MethodChannel(channelName), (
-          MethodCall methodCall,
-        ) async {
-          return responses[methodCall.method];
-        });
+      MethodCall methodCall,
+    ) async {
+      return responses[methodCall.method];
+    });
   }
 
   /// Verify that a future completes within a timeout

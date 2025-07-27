@@ -148,9 +148,8 @@ class QualityScoringService {
 
     // Key term preservation
     final keyTerms = _extractKeyTerms(originalWords);
-    final preservedTerms = keyTerms
-        .where((term) => summaryWords.contains(term))
-        .length;
+    final preservedTerms =
+        keyTerms.where((term) => summaryWords.contains(term)).length;
 
     if (keyTerms.isNotEmpty) {
       final preservationRatio = preservedTerms / keyTerms.length;
@@ -216,9 +215,8 @@ class QualityScoringService {
     final sentences = result.content.split(RegExp(r'[.!?]+'));
 
     // Average sentence length (optimal: 15-25 words)
-    final avgSentenceLength = sentences.isNotEmpty
-        ? result.wordCount / sentences.length
-        : 0;
+    final avgSentenceLength =
+        sentences.isNotEmpty ? result.wordCount / sentences.length : 0;
 
     if (avgSentenceLength >= 10 && avgSentenceLength <= 30) {
       score += 0.1;
@@ -337,8 +335,7 @@ class QualityScoringService {
       const systemPrompt =
           '''You are an expert at evaluating summary quality. Assess the following summary across multiple dimensions and provide scores from 0.0 to 1.0.''';
 
-      final prompt =
-          '''Evaluate this summary quality across these dimensions:
+      final prompt = '''Evaluate this summary quality across these dimensions:
 
 ACCURACY: How factually correct is the summary compared to the original?
 COMPLETENESS: How well does it cover the important points?
@@ -461,8 +458,7 @@ FEEDBACK: Brief explanation of strengths and weaknesses''';
     double? comparisonScore,
   ) {
     // Base weighted average
-    double score =
-        (accuracyScore * 0.25 +
+    double score = (accuracyScore * 0.25 +
         completenessScore * 0.25 +
         clarityScore * 0.20 +
         relevanceScore * 0.20 +
@@ -603,9 +599,8 @@ FEEDBACK: Brief explanation of strengths and weaknesses''';
 
     if (originalNumbers.isEmpty) return 1.0;
 
-    final preservedNumbers = originalNumbers
-        .intersection(summaryNumbers)
-        .length;
+    final preservedNumbers =
+        originalNumbers.intersection(summaryNumbers).length;
     return preservedNumbers / originalNumbers.length;
   }
 
@@ -633,13 +628,12 @@ FEEDBACK: Brief explanation of strengths and weaknesses''';
       SummaryLength.medium => (start: 150, end: 300),
       SummaryLength.long => (start: 300, end: 600),
       SummaryLength.extended => (start: 600, end: 1200),
-      SummaryLength.custom =>
-        configuration.customWordCount != null
-            ? (
-                start: (configuration.customWordCount! * 0.8).round(),
-                end: (configuration.customWordCount! * 1.2).round(),
-              )
-            : (start: 100, end: 300),
+      SummaryLength.custom => configuration.customWordCount != null
+          ? (
+              start: (configuration.customWordCount! * 0.8).round(),
+              end: (configuration.customWordCount! * 1.2).round(),
+            )
+          : (start: 100, end: 300),
     };
   }
 
@@ -702,9 +696,8 @@ FEEDBACK: Brief explanation of strengths and weaknesses''';
     final focusKeywords = _getFocusKeywords(configuration.summaryFocus);
     final summaryLower = result.content.toLowerCase();
 
-    final matchingKeywords = focusKeywords
-        .where((keyword) => summaryLower.contains(keyword))
-        .length;
+    final matchingKeywords =
+        focusKeywords.where((keyword) => summaryLower.contains(keyword)).length;
 
     return focusKeywords.isNotEmpty
         ? (matchingKeywords / focusKeywords.length).clamp(0.0, 1.0)
@@ -714,48 +707,48 @@ FEEDBACK: Brief explanation of strengths and weaknesses''';
   static List<String> _getFocusKeywords(SummaryFocus focus) {
     return switch (focus) {
       SummaryFocus.decisions => [
-        'decision',
-        'decided',
-        'choose',
-        'agree',
-        'approve',
-      ],
+          'decision',
+          'decided',
+          'choose',
+          'agree',
+          'approve',
+        ],
       SummaryFocus.actions => ['action', 'task', 'todo', 'assign', 'complete'],
       SummaryFocus.technical => [
-        'technical',
-        'system',
-        'implement',
-        'code',
-        'architecture',
-      ],
+          'technical',
+          'system',
+          'implement',
+          'code',
+          'architecture',
+        ],
       SummaryFocus.business => [
-        'business',
-        'revenue',
-        'market',
-        'strategy',
-        'roi',
-      ],
+          'business',
+          'revenue',
+          'market',
+          'strategy',
+          'roi',
+        ],
       SummaryFocus.timeline => [
-        'deadline',
-        'schedule',
-        'timeline',
-        'milestone',
-        'date',
-      ],
+          'deadline',
+          'schedule',
+          'timeline',
+          'milestone',
+          'date',
+        ],
       SummaryFocus.risks => [
-        'risk',
-        'challenge',
-        'issue',
-        'problem',
-        'mitigation',
-      ],
+          'risk',
+          'challenge',
+          'issue',
+          'problem',
+          'mitigation',
+        ],
       SummaryFocus.opportunities => [
-        'opportunity',
-        'benefit',
-        'advantage',
-        'growth',
-        'improve',
-      ],
+          'opportunity',
+          'benefit',
+          'advantage',
+          'growth',
+          'improve',
+        ],
       _ => [],
     };
   }
@@ -766,11 +759,10 @@ FEEDBACK: Brief explanation of strengths and weaknesses''';
   ) {
     return switch (configuration.summaryType) {
       SummaryType.actionItems => result.actionItems.isNotEmpty ? 1.0 : 0.5,
-      SummaryType.executive =>
-        result.content.contains('executive') ||
-                result.content.contains('strategic')
-            ? 1.0
-            : 0.7,
+      SummaryType.executive => result.content.contains('executive') ||
+              result.content.contains('strategic')
+          ? 1.0
+          : 0.7,
       SummaryType.meetingNotes =>
         result.content.contains('**') || result.content.contains('##')
             ? 1.0
@@ -839,8 +831,7 @@ FEEDBACK: Brief explanation of strengths and weaknesses''';
     if (hasBullets1 == hasBullets2) similarity += 0.25;
 
     // Compare word count ranges
-    final wordRatio =
-        math.min(result1.wordCount, result2.wordCount) /
+    final wordRatio = math.min(result1.wordCount, result2.wordCount) /
         math.max(result1.wordCount, result2.wordCount);
     similarity += wordRatio * 0.5;
 
@@ -933,9 +924,8 @@ FEEDBACK: Brief explanation of strengths and weaknesses''';
 
     final foundIssues = <String>[];
     for (final entry in issueKeywords.entries) {
-      final issueCount = comments
-          .where((comment) => comment.contains(entry.key))
-          .length;
+      final issueCount =
+          comments.where((comment) => comment.contains(entry.key)).length;
 
       if (issueCount >= 2 || issueCount / comments.length > 0.3) {
         foundIssues.add(entry.value);
@@ -957,9 +947,8 @@ FEEDBACK: Brief explanation of strengths and weaknesses''';
 
     final foundPositives = <String>[];
     for (final entry in positiveKeywords.entries) {
-      final positiveCount = comments
-          .where((comment) => comment.contains(entry.key))
-          .length;
+      final positiveCount =
+          comments.where((comment) => comment.contains(entry.key)).length;
 
       if (positiveCount >= 2 || positiveCount / comments.length > 0.3) {
         foundPositives.add(entry.value);
