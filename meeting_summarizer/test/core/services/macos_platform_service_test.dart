@@ -15,8 +15,6 @@ import 'macos_platform_service_test.mocks.dart';
 void main() {
   group('MacOSPlatformService', () {
     late MacOSPlatformService service;
-    late MockFlutterLocalNotificationsPlugin mockNotificationsPlugin;
-    late MockMacOSMenuBarService mockMenuBarService;
     late List<MethodCall> methodCallLog;
 
     setUp(() {
@@ -67,8 +65,6 @@ void main() {
         },
       );
 
-      mockNotificationsPlugin = MockFlutterLocalNotificationsPlugin();
-      mockMenuBarService = MockMacOSMenuBarService();
       methodCallLog = [];
 
       service = MacOSPlatformService();
@@ -426,7 +422,7 @@ void main() {
         // On test platform, this will fail gracefully
         try {
           final status = service.getServiceStatus();
-          
+
           expect(status, isA<Map<String, dynamic>>());
           expect(status.containsKey('isInitialized'), isTrue);
           expect(status.containsKey('isAvailable'), isTrue);
