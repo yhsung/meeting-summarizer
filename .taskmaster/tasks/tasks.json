@@ -375,7 +375,7 @@
         "dependencies": [
           1
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -383,7 +383,7 @@
             "description": "Create menu bar status item with recording controls and status indicators using NSStatusBar APIs",
             "dependencies": [],
             "details": "Implement NSStatusBar integration for menu bar presence, create status item with custom icon that changes based on recording state, add menu with recording controls (start/stop/pause), display current meeting status, and implement proper cleanup on app termination. Use method channels to communicate between Flutter and native macOS code.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -394,7 +394,7 @@
               "6.1"
             ],
             "details": "Use Core Spotlight framework (CSSearchableIndex) to index meeting transcripts and summaries, implement CSSearchableItem creation with proper metadata (title, content, keywords), handle Spotlight search result callbacks to open specific meetings, and implement proper indexing lifecycle management including updates and deletions.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -405,7 +405,7 @@
               "6.2"
             ],
             "details": "Implement drag and drop zones in Flutter app using native macOS APIs, support dragging audio files (.mp3, .wav, .m4a) into the app for transcription, enable dragging transcripts/summaries out as text files, implement proper file type validation and error handling, and add visual feedback during drag operations.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -416,7 +416,7 @@
               "6.3"
             ],
             "details": "Implement NSTouchBar integration with recording controls (record, stop, pause buttons), add scrubber control for audio playback navigation, display recording time and status indicators, implement context-sensitive Touch Bar updates based on app state, and ensure proper fallback for non-Touch Bar Macs.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -427,7 +427,7 @@
               "6.4"
             ],
             "details": "Implement system-wide hotkey registration using modern macOS APIs (avoiding deprecated Carbon framework), create configurable hotkey combinations in app settings, handle hotkey conflicts and registration failures gracefully, implement proper permissions handling for accessibility access, and ensure hotkeys work when app is in background or minimized.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           }
         ]
@@ -733,7 +733,7 @@
     ],
     "metadata": {
       "created": "2025-07-26T11:43:46.716Z",
-      "updated": "2025-07-27T09:18:03.709Z",
+      "updated": "2025-07-27T09:18:11.836Z",
       "description": "Tasks for master context"
     }
   }
